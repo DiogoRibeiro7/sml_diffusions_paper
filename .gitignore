@@ -57,8 +57,16 @@ env/
 *.acr
 *.acn
 
-# Generated PDFs
+# PDFs are ignored by default.  The manuscript and its figures are tracked
+# explicitly via `git add -f`, so this rule only covers stray build output.
 *.pdf
+
+# Literature under review: third-party publisher PDFs, kept locally only and
+# deliberately never committed.
+reference/
+
+# pytest-benchmark
+.benchmarks/
 
 # OS files
 .DS_Store
@@ -70,3 +78,6 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# latexmk failure artefact
+*-SAVE-ERROR

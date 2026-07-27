@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
-from typing import Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,8 +17,9 @@ from scipy.special import logsumexp
 from scipy.stats import norm
 
 ROOT = Path(__file__).resolve().parents[1]
-FIGURES = ROOT / "figures"
-TABLES = ROOT / "tables"
+PAPER = ROOT / "paper"
+FIGURES = PAPER / "figures"
+TABLES = PAPER / "tables"
 SEED = 20260726
 
 
@@ -269,7 +269,9 @@ def make_ou_scaling_figure() -> None:
     ratios = []
     for m in m_values:
         h = 1.0 / float(m)
-        ratios.append(h ** (dimension / 2.0) * ou_second_moment(dimension, int(m)) / limiting_constant)
+        ratios.append(
+            h ** (dimension / 2.0) * ou_second_moment(dimension, int(m)) / limiting_constant
+        )
 
     fig, ax = plt.subplots(figsize=(7.2, 4.8))
     ax.plot(m_values, ratios, marker="o")
