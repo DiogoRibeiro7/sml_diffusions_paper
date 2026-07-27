@@ -6,6 +6,7 @@ closed-form benchmarks are available.  No external data are required.
 
 from __future__ import annotations
 
+import argparse
 import math
 from pathlib import Path
 
@@ -21,6 +22,26 @@ PAPER = ROOT / "paper"
 FIGURES = PAPER / "figures"
 TABLES = PAPER / "tables"
 SEED = 20260726
+
+
+def set_output_root(root: Path) -> None:
+    """Redirect figure and table output, so `make verify` can write elsewhere."""
+    global FIGURES, TABLES
+    FIGURES = root / "figures"
+    TABLES = root / "tables"
+    FIGURES.mkdir(parents=True, exist_ok=True)
+    TABLES.mkdir(parents=True, exist_ok=True)
+
+
+def save_figure(fig: "plt.Figure", stem: str) -> None:
+    """Write a figure as PDF and PNG with no embedded creation timestamp.
+
+    Matplotlib stamps a CreationDate into PDF output and a Software tag into
+    PNG output by default, which makes otherwise identical rebuilds differ
+    byte for byte and defeats any hash-based reproducibility check.
+    """
+    fig.savefig(FIGURES / f"{stem}.pdf", metadata={"CreationDate": None})
+    fig.savefig(FIGURES / f"{stem}.png", dpi=220, metadata={"Software": None})
 
 
 def true_brownian_density_at_origin(dimension: int) -> float:
@@ -128,8 +149,7 @@ def make_variance_scaling_figure() -> None:
     ax.legend()
     ax.grid(alpha=0.25)
     fig.tight_layout()
-    fig.savefig(FIGURES / "brownian_second_moment_scaling.pdf")
-    fig.savefig(FIGURES / "brownian_second_moment_scaling.png", dpi=220)
+    save_figure(fig, "brownian_second_moment_scaling")
     plt.close(fig)
 
 
@@ -160,8 +180,7 @@ def make_path_rmse_figure() -> None:
     ax.legend()
     ax.grid(alpha=0.25, which="both")
     fig.tight_layout()
-    fig.savefig(FIGURES / "brownian_joint_path_rmse.pdf")
-    fig.savefig(FIGURES / "brownian_joint_path_rmse.png", dpi=220)
+    save_figure(fig, "brownian_joint_path_rmse")
     plt.close(fig)
 
 
@@ -228,8 +247,7 @@ def make_subcritical_distribution_results(rng: np.random.Generator) -> None:
     ax.legend()
     ax.grid(alpha=0.25, which="both")
     fig.tight_layout()
-    fig.savefig(FIGURES / "brownian_subcritical_distribution.pdf")
-    fig.savefig(FIGURES / "brownian_subcritical_distribution.png", dpi=220)
+    save_figure(fig, "brownian_subcritical_distribution")
     plt.close(fig)
 
 
@@ -282,8 +300,7 @@ def make_ou_scaling_figure() -> None:
     ax.set_title("Four-dimensional Ornstein-Uhlenbeck benchmark")
     ax.grid(alpha=0.25)
     fig.tight_layout()
-    fig.savefig(FIGURES / "ou_second_moment_scaling.pdf")
-    fig.savefig(FIGURES / "ou_second_moment_scaling.png", dpi=220)
+    save_figure(fig, "ou_second_moment_scaling")
     plt.close(fig)
 
 
@@ -338,8 +355,7 @@ def make_boundary_probability_figure() -> None:
     ax.legend(fontsize=8)
     ax.grid(alpha=0.25, which="both")
     fig.tight_layout()
-    fig.savefig(FIGURES / "epsilon_squared_euler_negative_probability.pdf")
-    fig.savefig(FIGURES / "epsilon_squared_euler_negative_probability.png", dpi=220)
+    save_figure(fig, "epsilon_squared_euler_negative_probability")
     plt.close(fig)
 
 
@@ -516,8 +532,18 @@ def make_rate_table() -> None:
     frame.to_csv(TABLES / "rate_conditions.csv", index=False)
 
 
-def main() -> None:
-    """Generate all reproducible manuscript outputs."""
+def main(output_root: Path | None = None) -> None:
+    """Generate all reproducible manuscript outputs.
+
+    Parameters
+    ----------
+    output_root:
+        Directory that receives ``figures/`` and ``tables/``.  Defaults to
+        ``paper/``.  ``make verify`` passes a scratch directory instead, so the
+        regenerated artefacts can be compared with the committed ones.
+    """
+    if output_root is not None:
+        set_output_root(output_root)
     FIGURES.mkdir(parents=True, exist_ok=True)
     TABLES.mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(SEED)
@@ -534,4 +560,11 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--output-root",
+        type=Path,
+        default=None,
+        help="directory to receive figures/ and tables/ (default: paper/)",
+    )
+    main(parser.parse_args().output_root)

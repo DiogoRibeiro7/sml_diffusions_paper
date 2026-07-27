@@ -696,11 +696,11 @@ It does not give convergence along every sequence $(M_n,S_n)\to(\infty,\infty)$.
 
 Two features of Lemma 2 are worth isolating. It is stated as a joint limit in $M$ and $S$ with no rate restriction whatsoever, so the refutation does not depend on the separate discussion of $\sqrt S/M\to0$ below; and it is stated under Assumptions 1 and 2 alone, which standard Brownian motion satisfies. The counterexample therefore meets the lemma on its own terms.
 
-\subsection{Lemma 3: the fixed-$M$ CLT is not uniform in $M$}
+\subsection{Lemma 3: the fixed-\texorpdfstring{$M$}{M} CLT is not uniform in \texorpdfstring{$M$}{M}}
 
 The paper uses a $\sqrt S$ central limit theorem and requires $\sqrt S/M\to0$ to suppress the Euler bias. The variance of the triangular-array summand is not asymptotically constant. It is of order $M^{K/2}$. The correct standardisation is $\sqrt{S/M^{K/2}}$. The Euler bias must then be compared with that scale, producing \eqref{eq:correct_bias_rate}.
 
-\subsection{Lemma 4: an $O_{\Pp}$ term is treated as $o_{\Pp}$}
+\subsection{Lemma 4: an \texorpdfstring{$O_{\Pp}$}{O\_P} term is treated as \texorpdfstring{$o_{\Pp}$}{o\_P}}
 
 Let $x_n=\widehat q_n-p_n$. A nondegenerate central limit theorem implies $x_n=O_{\Pp}(S^{-1/2})$ for fixed $M$, not $o_{\Pp}(S^{-1/2})$. The Taylor expansion
 \[
@@ -902,7 +902,7 @@ U.S. vs. Germany & $-0.142$ & 0.127 & 0.94 & 0.0702 & 0.9298 \\
 
 \subsection{Pairwise correlations do not guarantee a valid Brownian system}
 
-The application specifies a four-dimensional instantaneous correlation matrix for $(W_t,W_t^*,X_t,Y_t)$. Write it in block form as
+The application specifies an instantaneous correlation matrix for the four Brownian motions $(W_t,W_t^*,X_t,Y_t)$. Write it in block form as
 \begin{equation}\label{eq:corr_block}
 R_t=
 \begin{pmatrix}
@@ -1096,7 +1096,7 @@ The corrected analysis also supplies constructive results. The density estimator
 
 The exchange-rate application raises separate questions. Its square-root states fall outside the smooth uniformly elliptic theory, although for the interest rates the Feller ratios are large enough that this is a gap in proof coverage rather than a numerical hazard. The incompleteness state is different: its Feller ratio is exactly one half for every admissible parameter value, and the identification rule drives it onto its degenerate boundary exactly. Because the estimator substitutes that state out and simulates volatility instead, the requirement becomes that a recovered square root remain real along every simulated Euler path, which ordinary Euler discretisation does not guarantee. The volatility equation is implicit when risk prices depend on volatility, and the reported U.S.--U.K. estimates give a leading coefficient of the wrong sign, so that specification admits either no positive volatility branch or two, never exactly one. The Brownian correlation matrix requires a joint positive-semidefinite restriction that entrywise bounds do not deliver. The final empirical estimator also contains a minimum-incompleteness corner rule and binding constraints that are not covered by ordinary interior SML asymptotics.
 
-None of these points, individually or collectively, proves that the finite-sample economic conclusions are false. They show that those conclusions cannot inherit the claimed maximum-likelihood asymptotics from the mathematical argument given. The appropriate post-publication response is a corrected theorem, a clear statement of the estimator actually implemented, and a re-examination of numerical stability under dimensionally valid simulation rates or bridge-based alternatives.
+None of these points, individually or collectively, proves that the finite-sample economic conclusions are false. They show that those conclusions cannot inherit the claimed maximum-likelihood asymptotics from the mathematical argument given. The appropriate post-pub\-li\-ca\-tion response is a corrected theorem, a clear statement of the estimator actually implemented, and a re-examination of numerical stability under dimensionally valid simulation rates or bridge-based alternatives.
 
 \appendix
 

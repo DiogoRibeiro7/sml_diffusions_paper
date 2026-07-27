@@ -14,6 +14,9 @@ paper/                  manuscript and everything it includes
   tables/               CSV and LaTeX tables (generated)
 code/
   generate_results.py   all reproducible calculations, figures and tables
+  verify_reproducibility.py
+docs/
+  repository_audit.md   build, dependency and reproducibility baseline
 reference/              literature under review; local only, never committed
 ```
 
@@ -36,9 +39,13 @@ that the relative `figures/` and `tables/` paths resolve.
 ```bash
 make          # figures and tables, then the PDF
 make figures  # regenerate figures and tables only
-make pdf      # rebuild the PDF only
+make pdf      # rebuild the PDF only (alias: make paper)
+make verify   # check that committed figures and tables regenerate exactly
 make clean    # remove LaTeX auxiliary files, keep main.pdf
 ```
+
+`make verify` regenerates every artefact into a scratch directory and compares it with the
+committed copy. Figure output carries no embedded timestamp, so the comparison is exact.
 
 The build uses `latexmk`, which runs `pdflatex`, `biber` and the reruns in the right order. To
 compile by hand instead, run the cycle from inside `paper/` and let each pass finish:
