@@ -78,7 +78,7 @@ Dimensional Variance, Joint Asymptotics, and an Application Revisited}
 \maketitle
 
 \begin{abstract}
-A widely used simulation method for likelihood inference in discretely observed diffusions approximates each transition density by simulating an Euler scheme to one step before the observed endpoint and averaging the final Gaussian density. This endpoint estimator is a shrinking-bandwidth kernel estimator whose Monte Carlo variance grows with the discretisation level at a dimension-dependent rate: in $K$ dimensions the second moment of one simulated contribution is of order $M^{K/2}$, so the variance is of order $M^{K/2}/S$ rather than uniformly $1/S$. We derive exact Brownian moments, the corrected central-limit normalisation $\sqrt{S/M^{K/2}}$, the resulting bias--variance trade-off with optimal rate $S^{-4/(K+4)}$, and the scale of the nonlinear log-likelihood error. We then construct a joint-limit counterexample: along $M=S\to\infty$, which satisfies the rate condition $\sqrt S/M\to0$ of \citet{BrandtSantaClara2002} and their own regularity assumptions, the simulated density converges in probability to zero for every $K>2$ although the true density is strictly positive. In four dimensions their condition is equivalent to $S/M^2\to0$, whereas mean-square consistency requires $S/M^2\to\infty$. We then examine the mathematical status of the four-dimensional exchange-rate application: square-root boundaries, the reality of the incompleteness state along simulated paths, an implicitly defined volatility process whose reported loadings admit either zero or two positive branches, positive-semidefiniteness of the Brownian correlation matrix, a minimum-incompleteness selection rule with a corner solution, and binding inequality constraints. The paper does not assert that the published numerical estimates are incorrect; it establishes that their stated asymptotic justification is incomplete and, in the four-dimensional case, contradicted by an exact counterexample.
+A widely used simulation method for likelihood inference in discretely observed diffusions approximates each transition density by simulating an Euler scheme to one step before the observed endpoint and averaging the final Gaussian density. This endpoint estimator is a shrinking-bandwidth kernel estimator whose Monte Carlo variance grows with the discretisation level at a dimension-dependent rate: in $K$ dimensions the second moment of one simulated contribution is of order $M^{K/2}$, so the variance is of order $M^{K/2}/S$ rather than uniformly $1/S$. We derive exact Brownian moments, the corrected central-limit normalisation $\sqrt{S/M^{K/2}}$, the resulting bias--variance trade-off with optimal rate $S^{-4/(K+4)}$, and the scale of the nonlinear log-likelihood error. We then construct a direct counterexample to the joint transition-density convergence asserted in Lemma 2 of \citet{BrandtSantaClara2002}: along $M=S\to\infty$, which satisfies their rate condition $\sqrt S/M\to0$ and their own regularity assumptions, the simulated density converges in probability to zero for every $K>2$ although the true density is strictly positive. Consequently the published proofs of Theorems 1 and 2 fail, and in four dimensions their rate condition, equivalent to $S/M^2\to0$, is incompatible with pointwise mean-square consistency of the simulated transition density, which requires $S/M^2\to\infty$. We do not prove that the resulting simulated-likelihood argmax estimator is inconsistent, and we set out what such a proof would require. We then examine the mathematical status of the four-dimensional exchange-rate application: square-root boundaries, the reality of the incompleteness state along simulated paths, an implicitly defined volatility process whose reported loadings admit either zero or two positive branches, positive-semidefiniteness of the Brownian correlation matrix, a minimum-incompleteness selection rule with a corner solution, and binding inequality constraints. The paper does not assert that the published numerical estimates are incorrect; it establishes that their stated asymptotic justification is incomplete and, in the four-dimensional case, contradicted by an exact counterexample.
 \end{abstract}
 
 \noindent\textbf{Keywords:} simulated maximum likelihood; diffusion processes; Euler scheme; transition density; Monte Carlo variance; curse of dimensionality; diffusion bridges; nonregular inference.
@@ -97,13 +97,15 @@ S h^{K/2}=\frac{S}{M^{K/2}}.
 \]
 This quantity, rather than $S$ alone, controls the Monte Carlo approximation.
 
-That the endpoint construction is statistically wasteful is not a new observation. \citet{DurhamGallant2002} note that unconditioned Euler paths rarely arrive near the observed endpoint and propose bridge-based proposals for that reason; \citet{ElerianChibShephard2001} augment the path with a Metropolis--Hastings block for the same reason; \citet{StramerYan2007} document numerically that the accuracy of the endpoint estimator deteriorates as $M$ increases with $S$ held fixed; and \citet{Lindstrom2012} regularises the Pedersen proposal towards a bridge on the same diagnosis. What that literature records is a qualitative and largely numerical finding about efficiency. What is established here is different in kind: an exact dimensional law for the moments of the endpoint summand, the identification of $S/M^{K/2}$ as the quantity that governs the estimator, the corrected triangular-array normalisation, and a joint-limit counterexample showing that the published convergence statement is not merely unproved but false. The distinction matters because an efficiency loss can be absorbed by more simulations, whereas an inconsistency along an admissible rate path cannot.
+That the endpoint construction is statistically wasteful is not a new observation. \citet{DurhamGallant2002} note that unconditioned Euler paths rarely arrive near the observed endpoint and propose bridge-based proposals for that reason; \citet{ElerianChibShephard2001} augment the path with a Metropolis--Hastings block for the same reason; \citet{StramerYan2007} document numerically that the accuracy of the endpoint estimator deteriorates as $M$ increases with $S$ held fixed; and \citet{Lindstrom2012} regularises the Pedersen proposal towards a bridge on the same diagnosis. What that literature records is a qualitative and largely numerical finding about efficiency. What is established here is different in kind: an exact dimensional law for the moments of the endpoint summand, the identification of $S/M^{K/2}$ as the quantity that governs the estimator, the corrected triangular-array normalisation, and a joint-limit counterexample showing that the published transition-density convergence statement is not merely unproved but false. The distinction matters because an efficiency loss can be absorbed by more simulations, whereas failure of the density estimator along an admissible rate path cannot.
 
 The paper makes six main contributions.
 
 First, we derive exact finite-$M$ moments for the estimator under $K$-dimensional Brownian motion. The Euler approximation is exact in this benchmark, so any failure is caused by the endpoint Monte Carlo construction and not by discretisation bias, boundary behaviour, nonlinear coefficients, or parameter identification.
 
-Second, we construct a direct counterexample to the joint convergence result stated in Lemma 2 and Theorem 1 of \citet{BrandtSantaClara2002}. For every $K>2$, choosing $M=S=n$ makes the simulated density at the Brownian origin converge in probability to zero. Standard Brownian motion satisfies the regularity assumptions of that paper exactly, and the sequence satisfies its condition $\sqrt{S}/M\to0$, so the counterexample cannot be excluded by strengthening the hypotheses. In the four-dimensional application, their condition requires $S/M^2\to0$, while the variance calculation requires $S/M^2\to\infty$ for mean-square consistency.
+Second, we construct a direct counterexample to the joint transition-density convergence asserted in Lemma 2 of \citet{BrandtSantaClara2002}. For every $K>2$, choosing $M=S=n$ makes the simulated density at the Brownian origin converge in probability to zero. Standard Brownian motion satisfies the regularity assumptions of that paper exactly, and the sequence satisfies its condition $\sqrt{S}/M\to0$, so the counterexample cannot be excluded by strengthening the hypotheses. Consequently the published proofs of Theorems 1 and 2 fail, since both rest on Lemma 2. In the four-dimensional application, their condition requires $S/M^2\to0$, while the variance calculation requires $S/M^2\to\infty$ for mean-square consistency of the simulated transition density.
+
+We are careful about what this does and does not establish. The counterexample concerns the simulated transition-density estimator at a point. It does not by itself exhibit a sequence along which the simulated-likelihood argmax estimator fails to converge, and we do not claim one. \Cref{sec:scope} states the logical status of each result, and \Cref{sec:argmax_gap} sets out what an argmax counterexample would require.
 
 Third, we establish the generic local moment law for a smooth uniformly elliptic diffusion. If $G_h$ denotes one endpoint-density summand, then for $r>1$,
 \[
@@ -129,6 +131,18 @@ Fifth, we trace the density-level result into the log likelihood. The nonlineari
 Sixth, we examine the mathematical status of the exchange-rate application. We first record that the implemented design does not satisfy the paper's own rate conditions, which jointly require $N^4\ll S\ll M^2$, by several orders of magnitude. The empirical model then contains square-root diffusions that violate the smoothness and nondegeneracy assumptions of the generic theorem, though we show that for the interest rates this violation is numerically inconsequential at the reported estimates. The market-incompleteness state is not: its Feller ratio equals one half for every parameter value, and because the estimator eliminates that state in favour of volatility, every Euler substep requires a recovered square root to remain real. The time-varying risk-price specification defines exchange-rate volatility through an implicit quadratic identity whose leading coefficient is negative at the reported U.S.--U.K. estimates, so that system admits either zero or two positive volatility branches and never exactly one. The full Brownian correlation matrix requires a joint positive-semidefinite constraint, not merely pairwise correlations in $[-1,1]$. Finally, the minimum-incompleteness rule is a linear programme whose solution is always a corner, which we verify against the published tables, and together with the binding nonnegativity constraint it yields a hybrid and potentially nonregular estimator not covered by the unconstrained SML theorem.
 
 The aim is not to relitigate the substantive economics of a paper published more than two decades ago. Nor do we infer from a false theorem that every numerical estimate obtained with finite $M$ and $S$ must be poor. The aim is narrower and mathematical: to identify the correct dimensional scale of the endpoint estimator, separate sequential from joint convergence, and determine what the published asymptotic arguments do and do not establish.
+
+\subsection{Scope of the results}\label{sec:scope}
+
+Because this paper both proves theorems and reassesses a published application, it matters which claims are which. Every result below falls into one of three categories, and the text signals the category wherever a result is stated.
+
+\emph{Proved.} The exact Brownian moments of \Cref{prop:brownian_moments}, the collapse theorem \Cref{thm:collapse}, the general local moment law \Cref{thm:local_moments}, the density variance scale of \Cref{cor:generic_variance}, the density-level triangular-array central limit theorems \Cref{thm:brownian_clt} and \Cref{thm:generic_clt}, and the pointwise mean-squared-error balance of \Cref{prop:optimal_m}. These are theorems about the simulated \emph{transition density}, proved under stated assumptions.
+
+\emph{Conditional.} The log-density expansion \Cref{prop:log_delta}, which requires uniform integrability and lower-tail control that we assume rather than verify; the resulting statements about scores and Hessians; and the abstract perturbation result \Cref{prop:m_estimator}, which is a deterministic implication and not a theorem about the simulated estimator.
+
+\emph{Diagnostic.} Everything in \Cref{sec:application} concerning the exchange-rate model: the finite-sample scaling ratios, the square-root boundary behaviour, correlation-matrix feasibility, the volatility state transformation, minimum-incompleteness geometry, and constrained inference. These are calculations about a specific published model, not asymptotic theorems, and they are reported as such.
+
+One boundary deserves emphasis because it is easy to blur. All the proved results concern the simulated transition density. None of them concerns the maximiser of the simulated log likelihood. We do not prove that the endpoint simulated-likelihood estimator is inconsistent, and \Cref{sec:argmax_gap} and \Cref{app:argmax} set out precisely what such a proof would require.
 
 The remainder is organised as follows. \Cref{sec:estimator} defines the estimator. \Cref{sec:brownian} gives exact Brownian results and the counterexample. \Cref{sec:general} derives the general diffusion moment law and corrected CLT. \Cref{sec:mse} studies the bias--variance trade-off. \Cref{sec:loglik} discusses log likelihood and parameter estimation. \Cref{sec:proof_review} analyses the published proof. \Cref{sec:application} studies the exchange-rate diffusion. \Cref{sec:numerics} presents reproducible numerical evidence, and \Cref{sec:remedies} discusses variance-reduction alternatives.
 
@@ -277,7 +291,7 @@ The variance is not uniformly $O(1/S)$. It is $O(M^{K/2}/S)$. The estimator is u
 
 \subsection{A direct joint-limit counterexample}
 
-A variance calculation alone does not prove failure of convergence in probability because a non-uniformly integrable sequence can converge in probability while retaining large or divergent moments. The next theorem gives a direct failure result.
+A variance calculation alone does not prove failure of convergence in probability because a non-uniformly integrable sequence can converge in probability while retaining large or divergent moments. The next theorem gives a direct failure result. It is a statement about the simulated transition density at a single pair of points; \Cref{sec:argmax_gap} explains why it does not transfer automatically to the parameter estimator.
 
 \begin{theorem}[Collapse along $M=S$]\label{thm:collapse}
 Let $K>2$, $x=y=0$, and choose $M_n=S_n=n$. Then the Brownian endpoint estimator satisfies
@@ -676,7 +690,7 @@ The broader Monte Carlo likelihood literature treats joint data and simulation l
 
 \section{What fails in the published asymptotic argument}\label{sec:proof_review}
 
-This section distinguishes statements refuted by the Brownian example from steps that are merely unproved under the stated assumptions.
+This section distinguishes statements refuted by the Brownian example from steps that are merely unproved under the stated assumptions. Exactly one published statement is directly refuted, namely the joint transition-density convergence in Lemma 2. Everything else below is a gap in a proof, not a demonstrated falsehood.
 
 \subsection{Lemma 2: sequential convergence is used as joint convergence}
 
@@ -695,6 +709,8 @@ This gives the iterated limit
 It does not give convergence along every sequence $(M_n,S_n)\to(\infty,\infty)$. The summand changes with $M$ and its variance diverges as $M^{K/2}$. \Cref{thm:collapse} directly refutes the stated joint conclusion.
 
 Two features of Lemma 2 are worth isolating. It is stated as a joint limit in $M$ and $S$ with no rate restriction whatsoever, so the refutation does not depend on the separate discussion of $\sqrt S/M\to0$ below; and it is stated under Assumptions 1 and 2 alone, which standard Brownian motion satisfies. The counterexample therefore meets the lemma on its own terms.
+
+Because Lemmas 3 to 6 take Lemma 2 as an input, and Theorem 1 is stated as the summary of Lemmas 1 to 6, the published proofs of Theorems 1 and 2 fail. That is a statement about the proofs. It does not establish that the conclusions of those theorems are false, and the subsections that follow identify further steps that are independently unproved.
 
 \subsection{Lemma 3: the fixed-\texorpdfstring{$M$}{M} CLT is not uniform in \texorpdfstring{$M$}{M}}
 
@@ -722,6 +738,18 @@ Consistency of the exact diffusion MLE ordinarily requires a uniform law of larg
 Similarly, the martingale central limit theorem invoked from \citet{HallHeyde1980} requires convergence of the realised conditional quadratic variation and a conditional Lindeberg condition. Defining Fisher information as an expectation does not make the realised conditional variance condition automatic. Boundedness of $\partial p/\partial\theta$ is also not a bound on the score $(\partial p/\partial\theta)/p$ when $p$ can be small; strict positivity of $p$ at each point is weaker than the uniform lower bound the argument needs.
 
 These points do not imply that no correct exact-MLE theorem can be written. They imply that the short proof in Appendix A does not establish the stated result, even apart from the false transition-density joint limit.
+
+\subsection{What a counterexample to the argmax estimator would require}\label{sec:argmax_gap}
+
+It is worth being explicit about the limit of the negative results above. \Cref{thm:collapse} refutes a statement about the simulated transition density at one pair of points. It does not refute the conclusion of Theorem 1, which concerns the maximiser of the simulated log likelihood. Failure of a criterion pointwise does not imply failure of its argmax, and three obstacles separate the two.
+
+First, the collapse is driven by a rare-event geometry that is not uniform over the state space or over the parameter. \Cref{thm:collapse} fixes $x=y=0$. An argmax argument needs control of $\widehat q_{M,S}(Y_{n+1}\mid Y_n;\theta)$ simultaneously over $N$ observed pairs and over a neighbourhood of $\thetao$, and the sets on which individual densities collapse need not align.
+
+Second, the simulated criterion is evaluated with common random numbers across $\theta$, as the published implementation requires for a smooth objective. The summands are therefore strongly dependent across parameter values. A criterion that is badly behaved at each fixed $\theta$ may still have a well-behaved maximiser if the errors move together; conversely, common random numbers can create a random limit criterion whose argmax is random. Which happens is a property of the coupling, not of the pointwise limit.
+
+Third, the logarithm is unbounded below. Collapse towards zero at a single observation drives one log-density term to $-\infty$, which may push the maximiser away from the region where collapse occurs rather than towards a wrong value. The direction of that effect depends on how the collapse region varies with $\theta$.
+
+A complete argmax counterexample would need to exhibit a parametric family, an admissible sequence $(M_n,S_n)$, and either a limit criterion whose maximiser differs from $\thetao$, or a demonstration that the simulated criterion fails to converge uniformly on a neighbourhood in a way that the maximiser inherits. We record in \Cref{app:argmax} the approaches we attempted and where each fails. Until such a construction exists, the correct statement is that the published proofs of Theorems 1 and 2 do not establish their conclusions, not that those conclusions are false.
 
 \section{Mathematical status of the exchange-rate application}\label{sec:application}
 
@@ -1090,9 +1118,9 @@ Increasing $M$ without increasing $R_{M,S}$ is not an accuracy improvement. For 
 
 The endpoint simulated-likelihood estimator has a simple but consequential dimensional structure. Its final Gaussian transition is a shrinking kernel. In $K$ dimensions, the second moment of one simulated contribution grows as $M^{K/2}$, so the Monte Carlo variance is of order $M^{K/2}/S$. The relevant simulation size is $S/M^{K/2}$.
 
-This leads to four definite conclusions about \citet{BrandtSantaClara2002}. First, the proof of transition-density convergence combines two sequential limits without controlling their joint path. Second, the rate condition used in the asymptotic theorems is incompatible with mean-square density consistency in the four-dimensional application. Third, an exact Brownian sequence satisfying the stated condition, and satisfying the paper's own Assumptions 1 and 2, makes the simulated density converge in probability to zero rather than to the positive true density. The issue is therefore not only a missing technical lemma; the stated joint theorem is false. Fourth, and independently of all of the above, the implemented design $N=544$, $M=10$, $S=5{,}000$ does not approach the region described by the paper's own conditions $\sqrt S/M\to0$ and $N/S^{1/4}\to0$, which would require $N^4\ll S\ll M^2$.
+This leads to four conclusions about \citet{BrandtSantaClara2002}, stated in decreasing order of strength. First, the joint transition-density convergence asserted in their Lemma 2 is directly false: an exact Brownian sequence satisfying the paper's own Assumptions 1 and 2, and satisfying its rate condition, makes the simulated density converge in probability to zero rather than to the positive true density. Second, because Lemmas 3 to 6 take Lemma 2 as an input, the published proofs of Theorems 1 and 2 fail. That is a statement about the proofs; we do not show that their conclusions are false, and \Cref{app:argmax} explains why the density counterexample does not transfer to the maximiser. Third, the rate condition used in those theorems is incompatible with pointwise mean-square consistency of the simulated transition density in the four-dimensional application. Fourth, and independently of all of the above, the ratios corresponding to the paper's own conditions $\sqrt S/M\to0$ and $N/S^{1/4}\to0$ are not small at the implemented design $N=544$, $M=10$, $S=5{,}000$, so that design is not in a regime resembling the asymptotic ordering the theorems describe.
 
-The corrected analysis also supplies constructive results. The density estimator has a triangular-array CLT under $S/M^{K/2}\to\infty$. If the Euler density bias is first order, the MSE-optimal discretisation is $M\asymp S^{2/(K+4)}$. The nonlinear log-likelihood scale is $M^{K/2}/S$, subject to the usual lower-tail conditions required for expectations of logarithms. These results explain why bridge proposals and other importance-sampling methods are not merely computational refinements: they address the rare-event geometry of the estimator.
+The corrected transition-density analysis also supplies constructive results. The density estimator has a triangular-array CLT under $S/M^{K/2}\to\infty$. If the Euler density bias is first order, the MSE-optimal discretisation is $M\asymp S^{2/(K+4)}$. The nonlinear log-likelihood scale is $M^{K/2}/S$, subject to the usual lower-tail conditions required for expectations of logarithms. These results explain why bridge proposals and other importance-sampling methods are not merely computational refinements: they address the rare-event geometry of the estimator.
 
 The exchange-rate application raises separate questions. Its square-root states fall outside the smooth uniformly elliptic theory, although for the interest rates the Feller ratios are large enough that this is a gap in proof coverage rather than a numerical hazard. The incompleteness state is different: its Feller ratio is exactly one half for every admissible parameter value, and the identification rule drives it onto its degenerate boundary exactly. Because the estimator substitutes that state out and simulates volatility instead, the requirement becomes that a recovered square root remain real along every simulated Euler path, which ordinary Euler discretisation does not guarantee. The volatility equation is implicit when risk prices depend on volatility, and the reported U.S.--U.K. estimates give a leading coefficient of the wrong sign, so that specification admits either no positive volatility branch or two, never exactly one. The Brownian correlation matrix requires a joint positive-semidefinite restriction that entrywise bounds do not deliver. The final empirical estimator also contains a minimum-incompleteness corner rule and binding constraints that are not covered by ordinary interior SML asymptotics.
 
@@ -1128,6 +1156,63 @@ If
 S_n h_n^{K/2}\{\log(1/h_n)\}^{K/2}\to0
 \]
 and $S_n$ grows at most polynomially in $1/h_n$, then with high probability no preterminal draw lies within $r_n$ of the endpoint, while the maximum kernel outside that ball tends to zero for sufficiently large $c$. Thus the estimator again collapses to zero. The theorem uses $M=S$ because it is transparent and directly satisfies the published rate in four dimensions.
+
+\section{The argmax question in a location model}\label{app:argmax}
+
+This appendix records what can be proved about the simulated-likelihood maximiser in the most favourable possible model, and where the argument stops. The conclusion is negative: we do not obtain a counterexample to argmax consistency, and the manuscript makes no such claim. Two intermediate results are complete and are stated here because they clarify what the endpoint construction does to the estimation problem.
+
+Consider
+\begin{equation}\label{eq:location_model}
+dY_t=\theta\,dt+dW_t,\qquad Y_t\in\R^K,
+\end{equation}
+observed at unit intervals $t=0,1,\ldots,N$. The Euler scheme is exact for every $M$, the coefficients satisfy Assumptions 1 and 2 of \citet{BrandtSantaClara2002} exactly, and the exact maximum likelihood estimator is the mean increment $\widehat\theta_N=N^{-1}\sum_n\Delta Y_n$. Common random numbers across $\theta$ are used throughout, as the published implementation requires for a smooth objective: the innovations $\xi_{n,s}\sim\Normal(0,I_K)$ are drawn once and held fixed as $\theta$ varies.
+
+\begin{proposition}[Common random numbers give an exact kernel estimator]\label{prop:crn_kde}
+Set $h=1/M$, $u_n(\theta)=\Delta Y_n-\theta$ and $a_{n,s}=\sqrt{1-h}\,\xi_{n,s}$. Then for every $\theta$,
+\begin{equation}\label{eq:crn_kde}
+\widehat q_{M,S}(Y_{n+1}\mid Y_n;\theta)
+=\frac1S\sum_{s=1}^S\phik\!\left(u_n(\theta)-a_{n,s};0,hI_K\right).
+\end{equation}
+That is, the simulated transition density is exactly a Gaussian kernel density estimate with bandwidth $\sqrt h$, built from a sample that does not depend on $\theta$ and evaluated at the $\theta$-dependent point $u_n(\theta)$.
+\end{proposition}
+
+\begin{proof}
+The Euler recursion for \eqref{eq:location_model} is $Y^M_{m+1}=Y^M_m+\theta h+\sqrt h\,\varepsilon_{m+1}$, so after $M-1$ steps from $Y^M_0=Y_n$ the preterminal state is $Z_{n,s}(\theta)=Y_n+\theta(1-h)+\sqrt{1-h}\,\xi_{n,s}$, where $\sqrt{1-h}\,\xi_{n,s}$ collects the $M-1$ independent increments. The one-step density \eqref{eq:one_step_kernel} evaluated at $Y_{n+1}$ has mean $Z_{n,s}(\theta)+\theta h$ and covariance $hI_K$, and
+\[
+Y_{n+1}-Z_{n,s}(\theta)-\theta h=\Delta Y_n-\theta-\sqrt{1-h}\,\xi_{n,s}=u_n(\theta)-a_{n,s}.
+\]
+Substituting into \eqref{eq:pedersen_estimator} gives \eqref{eq:crn_kde}.
+\end{proof}
+
+\Cref{prop:crn_kde} is an identity, not an approximation, and it recasts \Cref{thm:collapse} in familiar terms: a kernel density estimate with $S$ atoms and bandwidth $\sqrt h$ is uninformative when $Sh^{K/2}\to0$.
+
+\begin{proposition}[The maximiser is governed by a nearest-atom objective]\label{prop:nearest_atom}
+Write $b_{n,s}=\Delta Y_n-\sqrt{1-h}\,\xi_{n,s}$ and
+\[
+D_N(\theta)=\sum_{n=0}^{N-1}\min_{s\le S}\lVert\theta-b_{n,s}\rVert^2 .
+\]
+Then for every $\theta$,
+\begin{equation}\label{eq:nearest_atom_sandwich}
+0\le
+2h\log\widehat{\mathcal L}_{N,M,S}(\theta)+D_N(\theta)+NhK\log(2\pi h)
+\le 2Nh\log S .
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Fix $n$ and let $d_n=\min_s\lVert\theta-b_{n,s}\rVert^2$. Factoring the minimising term out of the sum in \eqref{eq:crn_kde},
+\[
+\frac1S\sum_s e^{-\lVert\theta-b_{n,s}\rVert^2/(2h)}
+=e^{-d_n/(2h)}\cdot\frac1S\sum_s e^{-(\lVert\theta-b_{n,s}\rVert^2-d_n)/(2h)} .
+\]
+Every exponent in the second factor is nonpositive and at least one is zero, so that factor lies in $[1/S,1]$. Taking logarithms, adding the constant $-\tfrac K2\log(2\pi h)$ from the Gaussian prefactor, multiplying by $2h$ and summing over $n$ gives \eqref{eq:nearest_atom_sandwich}.
+\end{proof}
+
+The bound is uniform in $\theta$ with slack $2Nh\log S$, which along $M=S=n$ is $2N(\log n)/n$ per unit of $N$ and therefore negligible relative to $D_N$. The maximiser of the simulated likelihood is thus governed by a nearest-neighbour objective over the $NS$ atoms $b_{n,s}$, whereas the exact log likelihood in this model is the smooth quadratic $-\tfrac12\sum_n\lVert\theta-\Delta Y_n\rVert^2$ with minimiser $\widehat\theta_N$. The two objectives have no reason to share a maximiser. This is the precise sense in which the endpoint construction replaces the estimation problem rather than approximating it.
+
+What is missing is the limit of $D_N$. A nearest-neighbour heuristic, given in the accompanying notes, suggests that $N^{-1}S^{2/K}D_N(\theta)$ converges to a multiple of $\exp\{\lVert\theta-\thetao\rVert^2/(K-2)\}$, finite exactly when $K>2$, which is the same threshold as \Cref{thm:collapse}. If that were established, the simulated argmax would be \emph{consistent} for $\thetao$ but would converge at a rate governed by $S^{2/K}$ rather than the parametric rate, so that $\sqrt N(\widehat\theta_{N,M,S}-\widehat\theta_N)$ would not vanish, contradicting the conclusion of Lemma 5. Proving it requires a uniform-in-$\theta$ nearest-neighbour law for a triangular array of exchangeable, not independent, atoms with $S$ growing; standard nearest-neighbour asymptotics are pointwise and assume independent sampling from a fixed density. We did not close that gap.
+
+Numerical results in the accompanying notes are consistent with this picture: the simulated maximiser is consistent, its error remains a roughly constant multiple of the exact MLE error, and the scaled gap $\sqrt N\lVert\widehat\theta_{N,M,S}-\widehat\theta_N\rVert$ shows no downward trend. Those computations use a single seed per design and cannot reach the regime $N^4\ll S\ll M^2$ in which the published theorem operates, so they are evidence and not proof. Accordingly the manuscript claims only what \Cref{sec:proof_review} establishes: Lemma 2 is directly refuted, and the proofs of Theorems 1 and 2 therefore fail.
 
 \section{Reproducibility}\label{app:repro}
 

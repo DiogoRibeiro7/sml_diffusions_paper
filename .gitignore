@@ -81,3 +81,6 @@ Thumbs.db
 
 # latexmk failure artefact
 *-SAVE-ERROR
+
+# Investigation scratch output
+notes/argmax_*.csv
