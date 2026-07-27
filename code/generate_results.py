@@ -378,6 +378,105 @@ def make_implicit_volatility_table() -> None:
     )
 
 
+def make_feller_table() -> None:
+    """Feller ratios for the square-root states, at the published estimates.
+
+    For dZ = kappa (theta - Z) dt + sigma sqrt(Z) dB the origin is unattainable
+    if and only if 2 kappa theta / sigma^2 >= 1.  The incompleteness state
+    X = epsilon^2 implied by an Ornstein-Uhlenbeck epsilon has kappa = 2 alpha,
+    theta = beta^2 / (2 alpha) and sigma = 2 beta, so its ratio is exactly 1/2
+    for every admissible (alpha, beta).
+    """
+    rows = []
+    for system, alpha, beta, rates in (
+        (
+            "U.S. vs. U.K.",
+            0.320,
+            0.088,
+            (("r (U.S.)", 0.284, 0.053, 0.028), ("r* (U.K.)", 0.486, 0.074, 0.056)),
+        ),
+        (
+            "U.S. vs. Germany",
+            0.338,
+            0.101,
+            (("r (U.S.)", 0.305, 0.058, 0.027), ("r* (Germany)", 0.088, 0.064, 0.042)),
+        ),
+    ):
+        for name, kappa, theta, sigma in rates:
+            rows.append(
+                {
+                    "system": system,
+                    "state": name,
+                    "kappa": kappa,
+                    "theta": theta,
+                    "sigma": sigma,
+                    "feller_ratio": 2.0 * kappa * theta / sigma**2,
+                }
+            )
+        kappa_x = 2.0 * alpha
+        theta_x = beta**2 / (2.0 * alpha)
+        sigma_x = 2.0 * beta
+        rows.append(
+            {
+                "system": system,
+                "state": "epsilon^2",
+                "kappa": kappa_x,
+                "theta": theta_x,
+                "sigma": sigma_x,
+                "feller_ratio": 2.0 * kappa_x * theta_x / sigma_x**2,
+            }
+        )
+
+    frame = pd.DataFrame(rows)
+    frame.to_csv(TABLES / "feller_conditions.csv", index=False)
+    (TABLES / "feller_conditions.tex").write_text(
+        frame.to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.4f}",
+            escape=False,
+            column_format="llrrrr",
+        ),
+        encoding="utf-8",
+    )
+
+
+def make_design_table() -> None:
+    """Compare the implemented simulation design with the published conditions.
+
+    Theorem 2 of Brandt and Santa-Clara (2002) requires sqrt(S)/M -> 0 and
+    N / S^(1/4) -> 0 jointly, that is N^4 << S << M^2.  The reported estimation
+    uses N = 544 weekly observations, M = 10 Euler substeps and S = 5,000
+    simulations (plus 5,000 antithetic variates, which are not independent).
+    """
+    n_obs, m_steps = 544, 10
+    rows = []
+    for label, simulations in (("Independent draws", 5_000), ("Counting antithetics", 10_000)):
+        rows.append(
+            {
+                "design": label,
+                "N": n_obs,
+                "M": m_steps,
+                "S": simulations,
+                "sqrt_S_over_M": math.sqrt(simulations) / m_steps,
+                "N_over_S_quarter": n_obs / simulations**0.25,
+                "effective_size_K4": simulations / m_steps**2,
+                "required_S": float(n_obs**4),
+                "required_M": math.sqrt(float(n_obs**4)),
+            }
+        )
+    frame = pd.DataFrame(rows)
+    frame.to_csv(TABLES / "implemented_design.csv", index=False)
+    (TABLES / "implemented_design.tex").write_text(
+        frame.to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.4g}",
+            escape=False,
+            column_format="lrrrrrrrr",
+        ),
+        encoding="utf-8",
+    )
+
+
 def make_rate_table() -> None:
     """Create a compact table of the principal rate conditions."""
     rows = [
@@ -401,6 +500,11 @@ def make_rate_table() -> None:
             "general_K": r"$\sqrt{S}/M\to0$",
             "K4": r"$S/M^2\to0$",
         },
+        {
+            "property": "Published parameter condition",
+            "general_K": r"$N/S^{1/4}\to0$",
+            "K4": r"$N/S^{1/4}\to0$",
+        },
     ]
     frame = pd.DataFrame(rows)
     (TABLES / "rate_conditions.tex").write_text(
@@ -422,6 +526,8 @@ def main() -> None:
     make_ou_scaling_figure()
     make_boundary_probability_figure()
     make_implicit_volatility_table()
+    make_feller_table()
+    make_design_table()
     make_rate_table()
 
 

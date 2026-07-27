@@ -40,4 +40,4 @@ pdflatex main.tex
 
 ## Scope
 
-The manuscript establishes an exact Brownian counterexample, derives dimension-dependent moment and central-limit rates for the endpoint estimator, and analyses the mathematical status of the four-dimensional exchange-rate application. It does not claim that the published finite-sample empirical estimates are necessarily incorrect.
+The manuscript establishes an exact Brownian counterexample, derives dimension-dependent moment and central-limit rates for the endpoint estimator, records that the implemented simulation design does not satisfy the published rate conditions, and analyses the mathematical status of the four-dimensional exchange-rate application. It does not claim that the published finite-sample empirical estimates are necessarily incorrect.

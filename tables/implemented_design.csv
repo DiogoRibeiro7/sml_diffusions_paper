@@ -1,0 +1,3 @@
+design,N,M,S,sqrt_S_over_M,N_over_S_quarter,effective_size_K4,required_S,required_M
+Independent draws,544,10,5000,7.0710678118654755,64.69286705614803,50.0,87578116096.0,295936.0
+Counting antithetics,544,10,10000,10.0,54.4,100.0,87578116096.0,295936.0
