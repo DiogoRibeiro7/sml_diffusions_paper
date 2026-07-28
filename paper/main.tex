@@ -128,7 +128,7 @@ which is minimised at $M\asymp S^{2/(K+4)}$ and yields the rate $S^{-4/(K+4)}$. 
 
 Fifth, we trace the density-level result into the log likelihood. The nonlinearity of the logarithm operates on the effective Monte Carlo size $S/M^{K/2}$. Whenever a standard second-order delta expansion is valid, the leading log-density bias is of order $M^{K/2}/S$, rather than uniformly of order $1/S$. This distinction matters because simulated likelihood sums a log transformation over all observations.
 
-Sixth, we examine the mathematical status of the exchange-rate application. We first record that the implemented design does not satisfy the paper's own rate conditions, which jointly require $N^4\ll S\ll M^2$, by several orders of magnitude. The empirical model then contains square-root diffusions that violate the smoothness and nondegeneracy assumptions of the generic theorem, though we show that for the interest rates this violation is numerically inconsequential at the reported estimates. The market-incompleteness state is not: its Feller ratio equals one half for every parameter value, and because the estimator eliminates that state in favour of volatility, every Euler substep requires a recovered square root to remain real. The time-varying risk-price specification defines exchange-rate volatility through an implicit quadratic identity whose leading coefficient is negative at the reported U.S.--U.K. estimates, so that system admits either zero or two positive volatility branches and never exactly one. The full Brownian correlation matrix requires a joint positive-semidefinite constraint, not merely pairwise correlations in $[-1,1]$. Finally, the minimum-incompleteness rule is a linear programme whose solution is always a corner, which we verify against the published tables, and together with the binding nonnegativity constraint it yields a hybrid and potentially nonregular estimator not covered by the unconstrained SML theorem.
+Sixth, we examine the mathematical status of the exchange-rate application. We first give finite-sample scaling diagnostics showing that the ratios corresponding to the paper's own rate conditions are not small at the implemented design, so the implementation does not resemble a point along a sequence in which those conditions operate. The empirical model then contains square-root diffusions that violate the smoothness and nondegeneracy assumptions of the generic theorem, though we show that for the interest rates this violation is numerically inconsequential at the reported estimates. The market-incompleteness state is not: its Feller ratio equals one half for every parameter value, and because the estimator eliminates that state in favour of volatility, every Euler substep requires a recovered square root to remain real. The time-varying risk-price specification defines exchange-rate volatility through an implicit quadratic identity whose leading coefficient is negative at the reported U.S.--U.K. estimates, so that system admits either zero or two positive volatility branches and never exactly one. The full Brownian correlation matrix requires a joint positive-semidefinite constraint, not merely pairwise correlations in $[-1,1]$. Finally, the minimum-incompleteness rule is a linear programme whose solution is always a corner, which we verify against the published tables, and together with the binding nonnegativity constraint it yields a hybrid and potentially nonregular estimator not covered by the unconstrained SML theorem.
 
 The aim is not to relitigate the substantive economics of a paper published more than two decades ago. Nor do we infer from a false theorem that every numerical estimate obtained with finite $M$ and $S$ must be poor. The aim is narrower and mathematical: to identify the correct dimensional scale of the endpoint estimator, separate sequential from joint convergence, and determine what the published asymptotic arguments do and do not establish.
 
@@ -896,33 +896,53 @@ A complete argmax counterexample would need to exhibit a parametric family, an a
 
 The empirical application estimates a four-dimensional system consisting of two interest rates, the log exchange rate, and exchange-rate volatility. It also reconstructs a market-incompleteness state. Several mathematical features are not covered by the generic SML theorem.
 
-\subsection{The implemented design and the paper's own rate conditions}\label{sec:design}
+\subsection{Finite-sample scaling diagnostics for the implementation}\label{sec:design}
 
-Before turning to the structure of the model it is worth recording what the asymptotic theorems require of $N$, $M$, and $S$, and what the implementation uses. Theorem 2 of \citet{BrandtSantaClara2002} imposes two conditions jointly,
+Before turning to the structure of the model it is worth recording how the implemented simulation design sits relative to the asymptotic ordering that the published theorems describe. Theorem 2 of \citet{BrandtSantaClara2002} imposes two conditions jointly,
 \begin{equation}\label{eq:published_joint}
 \frac{\sqrt S}{M}\longrightarrow0,
 \qquad
 \frac{N}{S^{1/4}}\longrightarrow0,
 \end{equation}
-the second entering through the $o(N^{1/2}/S^{1/4})$ bound of their Lemma 5. Together these require
-\begin{equation}\label{eq:published_sandwich}
-N^4\ll S\ll M^2 .
-\end{equation}
-The estimation uses $N=544$ weekly observations from January 1990 to May 2000, $M=10$ Euler substeps, and $S=5{,}000$ simulations together with $5{,}000$ antithetic variates. At these values
-\[
-\frac{\sqrt S}{M}=7.07,
-\qquad
-\frac{N}{S^{1/4}}=64.7,
-\]
-and counting the antithetic draws as if they were independent gives $10.0$ and $54.4$. Neither ratio is small. To satisfy \eqref{eq:published_sandwich} at $N=544$ one would need $S\gg N^4\approx8.8\times10^{10}$ and then $M\gg\sqrt S\gtrsim3\times10^5$, which exceeds the implemented values by roughly seven and four orders of magnitude respectively.
+the second entering through the $o(N^{1/2}/S^{1/4})$ bound of their Lemma 5. A sequence satisfying both must eventually have $N^4\ll S\ll M^2$.
 
-This observation is logically independent of everything else in this paper. Even granting the published lemmas in full, the reported estimates are not covered by the asymptotic theory that is invoked to justify them, because the design does not approach the region in which that theory operates. \Cref{cor:contradiction} then shows that in $K=4$ no design could have approached it, since \eqref{eq:published_joint} and mean-square consistency of the transition density cannot hold together.
+What follows is a set of diagnostics, not a test. A single finite triple $(N,M,S)$ cannot satisfy or violate a limit; only a sequence can. The question a diagnostic can answer is narrower and still useful: are the finite ratios appearing in \eqref{eq:published_joint} small, so that the implementation resembles a point along such a sequence, and does the theorem supply any error bound at the implemented sizes? The answer to the second question is no in any case, because \eqref{eq:published_joint} is a statement about limits and carries no quantitative finite-sample content.
 
-The dimensional diagnostic of \Cref{def:effective_size} gives the complementary finite-sample reading. With $K=4$, $M=10$, and $S=5{,}000$,
+The estimation uses $N=544$ weekly observations from January 1990 to May 2000, $M=10$ Euler substeps, and $S=5{,}000$ simulations together with $5{,}000$ antithetic variates. \Cref{tab:design} reports the ratios. At the implemented values $\sqrt S/M=7.07$ and $N/S^{1/4}=64.7$. Neither is small, so the implementation does not resemble a design drawn from a sequence along which \eqref{eq:published_joint} is operating. That is the whole of the claim; nothing here shows that the estimates are inaccurate.
+
+The antithetic variates deserve a separate word. They are a variance-reduction device: each antithetic draw is generated from $-\varepsilon$ where its partner uses $\varepsilon$, so the two are perfectly negatively dependent and the pair contributes less than two independent draws to any variance calculation. Counting them as though they doubled $S$ would be wrong in both directions, understating the variance reduction they achieve for smooth integrands and overstating the number of independent endpoint draws. \Cref{tab:design} therefore counts $S=5{,}000$.
+
+\begin{table}[t]
+\centering
+\caption{Finite-sample scaling ratios for the implemented design and three variations, at $N=544$ and $K=4$. The effective endpoint size is $R_{M,S}=S/M^{2}$ from \Cref{def:effective_size}. These are diagnostics: the columns record how the implementation is placed, not whether any limit holds.}
+\label{tab:design}
+\begin{tabular}{lrrrrr}
+\toprule
+Scenario & $M$ & $S$ & $R_{M,S}=S/M^2$ & $\sqrt S/M$ & $N/S^{1/4}$ \\
+\midrule
+Implemented & 10 & 5{,}000 & 50.0 & 7.07 & 64.7 \\
+Double $M$ and $S$ & 20 & 10{,}000 & 25.0 & 5.00 & 54.4 \\
+Double $M$, $S$ fixed & 20 & 5{,}000 & 12.5 & 3.54 & 64.7 \\
+Double $M$, quadruple $S$ & 20 & 20{,}000 & 50.0 & 7.07 & 45.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The dimensional diagnostic of \Cref{def:effective_size} gives the complementary reading. With $K=4$, $M=10$ and $S=5{,}000$,
 \begin{equation}\label{eq:implemented_effective_size}
-R_{M,S}=\frac{S}{M^{K/2}}=\frac{5{,}000}{100}=50,
+R_{M,S}=\frac{S}{M^{K/2}}=\frac{5{,}000}{100}=50 .
 \end{equation}
-or $100$ if the antithetic variates are counted as independent, which they are not. Each transition density in a $544$-term log likelihood is therefore resolved by an effective sample of order $10^2$, not $10^4$. Nothing here shows that such a design is inaccurate; the point is that its accuracy is governed by \eqref{eq:implemented_effective_size} rather than by $S$, and that doubling $M$ in the final round of optimisation, as the paper reports doing, divides $R_{M,S}$ by four while appearing to refine the approximation.
+Each transition density in a $544$-term log likelihood is therefore resolved by an effective endpoint sample of order $10^2$, not $10^4$. Again this is a scaling statement and not a verdict: an effective size of $50$ may well be adequate at these parameter values, and the exact Brownian formulas of \Cref{sec:brownian} would be the way to check that for a given target density.
+
+The last three rows of \Cref{tab:design} record how $R_{M,S}$ responds to refinement, because the arithmetic is easy to get wrong. In four dimensions $R_{M,S}=S/M^2$, so
+\begin{equation}\label{eq:doubling_arithmetic}
+R_{2M,2S}=\frac{2S}{4M^2}=\frac{R_{M,S}}{2},
+\qquad
+R_{2M,S}=\frac{R_{M,S}}{4},
+\qquad
+R_{2M,4S}=R_{M,S}.
+\end{equation}
+The paper reports a final round of optimisation in which both $S$ and $M$ are doubled. That halves the effective endpoint size rather than increasing it, and the reported stability of the estimates under this refinement is therefore not evidence that the simulation is converging in the endpoint dimension; it is a comparison between two designs, the second of which has half the effective size of the first. Holding $R_{M,S}$ fixed while doubling $M$ requires quadrupling $S$, which is the last row of the table.
 
 \subsection{Square-root coefficients violate the generic assumptions}
 

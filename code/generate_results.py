@@ -459,27 +459,43 @@ def make_feller_table() -> None:
 
 
 def make_design_table() -> None:
-    """Compare the implemented simulation design with the published conditions.
+    """Finite-sample scaling ratios for the implemented design and variations.
 
-    Theorem 2 of Brandt and Santa-Clara (2002) requires sqrt(S)/M -> 0 and
-    N / S^(1/4) -> 0 jointly, that is N^4 << S << M^2.  The reported estimation
-    uses N = 544 weekly observations, M = 10 Euler substeps and S = 5,000
-    simulations (plus 5,000 antithetic variates, which are not independent).
+    These are diagnostics, not tests.  A single finite triple (N, M, S) can
+    neither satisfy nor violate a limit; what the ratios show is whether the
+    implementation sits in a regime resembling the asymptotic ordering that
+    Theorem 2 of Brandt and Santa-Clara (2002) describes, namely
+    sqrt(S)/M -> 0 together with N / S^(1/4) -> 0.
+
+    The reported estimation uses N = 544 weekly observations, M = 10 Euler
+    substeps and S = 5,000 simulations, plus 5,000 antithetic variates.  The
+    antithetic draws are a variance-reduction device and are perfectly
+    negatively dependent with their partners, so they are not counted as
+    independent simulations here.
+
+    Note the arithmetic of the effective endpoint size in K = 4, where
+    R(M, S) = S / M^2:  doubling both M and S gives R(2M, 2S) = R(M, S) / 2,
+    doubling M alone gives R(M, S) / 4, and holding R fixed while doubling M
+    requires quadrupling S.
     """
-    n_obs, m_steps = 544, 10
+    n_obs = 544
+    scenarios = (
+        ("Implemented", 10, 5_000),
+        ("Double M and S", 20, 10_000),
+        ("Double M, S fixed", 20, 5_000),
+        ("Double M, quadruple S", 20, 20_000),
+    )
     rows = []
-    for label, simulations in (("Independent draws", 5_000), ("Counting antithetics", 10_000)):
+    for label, m_steps, simulations in scenarios:
         rows.append(
             {
-                "design": label,
+                "scenario": label,
                 "N": n_obs,
                 "M": m_steps,
                 "S": simulations,
+                "effective_size_K4": simulations / m_steps**2,
                 "sqrt_S_over_M": math.sqrt(simulations) / m_steps,
                 "N_over_S_quarter": n_obs / simulations**0.25,
-                "effective_size_K4": simulations / m_steps**2,
-                "required_S": float(n_obs**4),
-                "required_M": math.sqrt(float(n_obs**4)),
             }
         )
     frame = pd.DataFrame(rows)
@@ -489,7 +505,7 @@ def make_design_table() -> None:
             index=False,
             float_format=lambda value: f"{value:.4g}",
             escape=False,
-            column_format="lrrrrrrrr",
+            column_format="lrrrrrr",
         ),
         encoding="utf-8",
     )

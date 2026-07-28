@@ -1,8 +1,10 @@
-\begin{tabular}{lrrrrrrrr}
+\begin{tabular}{lrrrrrr}
 \toprule
-design & N & M & S & sqrt_S_over_M & N_over_S_quarter & effective_size_K4 & required_S & required_M \\
+scenario & N & M & S & effective_size_K4 & sqrt_S_over_M & N_over_S_quarter \\
 \midrule
-Independent draws & 544 & 10 & 5000 & 7.071 & 64.69 & 50 & 8.758e+10 & 2.959e+05 \\
-Counting antithetics & 544 & 10 & 10000 & 10 & 54.4 & 100 & 8.758e+10 & 2.959e+05 \\
+Implemented & 544 & 10 & 5000 & 50 & 7.071 & 64.69 \\
+Double M and S & 544 & 20 & 10000 & 25 & 5 & 54.4 \\
+Double M, S fixed & 544 & 20 & 5000 & 12.5 & 3.536 & 64.69 \\
+Double M, quadruple S & 544 & 20 & 20000 & 50 & 7.071 & 45.74 \\
 \bottomrule
 \end{tabular}
