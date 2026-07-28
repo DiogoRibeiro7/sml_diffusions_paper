@@ -69,16 +69,30 @@
 \newcommand{\phik}{\varphi_K}
 \newcommand{\BS}{Brandt and Santa-Clara}
 
-\title{\textbf{Euler-Based Simulated Likelihood for Multidimensional Diffusions:}\\
-Dimensional Variance, Joint Asymptotics, and an Application Revisited}
-\author{Diogo\\[0.3em]\small Draft for mathematical review}
-\date{26 July 2026}
+% ---------------------------------------------------------------------------
+% Front-matter metadata.  Fill these in; do not leave placeholder text in a
+% release build.  \draftlabel is printed only when \draftmode is set below.
+\newcommand{\authorname}{Diogo Ribeiro}
+\newcommand{\affiliation}{\textsc{[affiliation to be supplied]}}
+\newcommand{\email}{\texttt{[email to be supplied]}}
+\newcommand{\orcid}{\textsc{[ORCID to be supplied]}}
+
+% Comment out the next line for a release build.
+\newcommand{\draftmode}{}
+
+\newcommand{\draftlabel}{%
+  \ifdefined\draftmode\\[0.3em]\small Draft for mathematical review\fi}
+% ---------------------------------------------------------------------------
+
+\title{\textbf{Dimensional Asymptotics of Euler-Based Simulated Likelihood for Multidimensional Diffusions}}
+\author{\authorname\\[0.2em]\small\affiliation\\[0.1em]\small\email\ \ \orcid\draftlabel}
+\date{28 July 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-A widely used simulation method for likelihood inference in discretely observed diffusions approximates each transition density by simulating an Euler scheme to one step before the observed endpoint and averaging the final Gaussian density. This endpoint estimator is a shrinking-bandwidth kernel estimator whose Monte Carlo variance grows with the discretisation level at a dimension-dependent rate: in $K$ dimensions the second moment of one simulated contribution is of order $M^{K/2}$, so the variance is of order $M^{K/2}/S$ rather than uniformly $1/S$. We derive exact Brownian moments, the corrected central-limit normalisation $\sqrt{S/M^{K/2}}$, the resulting bias--variance trade-off with optimal rate $S^{-4/(K+4)}$, and the scale of the nonlinear log-likelihood error. We then construct a direct counterexample to the joint transition-density convergence asserted in Lemma 2 of \citet{BrandtSantaClara2002}: along $M=S\to\infty$, which satisfies their rate condition $\sqrt S/M\to0$ and their own regularity assumptions, the simulated density converges in probability to zero for every $K>2$ although the true density is strictly positive. Consequently the published proofs of Theorems 1 and 2 fail, and in four dimensions their rate condition, equivalent to $S/M^2\to0$, is incompatible with pointwise mean-square consistency of the simulated transition density, which requires $S/M^2\to\infty$. We do not prove that the resulting simulated-likelihood argmax estimator is inconsistent, and we set out what such a proof would require. We then examine the mathematical status of the four-dimensional exchange-rate application: square-root boundaries, the reality of the incompleteness state along simulated paths, an implicitly defined volatility process whose reported loadings admit either zero or two positive branches, positive-semidefiniteness of the Brownian correlation matrix, a minimum-incompleteness selection rule with a corner solution, and binding inequality constraints. The paper does not assert that the published numerical estimates are incorrect; it establishes that their stated asymptotic justification is incomplete and, in the four-dimensional case, contradicted by an exact counterexample.
+A widely used simulation method for likelihood inference in discretely observed diffusions approximates each transition density by simulating an Euler scheme to one step before the observed endpoint and averaging the final Gaussian density. We show that this endpoint estimator is a shrinking-bandwidth kernel estimator whose effective simulation size is $S/M^{K/2}$, not $S$, where $K$ is the state dimension, $M$ the number of Euler substeps and $S$ the number of simulations. We derive exact Brownian moments, the general local moment law, the corrected density-level normalisation $\sqrt{S/M^{K/2}}$, and the resulting pointwise mean squared error, minimised at $M\asymp S^{2/(K+4)}$ with rate $S^{-4/(K+4)}$. We then give a direct counterexample to the joint transition-density convergence asserted in Lemma 2 of \citet{BrandtSantaClara2002}: along $M=S\to\infty$, a sequence satisfying their rate condition and their own regularity assumptions, the simulated density converges in probability to zero for every $K>2$ although the true density is strictly positive. The published proofs of their parameter-estimator theorems consequently fail, and in four dimensions their rate condition is incompatible with pointwise mean-square consistency of the simulated density. We do not prove that the resulting argmax estimator is inconsistent, and we set out what such a proof would require. Issues specific to the exchange-rate application are analysed separately in appendices.
 \end{abstract}
 
 \noindent\textbf{Keywords:} simulated maximum likelihood; diffusion processes; Euler scheme; transition density; Monte Carlo variance; curse of dimensionality; diffusion bridges; nonregular inference.
@@ -479,6 +493,8 @@ Two comments on the content of these conditions. \ref{ass:conv} is a joint requi
 
 \Cref{ass:local} is compatible with the regular setting used to justify Euler density expansions in \citet{BallyTalay1996a,BallyTalay1996b}. It is not compatible with the square-root boundaries in the later financial application, where \ref{ass:V} fails at the origin; that distinction is discussed in \Cref{sec:application}.
 
+The following theorem proves the dimensional moment law under \Cref{ass:local}. It concerns the simulated transition density.
+
 \begin{theorem}[Local moment law]\label{thm:local_moments}
 Under \Cref{ass:local}, for every fixed $r>1$,
 \begin{equation}\label{eq:general_r_moment}
@@ -796,6 +812,8 @@ For observations $Y_0,\ldots,Y_N$, the simulated log likelihood is a sum of term
 \]
 Even when $\widehat q_{M,S}$ is unbiased for $q_M$, its logarithm is not unbiased. The effective endpoint size $R_{M,S}=S h^{K/2}$ controls this nonlinearity.
 
+The next result is conditional. Its first two statements follow from \Cref{thm:generic_clt}, but the third holds only under an additional uniform-integrability and lower-tail condition, stated in the proposition and assumed rather than verified.
+
 \begin{proposition}[Log-density delta expansion]\label{prop:log_delta}
 Fix an endpoint with $q_M\to p>0$ and suppose the conditions of \Cref{thm:generic_clt} hold. If $R_{M,S}=S h^{K/2}\to\infty$, then
 \begin{equation}\label{eq:log_clt}
@@ -841,7 +859,7 @@ the stochastic average of the first-order simulation error has standard deviatio
 \]
 while the average nonlinear bias remains of order $R_{M,S}^{-1}$. The simulation bias does not average out across observations.
 
-A full estimator theorem requires uniform control in $\theta$ of densities, scores, and Hessians. The following standard perturbation statement separates those requirements from the endpoint calculations.
+A full estimator theorem requires uniform control in $\theta$ of densities, scores, and Hessians. The following statement is an abstract perturbation result: it is a deterministic implication about any pair of maximisers satisfying the listed conditions, and it is \emph{not} a theorem about the simulated-likelihood estimator, because we do not verify conditions (ii) and (iii) for that estimator. It is included to separate what the endpoint calculations deliver from what an estimator theorem would additionally require.
 
 \begin{proposition}[Abstract equivalence to exact MLE]\label{prop:m_estimator}
 Let $\widehat\theta_N$ maximise an exact average log likelihood $Q_N$, and let $\widehat\theta_{N,M,S}$ maximise a simulated criterion $\widehat Q_{N,M,S}$. Assume:
@@ -949,7 +967,22 @@ A complete argmax counterexample would need to exhibit a parametric family, an a
 
 \section{Mathematical status of the exchange-rate application}\label{sec:application}
 
-The empirical application estimates a four-dimensional system consisting of two interest rates, the log exchange rate, and exchange-rate volatility. It also reconstructs a market-incompleteness state. Several mathematical features are not covered by the generic SML theorem.
+The empirical application estimates a four-dimensional system consisting of two interest rates, the log exchange rate, and exchange-rate volatility. It also reconstructs a market-incompleteness state. This section states the findings that bear on one question: whether the generic theorem of \Cref{sec:general} covers the model that was actually estimated. The supporting analysis is in \Cref{app:sqrt} to \Cref{app:constrained}, and every claim below is proved there.
+
+None of what follows is an asymptotic theorem. These are calculations about one published model, reported as diagnostics.
+
+\subsection{Summary of findings}\label{sec:application_summary}
+
+\begin{enumerate}[label=(\roman*)]
+\item \emph{The coefficients are outside the assumptions, but not equally so.} The interest rates follow square-root processes, which violate \ref{ass:V} at the origin. At the reported estimates this is a gap in proof coverage rather than a numerical hazard: the Feller ratios range from $6.4$ to $48.5$, so the origin is unattainable and one-step Euler negativity probabilities are nil. The incompleteness state is different. Its Feller ratio is exactly $1/2$ for every admissible parameter value, so no estimate can move it away from its boundary, and the worst-case one-step Euler negativity probability tends to $\Phi(-1)\approx0.16$ regardless of the step size. See \Cref{app:sqrt}.
+\item \emph{The estimator does not simulate the state whose boundary is at issue.} The implementation eliminates the incompleteness state and simulates $(r,r^*,e,v)$, recovering $\epsilon_t$ from a square root of the variance identity. Every Euler substep therefore requires that radicand to stay nonnegative at a \emph{simulated} state, not merely at the observed data, and a violation makes the next substep's coefficients complex rather than merely inaccurate. See \Cref{app:reality}.
+\item \emph{The two state representations are not interchangeable.} Taking volatility as primitive, the variance identity reconstructs incompleteness uniquely. Taking incompleteness as primitive, recovering positive volatility requires solving a quadratic, and at the reported U.S.--U.K. loadings that quadratic has either no positive root or two. A branch-selection condition is needed and is not supplied. See \Cref{app:invert}.
+\item \emph{Correlation validity holds at the estimates but is not guaranteed by the specification.} The reported matrices are positive definite and robust to perturbation by their standard errors. However, the variance identity already forces every individual correlation into $[-1,1]$, so the entrywise constraint the paper imposes adds nothing, and at the volatility floor the exchange-rate Brownian motion becomes spanned by the two interest-rate Brownian motions, which over-determines a correlation the paper estimates freely. See \Cref{app:psd}.
+\item \emph{Identification is by a corner rule, not by the likelihood.} The minimum-incompleteness criterion is affine in the selected parameter, so its optimum is a vertex of the feasible set. Which constraint is active depends on the full feasible set, including range and semidefiniteness restrictions. See \Cref{app:mincomp}.
+\item \emph{The final estimator is not the one the theorem describes.} It combines simulated likelihood, auxiliary least squares, a corner selection rule, and inequality constraints that the paper reports as binding. See \Cref{app:constrained}.
+\end{enumerate}
+
+Taken together these say that the estimator analysed in \Cref{sec:general} and the estimator implemented in the application are different objects, quite apart from the rate conditions. The remainder of this section reports the one diagnostic that concerns the simulation design itself.
 
 \subsection{Finite-sample scaling diagnostics for the implementation}\label{sec:design}
 
@@ -999,7 +1032,154 @@ R_{2M,4S}=R_{M,S}.
 \end{equation}
 The paper reports a final round of optimisation in which both $S$ and $M$ are doubled. That halves the effective endpoint size rather than increasing it, and the reported stability of the estimates under this refinement is therefore not evidence that the simulation is converging in the endpoint dimension; it is a comparison between two designs, the second of which has half the effective size of the first. Holding $R_{M,S}$ fixed while doubling $M$ requires quadrupling $S$, which is the last row of the table.
 
-\subsection{Square-root coefficients violate the generic assumptions}
+\section{Numerical evidence}\label{sec:numerics}
+
+All numerical results in this section are generated by the accompanying Python script. They use exact Gaussian benchmarks where possible and are intended to illustrate the theorems rather than replace them.
+
+\subsection{Second-moment scaling}
+
+\Cref{fig:brownian_scaling} plots
+\[
+h^{K/2}\E[G_h^2]
+\]
+divided by its limiting value for $K\in\{1,2,4,8\}$. The exact formula \eqref{eq:brownian_second} converges to the constant predicted by \Cref{thm:local_moments}. The unscaled second moment grows as $M^{K/2}$.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/brownian_second_moment_scaling.pdf}
+\caption{Exact local second-moment scaling for standard Brownian motion. The plotted quantity converges to one after division by its theoretical limit.}
+\label{fig:brownian_scaling}
+\end{figure}
+
+\subsection{Three joint asymptotic paths}
+
+For $K=4$, \Cref{fig:path_rmse} compares the exact relative root mean squared error under $S=M$, $S=M^2$, and $S=M^3$. The first path satisfies the published condition but has increasing RMSE. The second keeps the effective endpoint size constant and does not become consistent. The third satisfies $S/M^2\to\infty$ and has decreasing RMSE.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/brownian_joint_path_rmse.pdf}
+\caption{Exact relative RMSE at the origin for four-dimensional Brownian motion.}
+\label{fig:path_rmse}
+\end{figure}
+
+\subsection{Typical estimates collapse while the mean remains correct}
+
+\Cref{fig:collapse_simulation} simulates the counterexample path $M=S$. The sample median falls rapidly towards zero, and by $M=512$ more than $95\%$ of estimates are below half the true density. The sample mean remains near one after normalisation because a small number of very large realisations carry the expectation.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/brownian_subcritical_distribution.pdf}
+\caption{Monte Carlo distribution along $M=S$ for four-dimensional Brownian motion. Values are divided by the true density. The dashed line is one.}
+\label{fig:collapse_simulation}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{Simulation of the four-dimensional Brownian counterexample path $M=S$. The estimator is divided by the true density.}
+\label{tab:collapse_stats}
+\small
+\begin{tabular}{rrrrrrr}
+\toprule
+$M$ & Replications & Mean & Median & 10th pct. & 90th pct. & $\Pp(\widehat q<0.5p)$ \\
+\midrule
+8   & 20000 & 1.001 & 0.3674 & $1.427\times10^{-2}$ & 2.940 & 0.560 \\
+16  & 20000 & 1.009 & 0.1582 & $1.520\times10^{-3}$ & 3.161 & 0.665 \\
+32  & 20000 & 1.027 & 0.03628 & $5.925\times10^{-5}$ & 2.746 & 0.754 \\
+64  & 20000 & 1.002 & 0.004223 & $8.507\times10^{-7}$ & 1.777 & 0.827 \\
+128 & 20000 & 1.042 & $1.537\times10^{-4}$ & $1.487\times10^{-9}$ & 0.7409 & 0.886 \\
+256 & 19531 & 0.941 & $1.118\times10^{-6}$ & $7.168\times10^{-14}$ & 0.1579 & 0.929 \\
+512 & 9765  & 0.998 & $8.604\times10^{-10}$ & $7.076\times10^{-20}$ & 0.01738 & 0.955 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{A nonzero drift does not remove the dimensional law}
+
+Consider the diagonal Ornstein--Uhlenbeck process
+\[
+dY_t=-Y_tdt+dW_t
+\]
+in four dimensions. Its exact transition density is known, and the preterminal Euler state is Gaussian, so the second moment of the endpoint estimator can again be computed exactly. \Cref{fig:ou_scaling} shows convergence to the same local constant in \Cref{thm:local_moments}. The phenomenon is therefore not specific to driftless Brownian motion.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/ou_second_moment_scaling.pdf}
+\caption{Scaled second moment for a four-dimensional Ornstein--Uhlenbeck diffusion.}
+\label{fig:ou_scaling}
+\end{figure}
+
+\subsection{Euler boundary violations in the incompleteness process}
+
+\Cref{fig:negative_euler} evaluates \eqref{eq:negative_prob} at the reported estimates $(\alpha,\beta)=(0.320,0.088)$ and $(0.338,0.101)$, using the step sizes $h=1/520$ and $h=1/1040$ that correspond to weekly data with $M=10$ and $M=20$, with a coarser value shown only as a labelled illustration. The horizontal scale is logarithmic so that the region near the boundary is visible; on a linear scale the entire phenomenon is compressed into a sliver next to the origin.
+
+The figure makes \Cref{prop:worst_case_boundary} visible: refining the step translates the curve to the left without lowering it. As explained in \Cref{app:reality}, this calculation applies to the incompleteness specification \eqref{eq:epsilon_cir} treated as a state in its own right. The implemented chain simulates $(r,r^*,e,v)$ and recovers $\epsilon_t$ from \eqref{eq:epsilon_recovered}, so the boundary that must not be crossed is the complete-markets surface rather than $\{H=0\}$; the figure is an exact illustration of the mechanism rather than of the implemented chain. The contrast with the interest rates in \Cref{tab:feller} is the substantive content: for $r$ and $r^*$ the Feller ratios exceed one by an order of magnitude and the boundary is never approached, whereas for the incompleteness state the ratio is exactly $1/2$ for all parameter values, and under the conditions of \Cref{prop:min_incomplete} the boundary is reached at one sample date.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/epsilon_squared_euler_negative_probability.pdf}
+\caption{One-step probability that ordinary Euler discretisation of the incompleteness specification $H_t=\epsilon_t^2$ in \eqref{eq:epsilon_cir} produces a negative state, at the estimates in Table 3 of \citet{BrandtSantaClara2002}. Solid lines are the U.S.--U.K. estimates and dashed lines the U.S.--Germany estimates. The application step sizes $h=1/520$ and $h=1/1040$ are shown together with a coarser illustrative value. Halving $h$ shifts each curve left without lowering its peak, which stays near $\Phi(-1)$; see \Cref{prop:worst_case_boundary}. The implemented estimator substitutes $\epsilon_t$ out and simulates $(r,r^*,e,v)$ instead, so this illustrates the boundary mechanism rather than the implemented chain; see \Cref{app:reality}.}
+\label{fig:negative_euler}
+\end{figure}
+
+\section{Remedies and alternative constructions}\label{sec:remedies}
+
+The endpoint variance problem is not an unavoidable property of likelihood inference for diffusions. It is a consequence of drawing preterminal states from the unconditioned forward Euler law and asking a shrinking final Gaussian kernel to connect them to a fixed observed endpoint.
+
+\subsection{Bridge and importance proposals}
+
+A bridge proposal guides simulated paths towards the observed endpoint. In importance-sampling language, it increases the probability of drawing paths in the region that contributes to the transition-density integral and corrects the proposal through a likelihood ratio. This is the direction taken by the acceleration methods studied by \citet{DurhamGallant2002}, the path-augmentation schemes of \citet{ElerianChibShephard2001}, conditioned-diffusion methods such as \citet{DelyonHu2006}, the regularised proposal of \citet{Lindstrom2012}, and later guided proposals for multidimensional bridges \citep{SchauerEtAl2017,VanDerMeulenSchauer2017}. The nonparametric simulation approach of \citet{Nicolau2002} replaces the endpoint Gaussian kernel by a density estimate, which changes the bandwidth problem rather than removing it.
+
+A useful proposal should be assessed through the moments of its importance weights. Merely changing the path simulator does not guarantee finite or dimension-stable variance, but conditioning on the endpoint directly targets the rare-event failure identified here. The numerical comparisons of \citet{StramerYan2007b} are consistent with this reading: the endpoint estimator degrades as $M$ grows at fixed $S$, which is the finite-sample signature of \Cref{cor:generic_variance}.
+
+\subsection{Exact or discretisation-free likelihood estimators}
+
+For restricted classes of diffusions, exact simulation and unbiased transition-density estimators remove Euler bias entirely. \citet{BeskosEtAl2006,BeskosEtAl2009} develop likelihood-based methods of this kind. Their applicability is model dependent, but they illustrate the correct theoretical structure: unbiasedness, continuity in parameters, finite-moment conditions, and joint control of data and Monte Carlo sample sizes are stated explicitly.
+
+\subsection{Analytical density expansions}
+
+Closed-form expansions, such as those of \citet{AitSahalia2002}, avoid endpoint Monte Carlo variance but introduce an approximation-order problem of their own. They can be attractive for models that can be transformed to satisfy the required regularity conditions.
+
+\subsection{Positivity-preserving discretisation}
+
+For square-root components, ordinary Euler should be replaced by an exact transition where available or by a specified positivity-preserving approximation. The choice is part of the estimator, not an implementation detail, because different truncation and reflection rules define different transition densities.
+
+\subsection{Practical design rule}
+
+If the unconditioned endpoint estimator is nevertheless used, $M$ and $S$ should be calibrated jointly. A minimum diagnostic is the effective endpoint size
+\[
+R_{M,S}=S/M^{K/2}.
+\]
+Increasing $M$ without increasing $R_{M,S}$ is not an accuracy improvement. For density-level asymptotics, $R_{M,S}$ must diverge. For likelihood-level work, one should also monitor the variance and lower tail of every estimated transition density, use log-sum-exp evaluation, and verify stability after increasing both $M$ and $S$ along a theoretically admissible path.
+
+\section{Conclusion}
+
+The endpoint simulated-likelihood estimator has a simple but consequential dimensional structure. Its final Gaussian transition is a shrinking kernel. In $K$ dimensions, the second moment of one simulated contribution grows as $M^{K/2}$, so the Monte Carlo variance is of order $M^{K/2}/S$. The relevant simulation size is $S/M^{K/2}$.
+
+This leads to four conclusions about \citet{BrandtSantaClara2002}, stated in decreasing order of strength. First, the joint transition-density convergence asserted in their Lemma 2 is directly false: an exact Brownian sequence satisfying the paper's own Assumptions 1 and 2, and satisfying its rate condition, makes the simulated density converge in probability to zero rather than to the positive true density. Second, because Lemmas 3 to 6 take Lemma 2 as an input, the published proofs of Theorems 1 and 2 fail. That is a statement about the proofs; we do not show that their conclusions are false, and \Cref{app:argmax} explains why the density counterexample does not transfer to the maximiser. Third, the rate condition used in those theorems is incompatible with pointwise mean-square consistency of the simulated transition density in the four-dimensional application. Fourth, and independently of all of the above, the ratios corresponding to the paper's own conditions $\sqrt S/M\to0$ and $N/S^{1/4}\to0$ are not small at the implemented design $N=544$, $M=10$, $S=5{,}000$, so that design is not in a regime resembling the asymptotic ordering the theorems describe.
+
+The corrected transition-density analysis also supplies constructive results. The density estimator has a triangular-array CLT under $S/M^{K/2}\to\infty$. If the Euler density bias is first order, the MSE-optimal discretisation is $M\asymp S^{2/(K+4)}$. The nonlinear log-likelihood scale is $M^{K/2}/S$, subject to the usual lower-tail conditions required for expectations of logarithms. These results explain why bridge proposals and other importance-sampling methods are not merely computational refinements: they address the rare-event geometry of the estimator.
+
+The exchange-rate application raises separate questions. Its square-root states fall outside the smooth uniformly elliptic theory, although for the interest rates the Feller ratios are large enough that this is a gap in proof coverage rather than a numerical hazard. The incompleteness state is different: its Feller ratio is exactly one half for every admissible parameter value, and the identification rule drives it onto its degenerate boundary exactly. Because the estimator substitutes that state out and simulates volatility instead, the requirement becomes that a recovered square root remain real along every simulated Euler path, which ordinary Euler discretisation does not guarantee. The volatility equation is implicit when risk prices depend on volatility, and the reported U.S.--U.K. estimates give a leading coefficient of the wrong sign, so that specification admits either no positive volatility branch or two, never exactly one. The Brownian correlation matrix requires a joint positive-semidefinite restriction that entrywise bounds do not deliver. The final empirical estimator also contains a minimum-incompleteness corner rule and binding constraints that are not covered by ordinary interior SML asymptotics.
+
+None of these points, individually or collectively, proves that the finite-sample economic conclusions are false. They show that those conclusions cannot inherit the claimed maximum-likelihood asymptotics from the mathematical argument given. The appropriate post-pub\-li\-ca\-tion response is a corrected theorem, a clear statement of the estimator actually implemented, and a re-examination of numerical stability under dimensionally valid simulation rates or bridge-based alternatives.
+
+\appendix
+
+\section{Additional proof details}\label{app:proofs}
+
+\subsection{The Brownian collapse for more general subcritical paths}
+
+The proof of \Cref{thm:collapse} extends beyond $M=S$. Let $h_n\downarrow0$ and choose a radius
+\[
+r_n=\sqrt{c h_n\log(1/h_n)}.
+\]
+If
+\[
+S_n h_n^{K/2}\{\log(1/h_n)\}^{K/2}\to0
+\]
+and $S_n$ grows at most polynomially in $1/h_n$, then with high probability no preterminal draw lies within $r_n$ of the endpoint, while the maximum kernel outside that ball tends to zero for sufficiently large $c$. Thus the estimator again collapses to zero. The theorem uses $M=S$ because it is transparent and directly satisfies the published rate in four dimensions.
+
+\section{Square-root coefficients violate the generic assumptions}\label{app:sqrt}
 
 The interest rates are modelled as correlated Cox--Ingersoll--Ross processes \citep{CoxIngersollRoss1985},
 \begin{equation}\label{eq:cir_rates}
@@ -1041,7 +1221,7 @@ U.S. vs. Germany & $r$ (U.S.) & 0.305 & 0.058 & 0.027 & 48.5 \\
 \end{tabular}
 \end{table}
 
-\subsection{The simulated state and the reality of the incompleteness process}\label{sec:simulated_state}
+\section{The simulated state and the reality of the incompleteness process}\label{app:reality}
 
 The previous subsection treats \eqref{eq:epsilon_cir} as a state in its own right, which is how the model presents it. The estimator does not. Equation (31) and Appendix B of \citet{BrandtSantaClara2002} eliminate $\epsilon_t$ using the variance identity and simulate the four-dimensional state
 \begin{equation}\label{eq:simulated_state}
@@ -1119,9 +1299,9 @@ U.S. vs. Germany
 \end{tabular}
 \end{table}
 
-\subsection{Invertibility of the volatility--incompleteness map}\label{sec:vol_invert}
+\section{Invertibility of the volatility--incompleteness map}\label{app:invert}
 
-The model can be written with either volatility or incompleteness as the primitive state, and the two representations are equivalent only if the map between them is well defined in both directions. This subsection analyses that map. It is not a claim about what the implemented estimator computes: as described in \Cref{sec:simulated_state}, the implementation takes $v_t$ as the primitive simulated state and uses the variance identity in the easy direction, to reconstruct $\epsilon_t$. No quadratic is solved at any Euler step.
+The model can be written with either volatility or incompleteness as the primitive state, and the two representations are equivalent only if the map between them is well defined in both directions. This subsection analyses that map. It is not a claim about what the implemented estimator computes: as described in \Cref{app:reality}, the implementation takes $v_t$ as the primitive simulated state and uses the variance identity in the easy direction, to reconstruct $\epsilon_t$. No quadratic is solved at any Euler step.
 
 The time-varying pure-currency risk prices have the form
 \begin{equation}\label{eq:risk_price_v}
@@ -1150,7 +1330,7 @@ Both $\kappa_b$ and the state-dependent part of $\zeta_t$ are quadratic forms in
 
 The two directions of the map are not symmetric.
 
-\emph{Volatility primitive.} Given $v_t$ and the remaining states, \eqref{eq:vol_identity} determines $\epsilon_t^2$ by subtraction, uniquely and without any branch condition. This is the direction the estimator uses, and it is unproblematic apart from the reality requirement discussed in \Cref{sec:simulated_state}.
+\emph{Volatility primitive.} Given $v_t$ and the remaining states, \eqref{eq:vol_identity} determines $\epsilon_t^2$ by subtraction, uniquely and without any branch condition. This is the direction the estimator uses, and it is unproblematic apart from the reality requirement discussed in \Cref{app:reality}.
 
 \emph{Incompleteness primitive.} Given $\epsilon_t^2$ and the remaining states, recovering a positive $v_t$ requires solving $F(v;\text{state})=0$. This is the direction implied by reading equations (30) and (37) of \citet{BrandtSantaClara2002} as the primitive specification, with the volatility dynamics of their equation (31) derived from it by It\^o's lemma. The implicit function theorem gives local solvability wherever
 \begin{equation}\label{eq:implicit_derivative}
@@ -1162,6 +1342,8 @@ v=\frac{\eta_t}{1-\kappa_b}
 \qquad(\kappa_b\ne1),
 \end{equation}
 at which the two roots coalesce and the local inverse fails to exist. Local solvability is not global uniqueness, and the following proposition describes the global branch structure.
+
+The following proposition concerns the state transformation between volatility and incompleteness. It is not a statement about the implemented optimisation algorithm, which uses the identity only in the direction described above.
 
 \begin{proposition}[Branch structure of the volatility identity]\label{prop:vol_branch}
 Let $\zeta_t>0$.
@@ -1204,7 +1386,7 @@ U.S. vs. Germany & $-0.142$ & 0.127 & 0.94 & 0.0702 & 0.9298 & unique positive r
 \end{tabular}
 \end{table}
 
-\subsection{Pairwise correlations do not guarantee a valid Brownian system}\label{sec:psd}
+\section{Pairwise correlations do not guarantee a valid Brownian system}\label{app:psd}
 
 The application specifies an instantaneous correlation matrix for the four Brownian motions $(W_t,W_t^*,X_t,Y_t)$, where $W$ and $W^*$ drive the two interest rates, $X$ drives the log exchange rate and $Y$ drives the incompleteness state. Write it in block form as
 \begin{equation}\label{eq:corr_block}
@@ -1289,7 +1471,7 @@ U.S. vs. Germany
 \end{tabular}
 \end{table}
 
-\subsection{Minimum incompleteness is an identifying selection rule}\label{sec:min_incomplete}
+\section{Minimum incompleteness is an identifying selection rule}\label{app:mincomp}
 
 The exchange-rate dynamics do not separately identify one risk-premium component and the degree of market incompleteness. The paper resolves this by choosing the unidentified quantity, described as chosen ``in a least-squares sense'', to minimise $\sum_t\epsilon_t^2$ subject to $\epsilon_t^2\ge0$ at every date. Under constant pure-currency risk prices the free quantity is the product $\sigma_{z^*}\epsilon_{c^*}$; under time-varying prices it is the correlation $\rho_{zz^*}$.
 
@@ -1299,7 +1481,7 @@ The feasible set matters, and it is larger than the nonnegativity constraints al
 \begin{equation}\label{eq:feasible_set}
 \mathcal C=\left\{c:\ \epsilon_t^2(c)\ge0\ \text{for all }t,\ \ c\in\mathcal R,\ \ R(c)\succeq0\right\},
 \end{equation}
-where $\mathcal R$ collects any range restriction on $c$ itself, such as $c\in[-1,1]$ when $c$ is a correlation, and $R(c)\succeq0$ is positive semidefiniteness of the full Brownian correlation matrix of \Cref{sec:psd}. Restricting attention to the nonnegativity constraints alone, as an earlier version of this analysis did, can identify the wrong active constraint.
+where $\mathcal R$ collects any range restriction on $c$ itself, such as $c\in[-1,1]$ when $c$ is a correlation, and $R(c)\succeq0$ is positive semidefiniteness of the full Brownian correlation matrix of \Cref{app:psd}. Restricting attention to the nonnegativity constraints alone, as an earlier version of this analysis did, can identify the wrong active constraint.
 
 \begin{proposition}[Corner solution of the minimum-incompleteness rule]\label{prop:min_incomplete}
 Suppose $\mathcal C$ is nonempty, closed and bounded, and that $\sum_t\gamma_t\ne0$. Then the problem
@@ -1323,15 +1505,15 @@ c^*=\min_{1\le t\le N}A_t,
 The objective equals $\sum_tA_t-c\sum_t\gamma_t$, which is affine in $c$ with nonzero slope. The feasible set $\mathcal C$ is an intersection of the interval $\mathcal R$, the half-lines $\{c:A_t-\gamma_tc\ge0\}$, and $\{c:R(c)\succeq0\}$; the last is convex because the set of positive semidefinite matrices is convex and $c\mapsto R(c)$ is affine. Hence $\mathcal C$ is a closed bounded interval. An affine function with nonzero slope on a closed bounded interval attains its minimum at an endpoint, and at that endpoint at least one of the defining constraints holds with equality. Statements (i) and (ii) then follow according to which constraint that is. For (iii), $\gamma_t\equiv1$ gives slope $-N<0$, so the optimum is the largest feasible $c$; if that is $\min_tA_t$ then \eqref{eq:min_incomplete_solution} follows, and the constraint indexed by $\arg\min_tA_t$ is active.
 \end{proof}
 
-The proposition is conditional in a way the earlier version was not. It does not assert that an incompleteness constraint must always bind, because the optimum may instead be stopped by $\mathcal R$ or by semidefiniteness. Whether the conditional case applies to the published estimates is an empirical question about interiority, and \Cref{sec:psd} reports the check: at the reported estimates the correlation $\rho_{zz^*}$ is interior to $[-1,1]$ in every specification, and the reconstructed correlation matrices are positive definite with the minimum eigenvalue bounded away from zero. Under those conditions the binding constraint is a nonnegativity constraint and case (i) applies.
+The proposition is conditional in a way the earlier version was not. It does not assert that an incompleteness constraint must always bind, because the optimum may instead be stopped by $\mathcal R$ or by semidefiniteness. Whether the conditional case applies to the published estimates is an empirical question about interiority, and \Cref{app:psd} reports the check: at the reported estimates the correlation $\rho_{zz^*}$ is interior to $[-1,1]$ in every specification, and the reconstructed correlation matrices are positive definite with the minimum eigenvalue bounded away from zero. Under those conditions the binding constraint is a nonnegativity constraint and case (i) applies.
 
 Table 4 of \citet{BrandtSantaClara2002} reports the minimum of the inferred excess volatility as $0.0000$ in all six specifications, that is for models A, B and C in both the U.S.--U.K. and the U.S.--Germany systems. This is consistent with case (i), but it should be read carefully: a reported $0.0000$ is a rounded value at four decimal places and is not by itself proof of exact binding. What makes exact binding the right reading here is the optimisation geometry, not the table: the objective is affine with nonzero slope, so the optimum is a vertex, and the interiority checks above locate that vertex on a nonnegativity face. The table is corroboration of a conclusion that follows from \Cref{prop:min_incomplete}, not the evidence for it.
 
 The mechanism is acknowledged in part in the original paper, which observes on p.~193 that with constant risk prices the inferred excess volatility is essentially $\epsilon_t=\{v_t^2-\min_sv_s^2\}^{1/2}$, and draws from this the conclusion that a volatile $v_t$ leaves a large average residual. \Cref{prop:min_incomplete} formalises that observation, shows that it is a property of the optimisation rather than of the data, and extends it to the time-varying specifications where the same corner structure holds for a different free parameter. The consequence for interpretation is that the dispersion of $v_t^2$, rather than its level, mechanically drives much of the estimated excess volatility: the residual is the observed variance minus its sample minimum after other adjustments, so its average size is a measure of that dispersion and is bounded below by construction.
 
-The rule is transparent, but it is not identification by the likelihood of the original structural model. It selects a member of an observationally equivalent or weakly identified class by imposing the smallest feasible incompleteness. The paper describes it as a ``prior of sorts''. Mathematically, the final estimator combines simulated likelihood, auxiliary least squares from bond yields, a minimum-incompleteness corner rule, and inequality constraints. A further consequence, used in \Cref{sec:simulated_state}, is that under case (i) the reconstructed incompleteness state sits exactly on its own degenerate boundary at the minimising date.
+The rule is transparent, but it is not identification by the likelihood of the original structural model. It selects a member of an observationally equivalent or weakly identified class by imposing the smallest feasible incompleteness. The paper describes it as a ``prior of sorts''. Mathematically, the final estimator combines simulated likelihood, auxiliary least squares from bond yields, a minimum-incompleteness corner rule, and inequality constraints. A further consequence, used in \Cref{app:reality}, is that under case (i) the reconstructed incompleteness state sits exactly on its own degenerate boundary at the minimising date.
 
-\subsection{Binding constraints imply nonregular inference}
+\section{Binding constraints imply nonregular inference}\label{app:constrained}
 
 The empirical optimisation assigns zero likelihood to parameter values for which any reconstructed $\epsilon_t^2$ is negative. The paper later states that the constraint is binding in the time-varying specifications. A criterion with an active inequality boundary is not twice continuously differentiable across the boundary, and the usual unconstrained normal approximation need not hold. Boundary MLEs and likelihood-ratio statistics commonly have tangent-cone or mixture limits rather than the standard interior distributions; see \citet{SelfLiang1987}.
 
@@ -1344,153 +1526,6 @@ Stacking first-order conditions and reporting ordinary GMM standard errors does 
 \item an optimum on or near the boundary.
 \end{itemize}
 A separate constrained-estimation analysis is needed before conventional symmetric standard errors and Wald tests can be justified.
-
-\section{Numerical evidence}\label{sec:numerics}
-
-All numerical results in this section are generated by the accompanying Python script. They use exact Gaussian benchmarks where possible and are intended to illustrate the theorems rather than replace them.
-
-\subsection{Second-moment scaling}
-
-\Cref{fig:brownian_scaling} plots
-\[
-h^{K/2}\E[G_h^2]
-\]
-divided by its limiting value for $K\in\{1,2,4,8\}$. The exact formula \eqref{eq:brownian_second} converges to the constant predicted by \Cref{thm:local_moments}. The unscaled second moment grows as $M^{K/2}$.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.86\textwidth]{figures/brownian_second_moment_scaling.pdf}
-\caption{Exact local second-moment scaling for standard Brownian motion. The plotted quantity converges to one after division by its theoretical limit.}
-\label{fig:brownian_scaling}
-\end{figure}
-
-\subsection{Three joint asymptotic paths}
-
-For $K=4$, \Cref{fig:path_rmse} compares the exact relative root mean squared error under $S=M$, $S=M^2$, and $S=M^3$. The first path satisfies the published condition but has increasing RMSE. The second keeps the effective endpoint size constant and does not become consistent. The third satisfies $S/M^2\to\infty$ and has decreasing RMSE.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.86\textwidth]{figures/brownian_joint_path_rmse.pdf}
-\caption{Exact relative RMSE at the origin for four-dimensional Brownian motion.}
-\label{fig:path_rmse}
-\end{figure}
-
-\subsection{Typical estimates collapse while the mean remains correct}
-
-\Cref{fig:collapse_simulation} simulates the counterexample path $M=S$. The sample median falls rapidly towards zero, and by $M=512$ more than $95\%$ of estimates are below half the true density. The sample mean remains near one after normalisation because a small number of very large realisations carry the expectation.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.86\textwidth]{figures/brownian_subcritical_distribution.pdf}
-\caption{Monte Carlo distribution along $M=S$ for four-dimensional Brownian motion. Values are divided by the true density. The dashed line is one.}
-\label{fig:collapse_simulation}
-\end{figure}
-
-\begin{table}[t]
-\centering
-\caption{Simulation of the four-dimensional Brownian counterexample path $M=S$. The estimator is divided by the true density.}
-\label{tab:collapse_stats}
-\small
-\begin{tabular}{rrrrrrr}
-\toprule
-$M$ & Replications & Mean & Median & 10th pct. & 90th pct. & $\Pp(\widehat q<0.5p)$ \\
-\midrule
-8   & 20000 & 1.001 & 0.3674 & $1.427\times10^{-2}$ & 2.940 & 0.560 \\
-16  & 20000 & 1.009 & 0.1582 & $1.520\times10^{-3}$ & 3.161 & 0.665 \\
-32  & 20000 & 1.027 & 0.03628 & $5.925\times10^{-5}$ & 2.746 & 0.754 \\
-64  & 20000 & 1.002 & 0.004223 & $8.507\times10^{-7}$ & 1.777 & 0.827 \\
-128 & 20000 & 1.042 & $1.537\times10^{-4}$ & $1.487\times10^{-9}$ & 0.7409 & 0.886 \\
-256 & 19531 & 0.941 & $1.118\times10^{-6}$ & $7.168\times10^{-14}$ & 0.1579 & 0.929 \\
-512 & 9765  & 0.998 & $8.604\times10^{-10}$ & $7.076\times10^{-20}$ & 0.01738 & 0.955 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{A nonzero drift does not remove the dimensional law}
-
-Consider the diagonal Ornstein--Uhlenbeck process
-\[
-dY_t=-Y_tdt+dW_t
-\]
-in four dimensions. Its exact transition density is known, and the preterminal Euler state is Gaussian, so the second moment of the endpoint estimator can again be computed exactly. \Cref{fig:ou_scaling} shows convergence to the same local constant in \Cref{thm:local_moments}. The phenomenon is therefore not specific to driftless Brownian motion.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.86\textwidth]{figures/ou_second_moment_scaling.pdf}
-\caption{Scaled second moment for a four-dimensional Ornstein--Uhlenbeck diffusion.}
-\label{fig:ou_scaling}
-\end{figure}
-
-\subsection{Euler boundary violations in the incompleteness process}
-
-\Cref{fig:negative_euler} evaluates \eqref{eq:negative_prob} at the reported estimates $(\alpha,\beta)=(0.320,0.088)$ and $(0.338,0.101)$, using the step sizes $h=1/520$ and $h=1/1040$ that correspond to weekly data with $M=10$ and $M=20$, with a coarser value shown only as a labelled illustration. The horizontal scale is logarithmic so that the region near the boundary is visible; on a linear scale the entire phenomenon is compressed into a sliver next to the origin.
-
-The figure makes \Cref{prop:worst_case_boundary} visible: refining the step translates the curve to the left without lowering it. As explained in \Cref{sec:simulated_state}, this calculation applies to the incompleteness specification \eqref{eq:epsilon_cir} treated as a state in its own right. The implemented chain simulates $(r,r^*,e,v)$ and recovers $\epsilon_t$ from \eqref{eq:epsilon_recovered}, so the boundary that must not be crossed is the complete-markets surface rather than $\{H=0\}$; the figure is an exact illustration of the mechanism rather than of the implemented chain. The contrast with the interest rates in \Cref{tab:feller} is the substantive content: for $r$ and $r^*$ the Feller ratios exceed one by an order of magnitude and the boundary is never approached, whereas for the incompleteness state the ratio is exactly $1/2$ for all parameter values, and under the conditions of \Cref{prop:min_incomplete} the boundary is reached at one sample date.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.86\textwidth]{figures/epsilon_squared_euler_negative_probability.pdf}
-\caption{One-step probability that ordinary Euler discretisation of the incompleteness specification $H_t=\epsilon_t^2$ in \eqref{eq:epsilon_cir} produces a negative state, at the estimates in Table 3 of \citet{BrandtSantaClara2002}. Solid lines are the U.S.--U.K. estimates and dashed lines the U.S.--Germany estimates. The application step sizes $h=1/520$ and $h=1/1040$ are shown together with a coarser illustrative value. Halving $h$ shifts each curve left without lowering its peak, which stays near $\Phi(-1)$; see \Cref{prop:worst_case_boundary}. The implemented estimator substitutes $\epsilon_t$ out and simulates $(r,r^*,e,v)$ instead, so this illustrates the boundary mechanism rather than the implemented chain; see \Cref{sec:simulated_state}.}
-\label{fig:negative_euler}
-\end{figure}
-
-\section{Remedies and alternative constructions}\label{sec:remedies}
-
-The endpoint variance problem is not an unavoidable property of likelihood inference for diffusions. It is a consequence of drawing preterminal states from the unconditioned forward Euler law and asking a shrinking final Gaussian kernel to connect them to a fixed observed endpoint.
-
-\subsection{Bridge and importance proposals}
-
-A bridge proposal guides simulated paths towards the observed endpoint. In importance-sampling language, it increases the probability of drawing paths in the region that contributes to the transition-density integral and corrects the proposal through a likelihood ratio. This is the direction taken by the acceleration methods studied by \citet{DurhamGallant2002}, the path-augmentation schemes of \citet{ElerianChibShephard2001}, conditioned-diffusion methods such as \citet{DelyonHu2006}, the regularised proposal of \citet{Lindstrom2012}, and later guided proposals for multidimensional bridges \citep{SchauerEtAl2017,VanDerMeulenSchauer2017}. The nonparametric simulation approach of \citet{Nicolau2002} replaces the endpoint Gaussian kernel by a density estimate, which changes the bandwidth problem rather than removing it.
-
-A useful proposal should be assessed through the moments of its importance weights. Merely changing the path simulator does not guarantee finite or dimension-stable variance, but conditioning on the endpoint directly targets the rare-event failure identified here. The numerical comparisons of \citet{StramerYan2007b} are consistent with this reading: the endpoint estimator degrades as $M$ grows at fixed $S$, which is the finite-sample signature of \Cref{cor:generic_variance}.
-
-\subsection{Exact or discretisation-free likelihood estimators}
-
-For restricted classes of diffusions, exact simulation and unbiased transition-density estimators remove Euler bias entirely. \citet{BeskosEtAl2006,BeskosEtAl2009} develop likelihood-based methods of this kind. Their applicability is model dependent, but they illustrate the correct theoretical structure: unbiasedness, continuity in parameters, finite-moment conditions, and joint control of data and Monte Carlo sample sizes are stated explicitly.
-
-\subsection{Analytical density expansions}
-
-Closed-form expansions, such as those of \citet{AitSahalia2002}, avoid endpoint Monte Carlo variance but introduce an approximation-order problem of their own. They can be attractive for models that can be transformed to satisfy the required regularity conditions.
-
-\subsection{Positivity-preserving discretisation}
-
-For square-root components, ordinary Euler should be replaced by an exact transition where available or by a specified positivity-preserving approximation. The choice is part of the estimator, not an implementation detail, because different truncation and reflection rules define different transition densities.
-
-\subsection{Practical design rule}
-
-If the unconditioned endpoint estimator is nevertheless used, $M$ and $S$ should be calibrated jointly. A minimum diagnostic is the effective endpoint size
-\[
-R_{M,S}=S/M^{K/2}.
-\]
-Increasing $M$ without increasing $R_{M,S}$ is not an accuracy improvement. For density-level asymptotics, $R_{M,S}$ must diverge. For likelihood-level work, one should also monitor the variance and lower tail of every estimated transition density, use log-sum-exp evaluation, and verify stability after increasing both $M$ and $S$ along a theoretically admissible path.
-
-\section{Conclusion}
-
-The endpoint simulated-likelihood estimator has a simple but consequential dimensional structure. Its final Gaussian transition is a shrinking kernel. In $K$ dimensions, the second moment of one simulated contribution grows as $M^{K/2}$, so the Monte Carlo variance is of order $M^{K/2}/S$. The relevant simulation size is $S/M^{K/2}$.
-
-This leads to four conclusions about \citet{BrandtSantaClara2002}, stated in decreasing order of strength. First, the joint transition-density convergence asserted in their Lemma 2 is directly false: an exact Brownian sequence satisfying the paper's own Assumptions 1 and 2, and satisfying its rate condition, makes the simulated density converge in probability to zero rather than to the positive true density. Second, because Lemmas 3 to 6 take Lemma 2 as an input, the published proofs of Theorems 1 and 2 fail. That is a statement about the proofs; we do not show that their conclusions are false, and \Cref{app:argmax} explains why the density counterexample does not transfer to the maximiser. Third, the rate condition used in those theorems is incompatible with pointwise mean-square consistency of the simulated transition density in the four-dimensional application. Fourth, and independently of all of the above, the ratios corresponding to the paper's own conditions $\sqrt S/M\to0$ and $N/S^{1/4}\to0$ are not small at the implemented design $N=544$, $M=10$, $S=5{,}000$, so that design is not in a regime resembling the asymptotic ordering the theorems describe.
-
-The corrected transition-density analysis also supplies constructive results. The density estimator has a triangular-array CLT under $S/M^{K/2}\to\infty$. If the Euler density bias is first order, the MSE-optimal discretisation is $M\asymp S^{2/(K+4)}$. The nonlinear log-likelihood scale is $M^{K/2}/S$, subject to the usual lower-tail conditions required for expectations of logarithms. These results explain why bridge proposals and other importance-sampling methods are not merely computational refinements: they address the rare-event geometry of the estimator.
-
-The exchange-rate application raises separate questions. Its square-root states fall outside the smooth uniformly elliptic theory, although for the interest rates the Feller ratios are large enough that this is a gap in proof coverage rather than a numerical hazard. The incompleteness state is different: its Feller ratio is exactly one half for every admissible parameter value, and the identification rule drives it onto its degenerate boundary exactly. Because the estimator substitutes that state out and simulates volatility instead, the requirement becomes that a recovered square root remain real along every simulated Euler path, which ordinary Euler discretisation does not guarantee. The volatility equation is implicit when risk prices depend on volatility, and the reported U.S.--U.K. estimates give a leading coefficient of the wrong sign, so that specification admits either no positive volatility branch or two, never exactly one. The Brownian correlation matrix requires a joint positive-semidefinite restriction that entrywise bounds do not deliver. The final empirical estimator also contains a minimum-incompleteness corner rule and binding constraints that are not covered by ordinary interior SML asymptotics.
-
-None of these points, individually or collectively, proves that the finite-sample economic conclusions are false. They show that those conclusions cannot inherit the claimed maximum-likelihood asymptotics from the mathematical argument given. The appropriate post-pub\-li\-ca\-tion response is a corrected theorem, a clear statement of the estimator actually implemented, and a re-examination of numerical stability under dimensionally valid simulation rates or bridge-based alternatives.
-
-\appendix
-
-\section{Additional proof details}\label{app:proofs}
-
-\subsection{The Brownian collapse for more general subcritical paths}
-
-The proof of \Cref{thm:collapse} extends beyond $M=S$. Let $h_n\downarrow0$ and choose a radius
-\[
-r_n=\sqrt{c h_n\log(1/h_n)}.
-\]
-If
-\[
-S_n h_n^{K/2}\{\log(1/h_n)\}^{K/2}\to0
-\]
-and $S_n$ grows at most polynomially in $1/h_n$, then with high probability no preterminal draw lies within $r_n$ of the endpoint, while the maximum kernel outside that ball tends to zero for sufficiently large $c$. Thus the estimator again collapses to zero. The theorem uses $M=S$ because it is transparent and directly satisfies the published rate in four dimensions.
 
 \section{The argmax question in a location model}\label{app:argmax}
 
