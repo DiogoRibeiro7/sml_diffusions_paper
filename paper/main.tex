@@ -956,9 +956,9 @@ The generic theory assumes infinitely differentiable coefficients with bounded d
 
 It is important to separate this structural violation from its practical consequences, and the two point in opposite directions for the interest rates. \Cref{tab:feller} reports the Feller ratio $2\lambda\vartheta/\sigma^2$ at the estimates of Table 3 of \citet{BrandtSantaClara2002}. It ranges from $6.4$ to $48.5$, so in every case the ratio comfortably exceeds one, the origin is unattainable for the exact processes, and the interest-rate states are far from the boundary. The corresponding Euler negativity probabilities are numerically nil: with $h=1/520$, corresponding to weekly data and $M=10$, a step taken from the German long-run mean $\vartheta^*=0.064$ has mean-to-standard-deviation ratio $137$, and even a step taken from the implausibly low state $r^*=0.001$ has ratio $17.4$. The assumptions of the generic theorem are genuinely violated by \eqref{eq:cir_rates}, and the estimator applied is therefore not the estimator analysed; but for $r$ and $r^*$ that gap is a matter of proof coverage rather than of numerical damage.
 
-The market-incompleteness state behaves differently. Let $X_t=\epsilon_t^2$. Equation (37) of \citet{BrandtSantaClara2002} specifies
+The market-incompleteness state behaves differently. Write $H_t=\epsilon_t^2$ for it; the letter $X$ is reserved for the Brownian motion driving the log exchange rate in \eqref{eq:corr_block}. Equation (37) of \citet{BrandtSantaClara2002} specifies
 \begin{equation}\label{eq:epsilon_cir}
-dX_t=(\beta^2-2\alpha X_t)dt+2\beta\sqrt{X_t}\,dY_t,
+dH_t=(\beta^2-2\alpha H_t)dt+2\beta\sqrt{H_t}\,dY_t,
 \end{equation}
 which is a CIR process with $\kappa=2\alpha$, long-run mean $\beta^2/(2\alpha)$, and diffusion coefficient $2\beta$. Its Feller ratio is
 \[
@@ -978,10 +978,10 @@ System & State & $\kappa$ & $\vartheta_Z$ & $\sigma_Z$ & $2\kappa\vartheta_Z/\si
 \midrule
 U.S. vs. U.K. & $r$ (U.S.) & 0.284 & 0.053 & 0.028 & 38.4 \\
               & $r^*$ (U.K.) & 0.486 & 0.074 & 0.056 & 22.9 \\
-              & $\epsilon^2$ & 0.640 & 0.0121 & 0.176 & 0.5 \\
+              & $H=\epsilon^2$ & 0.640 & 0.0121 & 0.176 & 0.5 \\
 U.S. vs. Germany & $r$ (U.S.) & 0.305 & 0.058 & 0.027 & 48.5 \\
               & $r^*$ (Germany) & 0.088 & 0.064 & 0.042 & 6.4 \\
-              & $\epsilon^2$ & 0.676 & 0.0151 & 0.202 & 0.5 \\
+              & $H=\epsilon^2$ & 0.676 & 0.0151 & 0.202 & 0.5 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1005,15 +1005,64 @@ v_t^2
 \end{equation}
 where $\phi_t=\phi\sqrt{r_t}$ and $\phi_t^*=\phi^*\sqrt{r_t^*}$ are the market prices of domestic and foreign interest-rate risk and $\psi_t,\psi_t^*$ are the market prices of pure currency risk. The state $\epsilon_t$ appears in the diffusion of the log exchange rate, through $v_t\,dX_t=\phi_t dW_t-\phi_t^*dW_t^*+\psi_t dZ_t-\psi_t^*dZ_t^*+\epsilon_t dU_t$, and in the coefficients of the $v_t$ equation obtained from It\^o's lemma. Every Euler substep of \eqref{eq:simulated_state} therefore requires the radicand of \eqref{eq:epsilon_recovered} to be nonnegative at the simulated state, not merely at the observed data. Ordinary Euler discretisation of a system whose coefficients are defined by \eqref{eq:epsilon_recovered} offers no such guarantee: the increments of $v_t$ are conditionally Gaussian and unbounded below, while the subtracted terms are continuous and generically bounded away from zero.
 
-This is the operative form of the degeneracy, and three features make it sharp rather than hypothetical. First, the constraint is not slack: \Cref{prop:min_incomplete} shows that the reported identification scheme drives $\min_t\epsilon_t^2$ to exactly zero, and Table 4 of \citet{BrandtSantaClara2002} reports a minimum excess volatility of $0.0000$ in all six reported specifications. The simulated system is started, at least once in every sample, from a state exactly on the boundary. Second, the failure is not a recoverable numerical event such as a negative variance that can be floored at zero; it makes the drift and diffusion coefficients of the next substep complex-valued, so the chain is undefined rather than inaccurate. Third, the paper reports assigning zero likelihood to parameter values that violate $\epsilon_t^2\ge0$ at the observed dates, which is a restriction on parameters, not a rule for what the simulator does when an intermediate Euler state violates it.
+This is the operative form of the degeneracy, and three features make it sharp rather than hypothetical.
 
-As with the interest rates, a truncation, reflection, absorption, or exact-transition rule would resolve the issue, but each such rule defines a different approximating chain with a different transition density and requires its own convergence analysis. The published paper does not specify one. \Cref{fig:negative_euler} illustrates the mechanism on the incompleteness specification \eqref{eq:epsilon_cir} taken at face value, where it can be computed in closed form: for an Euler step of size $h$ the probability of a negative next state from $X_t=x>0$ is
+First, the constraint is not generically slack. Under the conditions of \Cref{prop:min_incomplete}, in the case where a nonnegativity constraint is the active one, the identification rule makes $\min_t\epsilon_t^2$ equal to zero exactly, so there is at least one sample date at which the reconstructed incompleteness state sits on the boundary. The transition simulated \emph{out of} that date therefore starts on the boundary, unless the active date happens to be the terminal observation, in which case no transition is simulated from it. This is a conclusion from the optimisation geometry, not from the reported table: the minima of $0.0000$ in Table 4 of \citet{BrandtSantaClara2002} are rounded to four decimal places and are corroboration rather than proof. Nothing here says that every simulated path starts from the boundary, only that at least one does.
+
+Second, the failure is not a recoverable numerical event such as a negative variance that can be floored at zero. It makes the drift and diffusion coefficients of the next substep complex-valued, so the chain is undefined rather than inaccurate.
+
+Third, the paper reports assigning zero likelihood to parameter values that violate $\epsilon_t^2\ge0$ at the observed dates. That is a restriction on parameters, not a rule for what the simulator does when an \emph{intermediate} Euler state violates it, and the two are different objects: the constraint is checked at $N$ observation dates, whereas the chain visits $NMS$ intermediate states.
+
+As with the interest rates, a truncation, reflection, absorption, or exact-transition rule would resolve the issue. Each such rule defines a \emph{different} approximating chain, with a different transition density and therefore a different estimator, and each requires its own convergence analysis; they are not interchangeable implementation details. The published paper does not specify one.
+
+The size of the problem can be computed exactly on the incompleteness specification \eqref{eq:epsilon_cir} taken at face value. For an Euler step of size $h$ the probability of a negative next state from $H_t=x>0$ is
 \begin{equation}\label{eq:negative_prob}
-\Phi\!\left(
+P_h(x)=\Phi\!\left(
 -\frac{x+(\beta^2-2\alpha x)h}{2\beta\sqrt{xh}}
 \right).
 \end{equation}
-The figure is an illustration of the class of failure, not a simulation of the implemented chain, whose boundary is \eqref{eq:epsilon_recovered} and whose exact crossing probability depends on the drift and diffusion of $v_t$ derived in Appendix B.
+This vanishes at $x=0$, where the diffusion term vanishes while the drift $\beta^2h$ is strictly positive, and again for large $x$, so it has an interior maximum. That maximum has a closed form, and it is not what one would hope.
+
+\begin{proposition}[Refining the step does not reduce the worst case]\label{prop:worst_case_boundary}
+Fix $\alpha>0$ and $\beta\ne0$. Then, as $h\downarrow0$,
+\begin{equation}\label{eq:worst_case}
+\sup_{x>0}P_h(x)\longrightarrow\Phi(-1)\approx0.1587,
+\end{equation}
+and the supremum is attained at $x_h^*\sim\beta^2h$. The limiting worst case does not depend on $\alpha$, on $\beta$, or on $h$.
+\end{proposition}
+
+\begin{proof}
+Substitute $x=\beta^2hu^2$ with $u>0$. The numerator of the argument in \eqref{eq:negative_prob} becomes $\beta^2h(u^2+1)-2\alpha\beta^2h^2u^2$ and the denominator becomes $2\beta^2hu$, so
+\[
+-\log\text{-argument}=\frac{u^2+1}{2u}-\alpha hu .
+\]
+As $h\downarrow0$ the second term vanishes uniformly on compact $u$-sets, and $u\mapsto(u^2+1)/(2u)$ is minimised at $u=1$ with value $1$. Since $\Phi$ is decreasing, $P_h$ is maximised where that ratio is smallest, giving \eqref{eq:worst_case} and $x_h^*\sim\beta^2h$. Outside compact $u$-sets the ratio diverges and $P_h\to0$.
+\end{proof}
+
+The practical reading is that halving the Euler step does not make the boundary safer. It moves the dangerous region closer to zero, in proportion to $h$, while leaving the worst-case one-step violation probability at about one in six. \Cref{tab:boundary_max} confirms this numerically at the reported estimates: the maximum is $0.1588$ at $h=1/520$ and $0.1587$ at $h=1/1040$, while the maximising state halves. Refinement therefore helps only to the extent that the chain spends less time in the shrinking dangerous region, which is a statement about the invariant law and not something the discretisation alone delivers.
+
+\Cref{fig:negative_euler} plots \eqref{eq:negative_prob} at these step sizes. It is an exact illustration of the class of failure, not a simulation of the implemented chain, whose boundary is \eqref{eq:epsilon_recovered} and whose exact crossing probability depends on the drift and diffusion of $v_t$ derived in Appendix B of \citet{BrandtSantaClara2002}.
+
+\begin{table}[t]
+\centering
+\caption{Worst-case one-step Euler negativity probability for the incompleteness specification \eqref{eq:epsilon_cir}, at the estimates of Table 3 of \citet{BrandtSantaClara2002}. The step $h=1/520$ corresponds to weekly data with $M=10$ and $h=1/1040$ to $M=20$; the third row is a coarser illustration. The maximum is essentially invariant to $h$, in accordance with \Cref{prop:worst_case_boundary}, while the maximising state scales with $h$.}
+\label{tab:boundary_max}
+\begin{tabular}{llrrr}
+\toprule
+System & Step & $H^*_h$ & $\epsilon^*_h=\sqrt{H^*_h}$ & $\max_xP_h(x)$ \\
+\midrule
+U.S. vs. U.K.
+ & $h=1/520$ & $1.49\times10^{-5}$ & 0.00386 & 0.1588 \\
+ & $h=1/1040$ & $7.45\times10^{-6}$ & 0.00273 & 0.1587 \\
+ & $h=0.02$ & $1.57\times10^{-4}$ & 0.01253 & 0.1602 \\
+\midrule
+U.S. vs. Germany
+ & $h=1/520$ & $1.96\times10^{-5}$ & 0.00443 & 0.1588 \\
+ & $h=1/1040$ & $9.82\times10^{-6}$ & 0.00313 & 0.1587 \\
+ & $h=0.02$ & $2.07\times10^{-4}$ & 0.01438 & 0.1603 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Invertibility of the volatility--incompleteness map}\label{sec:vol_invert}
 
@@ -1319,14 +1368,14 @@ in four dimensions. Its exact transition density is known, and the preterminal E
 
 \subsection{Euler boundary violations in the incompleteness process}
 
-\Cref{fig:negative_euler} evaluates \eqref{eq:negative_prob} using the reported estimates $(\alpha,\beta)=(0.320,0.088)$ and $(0.338,0.101)$. Even with relatively fine steps, an ordinary Euler chain near the attainable zero boundary can become negative with non-negligible probability. Once it does, the next square-root coefficient is not real without an additional numerical convention.
+\Cref{fig:negative_euler} evaluates \eqref{eq:negative_prob} at the reported estimates $(\alpha,\beta)=(0.320,0.088)$ and $(0.338,0.101)$, using the step sizes $h=1/520$ and $h=1/1040$ that correspond to weekly data with $M=10$ and $M=20$, with a coarser value shown only as a labelled illustration. The horizontal scale is logarithmic so that the region near the boundary is visible; on a linear scale the entire phenomenon is compressed into a sliver next to the origin.
 
-As explained in \Cref{sec:simulated_state}, this calculation applies to the incompleteness specification \eqref{eq:epsilon_cir} treated as a state in its own right. The implemented chain simulates $(r,r^*,e,v)$ and recovers $\epsilon_t$ from \eqref{eq:epsilon_recovered}, so the boundary that must not be crossed is the complete-markets surface rather than $\{X=0\}$. The figure is therefore an exact illustration of the mechanism rather than of the implemented chain. The contrast with the interest rates in \Cref{tab:feller} is the substantive content: for $r$ and $r^*$ the Feller ratios exceed one by an order of magnitude and the boundary is never approached, whereas for the incompleteness state the ratio is exactly $1/2$ for all parameter values and, by \Cref{prop:min_incomplete}, the boundary is reached exactly.
+The figure makes \Cref{prop:worst_case_boundary} visible: refining the step translates the curve to the left without lowering it. As explained in \Cref{sec:simulated_state}, this calculation applies to the incompleteness specification \eqref{eq:epsilon_cir} treated as a state in its own right. The implemented chain simulates $(r,r^*,e,v)$ and recovers $\epsilon_t$ from \eqref{eq:epsilon_recovered}, so the boundary that must not be crossed is the complete-markets surface rather than $\{H=0\}$; the figure is an exact illustration of the mechanism rather than of the implemented chain. The contrast with the interest rates in \Cref{tab:feller} is the substantive content: for $r$ and $r^*$ the Feller ratios exceed one by an order of magnitude and the boundary is never approached, whereas for the incompleteness state the ratio is exactly $1/2$ for all parameter values, and under the conditions of \Cref{prop:min_incomplete} the boundary is reached at one sample date.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.86\textwidth]{figures/epsilon_squared_euler_negative_probability.pdf}
-\caption{One-step probability that ordinary Euler discretisation of the incompleteness specification $X_t=\epsilon_t^2$ in \eqref{eq:epsilon_cir} produces a negative state, using the estimates in Table 3 of \citet{BrandtSantaClara2002}. The implemented estimator substitutes $\epsilon_t$ out and simulates $(r,r^*,e,v)$ instead, so this is an illustration of the boundary mechanism rather than of the implemented chain; see \Cref{sec:simulated_state}.}
+\caption{One-step probability that ordinary Euler discretisation of the incompleteness specification $H_t=\epsilon_t^2$ in \eqref{eq:epsilon_cir} produces a negative state, at the estimates in Table 3 of \citet{BrandtSantaClara2002}. Solid lines are the U.S.--U.K. estimates and dashed lines the U.S.--Germany estimates. The application step sizes $h=1/520$ and $h=1/1040$ are shown together with a coarser illustrative value. Halving $h$ shifts each curve left without lowering its peak, which stays near $\Phi(-1)$; see \Cref{prop:worst_case_boundary}. The implemented estimator substitutes $\epsilon_t$ out and simulates $(r,r^*,e,v)$ instead, so this illustrates the boundary mechanism rather than the implemented chain; see \Cref{sec:simulated_state}.}
 \label{fig:negative_euler}
 \end{figure}
 

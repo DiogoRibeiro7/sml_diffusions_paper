@@ -305,58 +305,115 @@ def make_ou_scaling_figure() -> None:
 
 
 def euler_negative_probability(
-    x: NDArray[np.float64],
+    state: NDArray[np.float64],
     *,
     alpha: float,
     beta: float,
     h: float,
 ) -> NDArray[np.float64]:
-    """Probability that one Euler step for X=epsilon^2 becomes negative.
+    """Probability that one Euler step for H = epsilon^2 becomes negative.
 
-    The process is dX = (beta^2 - 2 alpha X) dt + 2 beta sqrt(X) dW.
+    The process is dH = (beta^2 - 2 alpha H) dt + 2 beta sqrt(H) dY, so from
+    H_t = x the Euler update is Gaussian with mean x + (beta^2 - 2 alpha x) h
+    and standard deviation 2 beta sqrt(x h).  The state is written H rather
+    than X because X already denotes the Brownian motion driving the log
+    exchange rate in the application.
     """
     if alpha <= 0.0 or beta <= 0.0 or h <= 0.0:
         raise ValueError("alpha, beta, and h must be positive")
-    x = np.asarray(x, dtype=np.float64)
-    mean = x + (beta**2 - 2.0 * alpha * x) * h
-    sd = 2.0 * beta * np.sqrt(x * h)
-    probability = np.zeros_like(x)
+    state = np.asarray(state, dtype=np.float64)
+    if np.any(state < 0.0):
+        raise ValueError("the state must be nonnegative")
+    mean = state + (beta**2 - 2.0 * alpha * state) * h
+    sd = 2.0 * beta * np.sqrt(state * h)
+    probability = np.zeros_like(state)
     positive_sd = sd > 0.0
     probability[positive_sd] = norm.cdf(-mean[positive_sd] / sd[positive_sd])
     probability[~positive_sd] = (mean[~positive_sd] < 0.0).astype(float)
     return probability
 
 
+# Weekly observations with M = 10 Euler substeps give h = 1/520; doubling M
+# gives h = 1/1040.  The coarser value is retained only as a labelled
+# illustration of how the curve moves with the step size.
+APPLICATION_STEPS = ((1.0 / 520.0, "$h=1/520$ (weekly, $M=10$)"),
+                     (1.0 / 1040.0, "$h=1/1040$ ($M=20$)"),
+                     (0.02, "$h=0.02$ (illustration)"))
+
+INCOMPLETENESS_PARAMETERS = {
+    "U.S.-U.K.": (0.320, 0.088),
+    "U.S.-Germany": (0.338, 0.101),
+}
+
+
 def make_boundary_probability_figure() -> None:
-    """Plot Euler boundary-violation probabilities using reported estimates."""
-    x_values = np.logspace(-8, -1.2, 500)
-    parameter_sets = {
-        "U.S.-U.K. estimates": (0.320, 0.088),
-        "U.S.-Germany estimates": (0.338, 0.101),
-    }
-    step_sizes = [0.1, 0.02]
+    """Plot Euler boundary-violation probabilities at application step sizes."""
+    state_values = np.logspace(-10, -1.2, 800)
 
     fig, ax = plt.subplots(figsize=(7.2, 4.8))
-    for label, (alpha, beta) in parameter_sets.items():
-        for h in step_sizes:
+    for (label, (alpha, beta)), style in zip(
+        INCOMPLETENESS_PARAMETERS.items(), ("-", "--")
+    ):
+        for (h, step_label), colour in zip(APPLICATION_STEPS, ("C0", "C1", "C2")):
             probability = euler_negative_probability(
-                x_values,
-                alpha=alpha,
-                beta=beta,
-                h=h,
+                state_values, alpha=alpha, beta=beta, h=h
             )
-            ax.plot(x_values, probability, label=f"{label}, $h={h}$")
+            ax.plot(
+                state_values,
+                probability,
+                style,
+                color=colour,
+                linewidth=1.4,
+                label=f"{label}, {step_label}",
+            )
 
     ax.set_xscale("log")
-    ax.set_xlabel(r"Current state $X_t=\epsilon_t^2$")
+    ax.set_xlabel(r"Current state $H_t=\epsilon_t^2$")
     ax.set_ylabel("One-step probability of a negative Euler state")
     ax.set_ylim(0.0, 0.55)
     ax.set_title("Ordinary Euler discretisation is not positivity preserving")
-    ax.legend(fontsize=8)
+    ax.legend(fontsize=7, ncol=2)
     ax.grid(alpha=0.25, which="both")
     fig.tight_layout()
     save_figure(fig, "epsilon_squared_euler_negative_probability")
     plt.close(fig)
+
+
+def make_boundary_maximum_table() -> None:
+    """Locate the state maximising the one-step Euler negativity probability.
+
+    The probability vanishes both at H = 0, where the diffusion term vanishes
+    and the drift beta^2 h is strictly positive, and for large H, where the
+    mean dominates the standard deviation.  It therefore has an interior
+    maximum, and the position of that maximum is the natural summary of where
+    the boundary problem is worst for a given step size.
+    """
+    grid = np.logspace(-12, 0.0, 200_000)
+    rows = []
+    for label, (alpha, beta) in INCOMPLETENESS_PARAMETERS.items():
+        for h, step_label in APPLICATION_STEPS:
+            probability = euler_negative_probability(grid, alpha=alpha, beta=beta, h=h)
+            index = int(np.argmax(probability))
+            rows.append(
+                {
+                    "system": label,
+                    "h": h,
+                    "argmax_state": float(grid[index]),
+                    "argmax_epsilon": float(math.sqrt(grid[index])),
+                    "max_probability": float(probability[index]),
+                }
+            )
+    frame = pd.DataFrame(rows)
+    frame.to_csv(TABLES / "boundary_maximum.csv", index=False)
+    (TABLES / "boundary_maximum.tex").write_text(
+        frame.to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.4g}",
+            escape=False,
+            column_format="lrrrr",
+        ),
+        encoding="utf-8",
+    )
 
 
 def make_implicit_volatility_table() -> None:
@@ -600,6 +657,7 @@ def main(output_root: Path | None = None) -> None:
     make_design_table()
     make_rate_table()
     make_correlation_tables()
+    make_boundary_maximum_table()
 
 
 if __name__ == "__main__":
