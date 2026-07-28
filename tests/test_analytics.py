@@ -1,0 +1,464 @@
+"""Numerical validation of the analytical formulas used in the manuscript.
+
+Every closed form quoted in the paper is checked here against an independent
+computation: numerical Gaussian integration, direct Monte Carlo simulation, or
+a brute-force alternative. Tolerances are stated explicitly at each assertion
+rather than left to a global default.
+
+Run with ``pytest`` from the repository root.
+"""
+
+from __future__ import annotations
+
+import math
+import sys
+from pathlib import Path
+
+import numpy as np
+import pytest
+from scipy import integrate
+from scipy.stats import norm
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "code"))
+
+import check_correlation_matrix as ccm  # noqa: E402
+import generate_results as gr  # noqa: E402
+
+# Monte Carlo comparisons are checked at three standard errors, which is a
+# 99.7 per cent interval under the central limit theorem.
+MC_SIGMAS = 3.0
+
+
+# ---------------------------------------------------------------------------
+# 1. Exact Brownian moment formula
+# ---------------------------------------------------------------------------
+
+
+def brownian_moment_closed_form(dimension: int, m_steps: int, r: float, distance: float) -> float:
+    """Return E[G_h^r] from Proposition 3.1, for |y - x| = ``distance``."""
+    h = 1.0 / m_steps
+    return (
+        (2.0 * math.pi) ** (-r * dimension / 2.0)
+        * h ** (-(r - 1) * dimension / 2.0)
+        * (r - (r - 1) * h) ** (-dimension / 2.0)
+        * math.exp(-r * distance**2 / (2.0 * (r - (r - 1) * h)))
+    )
+
+
+def brownian_moment_quadrature(dimension: int, m_steps: int, r: float, distance: float) -> float:
+    """Integrate E[G_h^r] numerically in the one-dimensional radial reduction.
+
+    With x and y separated by ``distance`` along the first axis, the summand
+    depends on Z only through the first coordinate and the squared norm of the
+    rest, so the K-dimensional expectation factorises into a one-dimensional
+    integral times K-1 identical one-dimensional integrals.
+    """
+    h = 1.0 / m_steps
+    sigma = math.sqrt(1.0 - h)
+    prefactor = (2.0 * math.pi * h) ** (-r * dimension / 2.0)
+
+    def axis_integral(offset: float) -> float:
+        def integrand(z: float) -> float:
+            return math.exp(-r * (offset - z) ** 2 / (2.0 * h)) * norm.pdf(z, scale=sigma)
+
+        value, _ = integrate.quad(
+            integrand,
+            -40.0 * sigma,
+            40.0 * sigma,
+            limit=800,
+            epsabs=1e-14,
+            epsrel=1e-13,
+        )
+        return value
+
+    return prefactor * axis_integral(distance) * axis_integral(0.0) ** (dimension - 1)
+
+
+@pytest.mark.parametrize("dimension", [1, 2, 4, 5])
+@pytest.mark.parametrize("m_steps", [4, 32, 256])
+@pytest.mark.parametrize("r", [1.0, 2.0, 3.0, 2.5])
+@pytest.mark.parametrize("distance", [0.0, 0.7])
+def test_brownian_moment_matches_quadrature(
+    dimension: int, m_steps: int, r: float, distance: float
+) -> None:
+    """The closed form of Proposition 3.1 agrees with numerical integration."""
+    closed = brownian_moment_closed_form(dimension, m_steps, r, distance)
+    numeric = brownian_moment_quadrature(dimension, m_steps, r, distance)
+    assert closed == pytest.approx(numeric, rel=1e-8)
+
+
+def test_first_moment_is_the_true_density() -> None:
+    """The estimator is exactly unbiased for the Brownian density at every M."""
+    for dimension in (1, 3, 4):
+        for m_steps in (2, 10, 1000):
+            for distance in (0.0, 1.3):
+                expected = (2.0 * math.pi) ** (-dimension / 2.0) * math.exp(-(distance**2) / 2.0)
+                got = brownian_moment_closed_form(dimension, m_steps, 1.0, distance)
+                assert got == pytest.approx(expected, rel=1e-12)
+
+
+def test_second_moment_matches_generator() -> None:
+    """The module used for the figures agrees with the closed form at x = y = 0."""
+    for dimension in (1, 2, 4, 8):
+        for m_steps in (2, 16, 512):
+            assert gr.brownian_second_moment(dimension, m_steps) == pytest.approx(
+                brownian_moment_closed_form(dimension, m_steps, 2.0, 0.0), rel=1e-12
+            )
+
+
+def test_second_moment_scaling_limit() -> None:
+    """h^{K/2} E[G^2] converges to the constant of Theorem 4.2."""
+    for dimension in (1, 2, 4, 8):
+        limit = (2.0 * math.pi) ** (-dimension) * 2.0 ** (-dimension / 2.0)
+        scaled = gr.brownian_second_moment(dimension, 2**20) * (2.0**-20) ** (dimension / 2.0)
+        assert scaled == pytest.approx(limit, rel=1e-5)
+
+
+def test_local_moment_constant_matches_brownian_case() -> None:
+    """c_{r,K} p(y|x) |V|^{-(r-1)/2} reproduces the exact Brownian limit."""
+    for dimension in (1, 3, 4):
+        for r in (2.0, 3.0):
+            for distance in (0.0, 0.9):
+                c_rk = (2.0 * math.pi) ** (-(r - 1) * dimension / 2.0) * r ** (-dimension / 2.0)
+                density = (2.0 * math.pi) ** (-dimension / 2.0) * math.exp(-(distance**2) / 2.0)
+                predicted = c_rk * density  # |V| = 1 for standard Brownian motion
+                m_steps = 2**22
+                scaled = (1.0 / m_steps) ** ((r - 1) * dimension / 2.0) * (
+                    brownian_moment_closed_form(dimension, m_steps, r, distance)
+                )
+                assert scaled == pytest.approx(predicted, rel=1e-5)
+
+
+# ---------------------------------------------------------------------------
+# 2. Variance against Monte Carlo
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("dimension,m_steps,simulations", [(1, 8, 64), (2, 16, 128), (4, 8, 256)])
+def test_variance_matches_simulation(dimension: int, m_steps: int, simulations: int) -> None:
+    """The exact variance agrees with a direct Monte Carlo estimate."""
+    rng = np.random.default_rng(4242)
+    replications = 40_000
+    estimates = gr.simulate_brownian_estimator(
+        dimension=dimension,
+        m_steps=m_steps,
+        simulations=simulations,
+        replications=replications,
+        rng=rng,
+    )
+    theoretical = gr.brownian_estimator_variance(dimension, m_steps, simulations)
+    empirical = float(np.var(estimates, ddof=1))
+    # The variance of a sample variance is dominated by the fourth moment,
+    # which is heavy here, so this is a loose but meaningful check.
+    assert empirical == pytest.approx(theoretical, rel=0.25)
+
+
+def test_estimator_is_unbiased_in_simulation() -> None:
+    """The simulated mean matches the true density within Monte Carlo error."""
+    rng = np.random.default_rng(99)
+    dimension, m_steps, simulations, replications = 4, 16, 512, 60_000
+    estimates = gr.simulate_brownian_estimator(
+        dimension=dimension,
+        m_steps=m_steps,
+        simulations=simulations,
+        replications=replications,
+        rng=rng,
+    )
+    truth = gr.true_brownian_density_at_origin(dimension)
+    standard_error = float(np.std(estimates, ddof=1)) / math.sqrt(replications)
+    assert abs(float(np.mean(estimates)) - truth) < MC_SIGMAS * standard_error
+
+
+# ---------------------------------------------------------------------------
+# 3. Collapse path and 4. correct-rate path
+# ---------------------------------------------------------------------------
+
+
+def test_collapse_path_median_falls_and_tail_grows() -> None:
+    """Along M = S in four dimensions the median collapses (Theorem 3.3)."""
+    rng = np.random.default_rng(20260728)
+    truth = gr.true_brownian_density_at_origin(4)
+    medians, below_half = [], []
+    for m in (8, 32, 128):
+        estimates = gr.simulate_brownian_estimator(
+            dimension=4, m_steps=m, simulations=m, replications=8_000, rng=rng
+        )
+        relative = estimates / truth
+        medians.append(float(np.median(relative)))
+        below_half.append(float(np.mean(relative < 0.5)))
+    assert medians[0] > medians[1] > medians[2]
+    assert below_half[0] < below_half[1] < below_half[2]
+    assert medians[-1] < 0.05
+
+
+def test_correct_rate_path_rmse_falls() -> None:
+    """Relative RMSE falls when S/M^2 diverges, and rises when it does not."""
+    dimension = 4
+    truth = gr.true_brownian_density_at_origin(dimension)
+
+    def relative_rmse(m: int, simulations: int) -> float:
+        variance = gr.brownian_estimator_variance(dimension, m, simulations)
+        return math.sqrt(variance) / truth
+
+    increasing = [relative_rmse(m, m) for m in (8, 32, 128)]
+    decreasing = [relative_rmse(m, m**3) for m in (8, 32, 128)]
+    constant = [relative_rmse(m, m**2) for m in (8, 32, 128)]
+    assert increasing[0] < increasing[1] < increasing[2]
+    assert decreasing[0] > decreasing[1] > decreasing[2]
+    assert constant[2] == pytest.approx(constant[0], rel=0.05)
+
+
+# ---------------------------------------------------------------------------
+# 5. Boundary probability
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("alpha,beta", [(0.320, 0.088), (0.338, 0.101)])
+@pytest.mark.parametrize("h", [1.0 / 520.0, 0.02])
+def test_boundary_probability_matches_simulation(alpha: float, beta: float, h: float) -> None:
+    """The closed form agrees with direct simulation of one Euler step."""
+    rng = np.random.default_rng(7)
+    draws = 400_000
+    state = beta**2 * h  # the maximising state of Proposition B.2
+    formula = float(gr.euler_negative_probability(np.array([state]), alpha=alpha, beta=beta, h=h)[0])
+    step = (
+        state
+        + (beta**2 - 2.0 * alpha * state) * h
+        + 2.0 * beta * math.sqrt(state * h) * rng.normal(size=draws)
+    )
+    empirical = float(np.mean(step < 0.0))
+    standard_error = math.sqrt(empirical * (1.0 - empirical) / draws)
+    assert abs(formula - empirical) < MC_SIGMAS * standard_error
+
+
+@pytest.mark.parametrize("alpha,beta", [(0.320, 0.088), (0.338, 0.101), (1.5, 0.4)])
+def test_worst_case_boundary_probability_tends_to_phi_minus_one(alpha: float, beta: float) -> None:
+    """Proposition B.2: the supremum tends to Phi(-1), attained at H = beta^2 h."""
+    for h in (1e-3, 1e-4, 1e-5):
+        grid = np.logspace(math.log10(beta**2 * h) - 3.0, math.log10(beta**2 * h) + 3.0, 20_000)
+        probability = gr.euler_negative_probability(grid, alpha=alpha, beta=beta, h=h)
+        assert probability.max() == pytest.approx(norm.cdf(-1.0), abs=2e-3)
+        assert grid[int(np.argmax(probability))] == pytest.approx(beta**2 * h, rel=0.05)
+
+
+def test_boundary_probability_rejects_negative_state() -> None:
+    """A negative state is a caller error, not something to be clipped."""
+    with pytest.raises(ValueError):
+        gr.euler_negative_probability(np.array([-1.0]), alpha=0.3, beta=0.1, h=0.01)
+
+
+# ---------------------------------------------------------------------------
+# 6. Quadratic-root classification
+# ---------------------------------------------------------------------------
+
+
+def positive_roots(kappa_b: float, eta: float, zeta: float) -> list[float]:
+    """Return the positive roots of (1 - kappa_b) v^2 - 2 eta v - zeta = 0."""
+    a, b, c = kappa_b - 1.0, 2.0 * eta, zeta
+    if a == 0.0:
+        return [] if b == 0.0 else [v for v in (-c / b,) if v > 0.0]
+    discriminant = b * b - 4.0 * a * c
+    if discriminant < 0.0:
+        return []
+    root = math.sqrt(discriminant)
+    return sorted(v for v in ((-b - root) / (2.0 * a), (-b + root) / (2.0 * a)) if v > 0.0)
+
+
+def test_unique_positive_root_when_kappa_below_one() -> None:
+    """Case (i) of Proposition D.1: exactly one positive root."""
+    for kappa_b in (0.0, 0.0702, 0.5, 0.99):
+        for eta in (-2.0, -0.3, 0.0, 0.3, 2.0):
+            for zeta in (0.01, 1.0, 10.0):
+                assert len(positive_roots(kappa_b, eta, zeta)) == 1
+
+
+def test_zero_or_two_positive_roots_when_kappa_above_one() -> None:
+    """Case (ii): never exactly one positive root away from the repeated case."""
+    kappa_b = 1.9982  # the reported U.S.-U.K. value
+    for eta in (-3.0, -1.0, -0.05, 0.0, 0.5, 3.0):
+        for zeta in (0.001, 0.1, 1.0, 5.0):
+            roots = positive_roots(kappa_b, eta, zeta)
+            if math.isclose(eta**2, (kappa_b - 1.0) * zeta, rel_tol=1e-9):
+                continue
+            assert len(roots) in (0, 2)
+            if eta >= 0.0:
+                assert roots == []
+
+
+def test_repeated_root_boundary() -> None:
+    """At eta^2 = (kappa_b - 1) zeta the two roots coincide."""
+    kappa_b, zeta = 2.5, 0.8
+    eta = -math.sqrt((kappa_b - 1.0) * zeta)
+    roots = positive_roots(kappa_b, eta, zeta)
+    assert len(roots) in (1, 2)
+    # A repeated root is recovered through a discriminant that vanishes
+    # exactly, so the two branches agree only to about sqrt(eps).
+    assert roots[0] == pytest.approx(roots[-1], rel=1e-6)
+    assert roots[0] == pytest.approx(-eta / (kappa_b - 1.0), rel=1e-6)
+
+
+def test_kappa_b_matches_reported_values() -> None:
+    """kappa_b = b^2 + b*^2 - 2 rho b b* at the model-C loadings."""
+    assert 1.514**2 + 2.581**2 - 2 * 0.89 * 1.514 * 2.581 == pytest.approx(1.9982, abs=5e-5)
+    assert (-0.142) ** 2 + 0.127**2 - 2 * 0.94 * (-0.142) * 0.127 == pytest.approx(0.0702, abs=5e-5)
+
+
+# ---------------------------------------------------------------------------
+# 7. Correlation-matrix checks
+# ---------------------------------------------------------------------------
+
+
+def test_valid_matrix_passes() -> None:
+    """A matrix at the reported estimates is positive definite."""
+    for parameters in (ccm.US_UK, ccm.US_DE):
+        matrix = ccm.build_matrix(
+            parameters, parameters.theta, parameters.theta_star, parameters.mean_volatility
+        )
+        report = ccm.audit(matrix)
+        assert report["positive_definite"]
+        assert report["entries_in_range"]
+        assert 0.0 < report["schur_complement"] <= 1.0
+
+
+def test_invalid_matrix_is_detected() -> None:
+    """An entrywise-valid but indefinite matrix is reported as such."""
+    matrix = np.array(
+        [
+            [1.0, 0.9, 0.9, 0.0],
+            [0.9, 1.0, -0.9, 0.0],
+            [0.9, -0.9, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ]
+    )
+    report = ccm.audit(matrix)
+    assert report["entries_in_range"]
+    assert not report["positive_semidefinite"]
+
+
+def test_malformed_matrices_raise() -> None:
+    """Dimension, symmetry and diagonal violations raise informative errors."""
+    with pytest.raises(ValueError, match="square"):
+        ccm.validate_shape(np.zeros((2, 3)))
+    with pytest.raises(ValueError, match="symmetric"):
+        ccm.validate_shape(np.array([[1.0, 0.4], [0.5, 1.0]]))
+    with pytest.raises(ValueError, match="diagonal"):
+        ccm.validate_shape(np.array([[1.0, 0.4], [0.4, 0.9]]))
+    with pytest.raises(ValueError, match="at least two"):
+        ccm.validate_shape(np.array([[1.0]]))
+
+
+def test_entrywise_validity_is_automatic_above_the_floor() -> None:
+    """Proposition E.1: |rho_wx| <= 1 whenever v >= sqrt(Q)."""
+    for parameters in (ccm.US_UK, ccm.US_DE):
+        for multiple in (0.5, 1.0, 2.0, 3.0, 5.0):
+            rate = multiple * parameters.theta
+            rate_star = multiple * parameters.theta_star
+            floor = ccm.minimum_feasible_volatility(parameters, rate, rate_star)
+            for volatility in (floor, 1.01 * floor, 2.0 * floor, 10.0 * floor):
+                left, right = ccm.implied_correlations(parameters, rate, rate_star, volatility)
+                assert abs(left) <= 1.0 + 1e-12
+                assert abs(right) <= 1.0 + 1e-12
+
+
+def test_induced_correlation_differs_from_the_estimate() -> None:
+    """Proposition E.2: at the floor rho_xy is forced, and differs from Table 3."""
+    for parameters in (ccm.US_UK, ccm.US_DE):
+        rate, rate_star = 3.0 * parameters.theta, 3.0 * parameters.theta_star
+        induced = ccm.induced_xy_correlation(parameters, rate, rate_star)
+        assert abs(induced - parameters.rho_xy) > 0.03
+        floor = ccm.minimum_feasible_volatility(parameters, rate, rate_star)
+        matrix = ccm.build_matrix(parameters, rate, rate_star, floor)
+        report = ccm.audit(matrix)
+        assert report["entries_in_range"]
+        assert not report["positive_semidefinite"]
+
+
+def test_nearest_correlation_is_not_applied_silently() -> None:
+    """The projection is available but must be requested explicitly."""
+    bad = np.array([[1.0, 0.99, 0.99], [0.99, 1.0, -0.99], [0.99, -0.99, 1.0]])
+    assert not ccm.audit(bad)["positive_semidefinite"]
+    projected = ccm.nearest_correlation(bad)
+    assert np.linalg.eigvalsh(projected).min() > -1e-8
+    assert np.allclose(np.diag(projected), 1.0, atol=1e-8)
+
+
+# ---------------------------------------------------------------------------
+# 8. Minimum-incompleteness optimisation
+# ---------------------------------------------------------------------------
+
+
+def test_corner_solution_matches_numerical_optimiser() -> None:
+    """The analytic corner agrees with a brute-force search over the interval."""
+    rng = np.random.default_rng(11)
+    for _ in range(20):
+        a_values = rng.uniform(0.5, 3.0, size=40)
+        gammas = np.ones(40)
+        upper = float((a_values / gammas).min())
+        grid = np.linspace(upper - 5.0, upper, 200_001)
+        objective = np.array([(a_values - gammas * c).sum() for c in grid])
+        feasible = np.all(a_values[None, :] - grid[:, None] * gammas[None, :] >= -1e-12, axis=1)
+        best = grid[feasible][int(np.argmin(objective[feasible]))]
+        assert best == pytest.approx(upper, abs=1e-4)
+        residuals = a_values - upper
+        assert residuals.min() == pytest.approx(0.0, abs=1e-12)
+
+
+def test_corner_solution_with_a_binding_range_restriction() -> None:
+    """Case (ii): a range restriction can bind before any residual reaches zero."""
+    a_values = np.array([2.0, 3.0, 4.0])
+    gammas = np.ones(3)
+    range_upper = 1.0  # binds before min(A_t) = 2.0
+    c_star = min(float((a_values / gammas).min()), range_upper)
+    assert c_star == range_upper
+    residuals = a_values - c_star * gammas
+    assert residuals.min() > 0.0  # no incompleteness constraint is active
+
+
+# ---------------------------------------------------------------------------
+# 9. Reproducibility of the committed tables
+# ---------------------------------------------------------------------------
+
+
+def test_committed_tables_regenerate(tmp_path: Path) -> None:
+    """Regenerated artefacts match the committed ones (the make verify check)."""
+    sys.path.insert(0, str(ROOT / "code"))
+    import verify_reproducibility as vr
+
+    results = vr.verify()
+    failures = [r for r in results if not r.ok]
+    assert not failures, "; ".join(f"{r.path}: {r.status} {r.detail}" for r in failures)
+    assert len(results) >= 20
+
+
+def test_design_ratios_are_as_quoted() -> None:
+    """The finite-sample diagnostics quoted in Section 8.2."""
+    n_obs, m_steps, simulations = 544, 10, 5_000
+    assert math.sqrt(simulations) / m_steps == pytest.approx(7.07, abs=0.01)
+    assert n_obs / simulations**0.25 == pytest.approx(64.7, abs=0.1)
+    assert simulations / m_steps**2 == pytest.approx(50.0)
+    # Doubling both halves the effective size; doubling M alone quarters it.
+    assert (2 * simulations) / (2 * m_steps) ** 2 == pytest.approx(25.0)
+    assert simulations / (2 * m_steps) ** 2 == pytest.approx(12.5)
+    assert (4 * simulations) / (2 * m_steps) ** 2 == pytest.approx(50.0)
+
+
+def test_feller_ratios_are_as_quoted() -> None:
+    """Table 5: interest rates comfortably above one, incompleteness exactly 1/2."""
+    for kappa, theta, sigma, expected in (
+        (0.284, 0.053, 0.028, 38.4),
+        (0.486, 0.074, 0.056, 22.9),
+        (0.305, 0.058, 0.027, 48.5),
+        (0.088, 0.064, 0.042, 6.4),
+    ):
+        assert 2.0 * kappa * theta / sigma**2 == pytest.approx(expected, abs=0.05)
+    for alpha, beta in ((0.320, 0.088), (0.338, 0.101), (2.7, 0.013)):
+        kappa, theta, sigma = 2.0 * alpha, beta**2 / (2.0 * alpha), 2.0 * beta
+        assert 2.0 * kappa * theta / sigma**2 == pytest.approx(0.5, rel=1e-12)
+
+
+def test_optimal_discretisation_exponents() -> None:
+    """Proposition 5.1: M ~ S^{2/(K+4)} and MSE ~ S^{-4/(K+4)}."""
+    for dimension, m_exponent, mse_exponent in ((1, 2 / 5, -4 / 5), (2, 1 / 3, -2 / 3), (4, 1 / 4, -1 / 2), (8, 1 / 6, -1 / 3)):
+        assert 2.0 / (dimension + 4.0) == pytest.approx(m_exponent)
+        assert -4.0 / (dimension + 4.0) == pytest.approx(mse_exponent)

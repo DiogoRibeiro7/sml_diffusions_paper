@@ -6,7 +6,7 @@ PAPER_DIR := paper
 # later pass with a misleading "Missing \begin{document}".
 LATEXMK := latexmk -pdf -interaction=nonstopmode -halt-on-error
 
-.PHONY: all figures pdf paper verify clean
+.PHONY: all figures pdf paper verify test check clean
 
 all: figures pdf
 
@@ -24,6 +24,11 @@ paper: pdf
 # the committed copies.  Figure output is timestamp-free, so this is exact.
 verify:
 	python code/verify_reproducibility.py
+
+test:
+	python -m pytest tests -q
+
+check: test verify
 
 # -c removes auxiliary files but keeps main.pdf, which is tracked.
 clean:
