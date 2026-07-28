@@ -1563,9 +1563,9 @@ D_N(\theta)=\sum_{n=0}^{N-1}\min_{s\le S}\lVert\theta-b_{n,s}\rVert^2 .
 \]
 Then for every $\theta$,
 \begin{equation}\label{eq:nearest_atom_sandwich}
-0\le
+-2Nh\log S\le
 2h\log\widehat{\mathcal L}_{N,M,S}(\theta)+D_N(\theta)+NhK\log(2\pi h)
-\le 2Nh\log S .
+\le 0 .
 \end{equation}
 \end{proposition}
 
@@ -1575,7 +1575,7 @@ Fix $n$ and let $d_n=\min_s\lVert\theta-b_{n,s}\rVert^2$. Factoring the minimisi
 \frac1S\sum_s e^{-\lVert\theta-b_{n,s}\rVert^2/(2h)}
 =e^{-d_n/(2h)}\cdot\frac1S\sum_s e^{-(\lVert\theta-b_{n,s}\rVert^2-d_n)/(2h)} .
 \]
-Every exponent in the second factor is nonpositive and at least one is zero, so that factor lies in $[1/S,1]$. Taking logarithms, adding the constant $-\tfrac K2\log(2\pi h)$ from the Gaussian prefactor, multiplying by $2h$ and summing over $n$ gives \eqref{eq:nearest_atom_sandwich}.
+Every exponent in the second factor is nonpositive and at least one is zero, so that factor lies in $[1/S,1]$ and its logarithm lies in $[-\log S,0]$. Taking logarithms, adding the constant $-\tfrac K2\log(2\pi h)$ from the Gaussian prefactor, multiplying by $2h$ and summing over $n$ gives \eqref{eq:nearest_atom_sandwich}.
 \end{proof}
 
 The bound is uniform in $\theta$ with slack $2Nh\log S$, which along $M=S=n$ is $2N(\log n)/n$ per unit of $N$ and therefore negligible relative to $D_N$. The maximiser of the simulated likelihood is thus governed by a nearest-neighbour objective over the $NS$ atoms $b_{n,s}$, whereas the exact log likelihood in this model is the smooth quadratic $-\tfrac12\sum_n\lVert\theta-\Delta Y_n\rVert^2$ with minimiser $\widehat\theta_N$. The two objectives have no reason to share a maximiser. This is the precise sense in which the endpoint construction replaces the estimation problem rather than approximating it.

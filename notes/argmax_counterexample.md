@@ -7,7 +7,7 @@ does not assert that the argmax estimator is inconsistent.
 
 Two by-products of the investigation *are* rigorous and are worth keeping: an exact reduction of
 the simulated criterion under common random numbers, and a uniform sandwich bound that identifies
-which objective governs the maximiser. Both are recorded in Appendix E of the manuscript. A third
+which objective governs the maximiser. Both are recorded in Appendix H of the manuscript. A third
 result, the limiting shape of that objective, is derived heuristically and verified numerically
 but not proved; it is reported here only.
 
@@ -72,14 +72,15 @@ $$ D_N(\theta) = \sum_{n} \min_{s\le S}\ \lVert \theta - b_{n,s}\rVert^2 . $$
 
 **Lemma B.** For every $\theta$,
 
-$$ 0 \;\le\; 2h\log\hat{\mathcal L}_{N,M,S}(\theta) + D_N(\theta) + Nh\,K\log(2\pi h) \;\le\; 2Nh\log S . $$
+$$ -2Nh\log S \;\le\; 2h\log\hat{\mathcal L}_{N,M,S}(\theta) + D_N(\theta) + Nh\,K\log(2\pi h) \;\le\; 0 . $$
 
 *Proof.* For each $n$ factor the minimising atom out of the sum:
 
 $$ \frac1S\sum_s e^{-\lVert\theta-b_{n,s}\rVert^2/(2h)} = e^{-\min_s\lVert\theta-b_{n,s}\rVert^2/(2h)}\cdot\frac1S\sum_s e^{-(\lVert\theta-b_{n,s}\rVert^2-\min_s\lVert\theta-b_{n,s}\rVert^2)/(2h)} . $$
 
 Every exponent in the second factor is non-positive and at least one equals zero, so that factor
-lies in $[1/S, 1]$. Take logarithms, multiply by $2h$, and sum over $n$. $\square$
+lies in $[1/S, 1]$ and its logarithm lies in $[-\log S, 0]$. Take logarithms, multiply by $2h$, and
+sum over $n$. $\square$
 
 The bound is **uniform in $\theta$** and the slack is $2Nh\log S$, whereas the objective itself is
 of order $D_N$. Along the collapse path $M = S = n$ the slack per observation is

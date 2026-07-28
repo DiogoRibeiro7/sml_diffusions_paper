@@ -462,3 +462,58 @@ def test_optimal_discretisation_exponents() -> None:
     for dimension, m_exponent, mse_exponent in ((1, 2 / 5, -4 / 5), (2, 1 / 3, -2 / 3), (4, 1 / 4, -1 / 2), (8, 1 / 6, -1 / 3)):
         assert 2.0 / (dimension + 4.0) == pytest.approx(m_exponent)
         assert -4.0 / (dimension + 4.0) == pytest.approx(mse_exponent)
+
+
+# ---------------------------------------------------------------------------
+# 10. Appendix H: the common-random-number reduction and the sandwich bound
+# ---------------------------------------------------------------------------
+
+
+def _location_model_pieces(rng: np.random.Generator, dimension: int, n_obs: int, sims: int, m: int):
+    """Return the atoms and data for the location model of Appendix H."""
+    h = 1.0 / m
+    increments = rng.normal(size=(n_obs, dimension))
+    innovations = rng.normal(size=(n_obs, sims, dimension))
+    atoms = increments[:, None, :] - math.sqrt(1.0 - h) * innovations
+    return h, increments, innovations, atoms
+
+
+def test_common_random_number_reduction_is_an_identity() -> None:
+    """Proposition H.1: the simulated density is exactly a Gaussian KDE."""
+    from scipy.special import logsumexp
+
+    rng = np.random.default_rng(3)
+    dimension, n_obs, sims, m = 3, 6, 9, 11
+    h, increments, innovations, _ = _location_model_pieces(rng, dimension, n_obs, sims, m)
+    for _ in range(5):
+        theta = rng.normal(scale=0.7, size=dimension)
+        # Direct Euler simulation, exact for this model.
+        preterminal = theta * (1.0 - h) + math.sqrt(1.0 - h) * innovations
+        residual = increments[:, None, :] - preterminal - theta * h
+        direct = -(dimension / 2.0) * math.log(2.0 * math.pi * h) - (residual**2).sum(-1) / (2.0 * h)
+        # The kernel-density form of Proposition H.1.
+        centred = (increments - theta)[:, None, :] - math.sqrt(1.0 - h) * innovations
+        kde = -(dimension / 2.0) * math.log(2.0 * math.pi * h) - (centred**2).sum(-1) / (2.0 * h)
+        assert np.allclose(logsumexp(direct, axis=1), logsumexp(kde, axis=1), rtol=0, atol=1e-11)
+
+
+def test_nearest_atom_sandwich_bound() -> None:
+    """Proposition H.2: the bound holds, and with the sign as stated."""
+    from scipy.special import logsumexp
+
+    rng = np.random.default_rng(5)
+    dimension, n_obs, sims, m = 3, 12, 7, 9
+    h, increments, innovations, atoms = _location_model_pieces(rng, dimension, n_obs, sims, m)
+    lower = -2.0 * n_obs * h * math.log(sims)
+    for _ in range(25):
+        theta = rng.normal(scale=0.8, size=dimension)
+        squared = ((atoms - theta) ** 2).sum(-1)
+        log_kernel = -(dimension / 2.0) * math.log(2.0 * math.pi * h) - squared / (2.0 * h)
+        log_likelihood = float((logsumexp(log_kernel, axis=1) - math.log(sims)).sum())
+        nearest = float(squared.min(axis=1).sum())
+        quantity = (
+            2.0 * h * log_likelihood
+            + nearest
+            + n_obs * h * dimension * math.log(2.0 * math.pi * h)
+        )
+        assert lower - 1e-9 <= quantity <= 1e-9
