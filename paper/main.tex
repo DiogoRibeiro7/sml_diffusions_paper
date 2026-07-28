@@ -77,8 +77,8 @@
 \newcommand{\email}{\texttt{[email to be supplied]}}
 \newcommand{\orcid}{\textsc{[ORCID to be supplied]}}
 
-% Comment out the next line for a release build.
-\newcommand{\draftmode}{}
+% Uncomment the next line for a draft build; it must stay commented for a release.
+%\newcommand{\draftmode}{}
 
 \newcommand{\draftlabel}{%
   \ifdefined\draftmode\\[0.3em]\small Draft for mathematical review\fi}
@@ -174,7 +174,8 @@ We do \emph{not} claim as new the kernel interpretation of the endpoint density,
 \label{tab:related}
 \footnotesize
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{p{2.2cm}p{2.2cm}p{1.5cm}p{2.7cm}p{1.6cm}p{1.5cm}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\begin{tabular}{L{2.2cm}L{2.2cm}L{1.5cm}L{2.7cm}L{1.6cm}L{1.5cm}}
 \toprule
 Reference & Estimator & Dimension & Rate or variance result & Joint $M$--$S$ & Counter\-example \\
 \midrule

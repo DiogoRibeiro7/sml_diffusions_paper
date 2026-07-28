@@ -84,3 +84,6 @@ Thumbs.db
 
 # Investigation scratch output
 notes/argmax_*.csv
+
+# Release artefacts
+dist/
