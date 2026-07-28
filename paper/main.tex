@@ -97,7 +97,7 @@ S h^{K/2}=\frac{S}{M^{K/2}}.
 \]
 This quantity, rather than $S$ alone, controls the Monte Carlo approximation.
 
-That the endpoint construction is statistically wasteful is not a new observation. \citet{DurhamGallant2002} note that unconditioned Euler paths rarely arrive near the observed endpoint and propose bridge-based proposals for that reason; \citet{ElerianChibShephard2001} augment the path with a Metropolis--Hastings block for the same reason; \citet{StramerYan2007} document numerically that the accuracy of the endpoint estimator deteriorates as $M$ increases with $S$ held fixed; and \citet{Lindstrom2012} regularises the Pedersen proposal towards a bridge on the same diagnosis. What that literature records is a qualitative and largely numerical finding about efficiency. What is established here is different in kind: an exact dimensional law for the moments of the endpoint summand, the identification of $S/M^{K/2}$ as the quantity that governs the estimator, the corrected triangular-array normalisation, and a joint-limit counterexample showing that the published transition-density convergence statement is not merely unproved but false. The distinction matters because an efficiency loss can be absorbed by more simulations, whereas failure of the density estimator along an admissible rate path cannot.
+That the endpoint construction is statistically wasteful is not a new observation. \Cref{sec:related} sets out what earlier work established, what remains open, and which contributions below are new.
 
 The paper makes six main contributions.
 
@@ -131,6 +131,61 @@ Fifth, we trace the density-level result into the log likelihood. The nonlineari
 Sixth, we examine the mathematical status of the exchange-rate application. We first give finite-sample scaling diagnostics showing that the ratios corresponding to the paper's own rate conditions are not small at the implemented design, so the implementation does not resemble a point along a sequence in which those conditions operate. The empirical model then contains square-root diffusions that violate the smoothness and nondegeneracy assumptions of the generic theorem, though we show that for the interest rates this violation is numerically inconsequential at the reported estimates. The market-incompleteness state is not: its Feller ratio equals one half for every parameter value, and because the estimator eliminates that state in favour of volatility, every Euler substep requires a recovered square root to remain real. The time-varying risk-price specification defines exchange-rate volatility through an implicit quadratic identity whose leading coefficient is negative at the reported U.S.--U.K. estimates, so that system admits either zero or two positive volatility branches and never exactly one. The four-dimensional Brownian correlation matrix is valid at the reported estimates and robust to perturbation by their standard errors, but the specification does not guarantee validity across the state space: at the volatility floor the exchange-rate Brownian motion becomes spanned by the two interest-rate Brownian motions, which over-determines a correlation the paper estimates freely, and the matrix is then indefinite while every entry remains inside $[-1,1]$. Finally, the minimum-incompleteness rule is affine in the selected parameter, so its solution is a vertex of the feasible set; we identify which constraint is active rather than assuming it is the nonnegativity one, and together with the binding constraint this yields a hybrid and potentially nonregular estimator not covered by the unconstrained SML theorem.
 
 The aim is not to relitigate the substantive economics of a paper published more than two decades ago. Nor do we infer from a false theorem that every numerical estimate obtained with finite $M$ and $S$ must be poor. The aim is narrower and mathematical: to identify the correct dimensional scale of the endpoint estimator, separate sequential from joint convergence, and determine what the published asymptotic arguments do and do not establish.
+
+\subsection{Relation to existing asymptotic analyses}\label{sec:related}
+
+The estimator analysed here originates with \citet{Pedersen1995a,Pedersen1995b} and is the one implemented by \citet{BrandtSantaClara2002}. A substantial literature has studied it and its refinements, and it is important to be exact about what that literature already establishes, because several statements that might look like the contribution of this paper are in fact older.
+
+\emph{Prior work that anticipates part of the diagnosis.} \citet{DurhamGallant2002} observe that unconditioned Euler paths rarely arrive near the observed endpoint and introduce bridge-based proposals for that reason, and \citet{ElerianChibShephard2001} augment the path with a Metropolis--Hastings block on the same reasoning. \citet{StramerYan2007b} document numerically that the accuracy of the endpoint estimator deteriorates as $M$ increases with $S$ held fixed. \citet{Lindstrom2012} regularises the Pedersen proposal towards a bridge on the same diagnosis. The qualitative statement that the endpoint construction is inefficient, that its inefficiency worsens with finer discretisation, and that bridge proposals are the natural remedy, is therefore established prior work and is not claimed here as new.
+
+\emph{Prior work on the trade-off itself.} Two contributions are closest to the present analysis. \citet{StramerYan2007a} study the trade-off between Euler discretisation error and Monte Carlo error and derive an efficient allocation of computational effort, for the modified Brownian bridge importance sampler rather than for the unconditioned endpoint estimator. \citet{DetempleGarciaRindisbacher2006} develop limit distributions for Monte Carlo estimators of diffusions based on the Euler scheme, including expected approximation errors and bias-corrected estimators. The existence of a bias--variance trade-off between $M$ and $S$, and the idea that it determines an optimal allocation, are therefore also prior work.
+
+\emph{What is claimed here.} Against that background the contributions of this paper are the following, and each is stated as a claim about the \emph{unconditioned endpoint} estimator, which is the one \citet{BrandtSantaClara2002} implement and which differs from the bridge samplers studied by \citet{StramerYan2007a}.
+\begin{enumerate}[label=(\alph*)]
+\item Exact finite-$M$ moments of every order for the endpoint summand under $K$-dimensional Brownian motion (\Cref{prop:brownian_moments}), from which the variance is available in closed form at every $M$ and $S$ rather than asymptotically.
+\item The exact local moment constant $c_{r,K}=(2\pi)^{-(r-1)K/2}r^{-K/2}$ for general uniformly elliptic diffusions (\Cref{thm:local_moments}), and the identification of $R_{M,S}=S/M^{K/2}$ rather than $S$ as the quantity governing the estimator.
+\item An explicit collapse-in-probability counterexample along $M=S$ (\Cref{thm:collapse}), which is a statement of a different kind from an efficiency observation: it exhibits an admissible rate path along which the density estimator converges to the wrong value.
+\item A direct refutation of the joint convergence statement in Lemma 2 of \citet{BrandtSantaClara2002}, under that paper's own assumptions.
+\item The explicit four-dimensional incompatibility between the published condition $S/M^2\to0$ and mean-square consistency, which requires $S/M^2\to\infty$.
+\item The mathematical reassessment of the exchange-rate application in \Cref{sec:application}.
+\end{enumerate}
+
+We do \emph{not} claim as new the kernel interpretation of the endpoint density, the observation that accuracy deteriorates in $M$ at fixed $S$, the existence of a bias--variance trade-off between discretisation and simulation, or the case for bridge proposals. What distinguishes the present counterexample from a generic efficiency observation is its logical force. An efficiency loss says that a given design is wasteful and can be repaired by spending more; it is consistent with the estimator being consistent along every admissible sequence. \Cref{thm:collapse} says something stronger: along a sequence that satisfies the published rate condition and the published regularity assumptions, the simulated density converges in probability to zero while the true density is strictly positive. No amount of additional simulation repairs that, because the sequence in question already has $S\to\infty$.
+
+\Cref{tab:related} summarises the comparison.
+
+\begin{table}[t]
+\centering
+\caption{Relation to existing asymptotic analyses of Pedersen-type simulated likelihood. ``Joint $M$--$S$'' asks whether limits are taken jointly rather than sequentially; ``Counterexample'' asks whether a sequence is exhibited along which the estimator fails.}
+\label{tab:related}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{p{2.2cm}p{2.2cm}p{1.5cm}p{2.7cm}p{1.6cm}p{1.5cm}}
+\toprule
+Reference & Estimator & Dimension & Rate or variance result & Joint $M$--$S$ & Counter\-example \\
+\midrule
+\citet{Pedersen1995a,Pedersen1995b}
+& Endpoint & general & consistency and asymptotic normality & sequential & no \\
+\citet{BrandtSantaClara2002}
+& Endpoint & general, applied at $K=4$ & $\sqrt S/M\to0$, $N/S^{1/4}\to0$ & asserted, proved sequentially & no \\
+\citet{DurhamGallant2002}
+& Bridge proposals & general & numerical efficiency comparisons & --- & no \\
+\citet{ElerianChibShephard2001}
+& Path augmentation & general & MCMC convergence & --- & no \\
+\citet{DetempleGarciaRindisbacher2006}
+& Euler and Doss-trans\-formed & general & limit distributions, bias correction & yes & no \\
+\citet{StramerYan2007a}
+& Modified Brownian bridge & general & efficient allocation between discretisation and Monte Carlo error & yes & no \\
+\citet{StramerYan2007b}
+& Endpoint and closed-form expansion & general & numerical comparison & --- & no \\
+\citet{Lindstrom2012}
+& Regularised bridge & general & sparse-sampling performance & --- & no \\
+\midrule
+This paper
+& Endpoint & explicit in $K$ & $\Var\asymp M^{K/2}/S$; optimum $S^{-4/(K+4)}$ & yes & yes, \Cref{thm:collapse} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Scope of the results}\label{sec:scope}
 
@@ -189,7 +244,7 @@ For each fixed $M$, the strong law yields
 \widehat q_{M,S}(y\mid x)\longrightarrow q_M(y\mid x)
 \quad\text{almost surely as }S\to\infty,
 \]
-provided the summand is integrable. Under regularity conditions such as those of \citet{BallyTalay1995,BallyTalay1996},
+provided the summand is integrable. Under regularity conditions such as those of \citet{BallyTalay1996a,BallyTalay1996b},
 \[
 q_M(y\mid x)-p(y\mid x)=O(M^{-1}),
 \]
@@ -420,9 +475,9 @@ Let $G_h=g_h(y\mid Z_h)$ be one summand in \eqref{eq:pedersen_estimator}, where 
 \end{enumerate}
 \end{assumption}
 
-Two comments on the content of these conditions. \ref{ass:conv} is a joint requirement in time and space: the preterminal state lives at time $1-h$, not at time $1$, so the stated convergence combines convergence of the Euler law to the diffusion law with continuity of $t\mapsto p_t(\cdot\mid x)$ at $t=1$ in the topology of uniform convergence near $y$. The limit $p(\cdot\mid x)$ is the diffusion transition density at time $1$. And \ref{ass:bound} is not implied by \ref{ass:rh}: it is a uniform-in-$h$ statement, which for uniformly elliptic coefficients follows from the Gaussian upper bounds for Euler densities established by \citet{BallyTalay1996}, since the preterminal time $1-h\ge\tfrac12$ is bounded away from zero.
+Two comments on the content of these conditions. \ref{ass:conv} is a joint requirement in time and space: the preterminal state lives at time $1-h$, not at time $1$, so the stated convergence combines convergence of the Euler law to the diffusion law with continuity of $t\mapsto p_t(\cdot\mid x)$ at $t=1$ in the topology of uniform convergence near $y$. The limit $p(\cdot\mid x)$ is the diffusion transition density at time $1$. And \ref{ass:bound} is not implied by \ref{ass:rh}: it is a uniform-in-$h$ statement, which for uniformly elliptic coefficients follows from the Gaussian upper bounds for Euler densities established by \citet{BallyTalay1996b}, since the preterminal time $1-h\ge\tfrac12$ is bounded away from zero.
 
-\Cref{ass:local} is compatible with the regular setting used to justify Euler density expansions in \citet{BallyTalay1995,BallyTalay1996}. It is not compatible with the square-root boundaries in the later financial application, where \ref{ass:V} fails at the origin; that distinction is discussed in \Cref{sec:application}.
+\Cref{ass:local} is compatible with the regular setting used to justify Euler density expansions in \citet{BallyTalay1996a,BallyTalay1996b}. It is not compatible with the square-root boundaries in the later financial application, where \ref{ass:V} fails at the origin; that distinction is discussed in \Cref{sec:application}.
 
 \begin{theorem}[Local moment law]\label{thm:local_moments}
 Under \Cref{ass:local}, for every fixed $r>1$,
@@ -661,7 +716,7 @@ The two conditions in \eqref{eq:bias_negligible} do different work and pull in o
 \end{remark}
 
 \begin{remark}[Dependency structure]\label{rem:dependencies}
-The density-level results depend on one another as follows. \Cref{ass:local} supports \Cref{thm:local_moments}, which is used only through its cases $r=2$ and $r=3$. The case $r=2$ gives the variance scale \Cref{cor:generic_variance}; the two cases together give the Lyapunov condition in \Cref{thm:generic_clt}. \Cref{cor:diffusion_clt} adds the Euler bias expansion \eqref{eq:euler_bias_expansion}, which is an assumption imported from \citet{BallyTalay1995,BallyTalay1996} rather than proved here, and combines it with \Cref{thm:generic_clt}. \Cref{prop:optimal_m} uses \Cref{cor:generic_variance} and \eqref{eq:euler_bias_expansion} but no central limit theorem. In the Brownian benchmark, \Cref{prop:brownian_moments} replaces \Cref{thm:local_moments} with an exact computation and the bias expansion is unnecessary because the bias is zero, so \Cref{thm:brownian_clt} rests on no imported result at all. \Cref{thm:collapse} is independent of every central limit theorem above; it uses only the exact Gaussian tail bound.
+The density-level results depend on one another as follows. \Cref{ass:local} supports \Cref{thm:local_moments}, which is used only through its cases $r=2$ and $r=3$. The case $r=2$ gives the variance scale \Cref{cor:generic_variance}; the two cases together give the Lyapunov condition in \Cref{thm:generic_clt}. \Cref{cor:diffusion_clt} adds the Euler bias expansion \eqref{eq:euler_bias_expansion}, which is an assumption imported from \citet{BallyTalay1996a,BallyTalay1996b} rather than proved here, and combines it with \Cref{thm:generic_clt}. \Cref{prop:optimal_m} uses \Cref{cor:generic_variance} and \eqref{eq:euler_bias_expansion} but no central limit theorem. In the Brownian benchmark, \Cref{prop:brownian_moments} replaces \Cref{thm:local_moments} with an exact computation and the bias expansion is unnecessary because the bias is zero, so \Cref{thm:brownian_clt} rests on no imported result at all. \Cref{thm:collapse} is independent of every central limit theorem above; it uses only the exact Gaussian tail bound.
 \end{remark}
 
 \begin{remark}[The dimensional conflict]
@@ -1387,7 +1442,7 @@ The endpoint variance problem is not an unavoidable property of likelihood infer
 
 A bridge proposal guides simulated paths towards the observed endpoint. In importance-sampling language, it increases the probability of drawing paths in the region that contributes to the transition-density integral and corrects the proposal through a likelihood ratio. This is the direction taken by the acceleration methods studied by \citet{DurhamGallant2002}, the path-augmentation schemes of \citet{ElerianChibShephard2001}, conditioned-diffusion methods such as \citet{DelyonHu2006}, the regularised proposal of \citet{Lindstrom2012}, and later guided proposals for multidimensional bridges \citep{SchauerEtAl2017,VanDerMeulenSchauer2017}. The nonparametric simulation approach of \citet{Nicolau2002} replaces the endpoint Gaussian kernel by a density estimate, which changes the bandwidth problem rather than removing it.
 
-A useful proposal should be assessed through the moments of its importance weights. Merely changing the path simulator does not guarantee finite or dimension-stable variance, but conditioning on the endpoint directly targets the rare-event failure identified here. The numerical comparisons of \citet{StramerYan2007} are consistent with this reading: the endpoint estimator degrades as $M$ grows at fixed $S$, which is the finite-sample signature of \Cref{cor:generic_variance}.
+A useful proposal should be assessed through the moments of its importance weights. Merely changing the path simulator does not guarantee finite or dimension-stable variance, but conditioning on the endpoint directly targets the rare-event failure identified here. The numerical comparisons of \citet{StramerYan2007b} are consistent with this reading: the endpoint estimator degrades as $M$ grows at fixed $S$, which is the finite-sample signature of \Cref{cor:generic_variance}.
 
 \subsection{Exact or discretisation-free likelihood estimators}
 
