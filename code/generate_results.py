@@ -548,6 +548,32 @@ def make_rate_table() -> None:
     frame.to_csv(TABLES / "rate_conditions.csv", index=False)
 
 
+def make_correlation_tables() -> None:
+    """Write the four-dimensional Brownian correlation audit.
+
+    Delegates to ``check_correlation_matrix`` so that the manuscript tables and
+    the standalone audit tool cannot drift apart.  The perturbation study is
+    run with a reduced draw count here; the standalone tool defaults higher.
+    """
+    import check_correlation_matrix as ccm
+
+    states = ccm.run_state_audit()
+    states.to_csv(TABLES / "correlation_audit.csv", index=False)
+    columns = ["system", "state", "feasible", "max_abs_off_diagonal", "min_eigenvalue"]
+    (TABLES / "correlation_audit.tex").write_text(
+        states[columns].to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.4f}",
+            escape=False,
+            column_format="llcrr",
+        ),
+        encoding="utf-8",
+    )
+
+    perturbation = ccm.run_perturbation_audit(draws=5_000)
+    perturbation.to_csv(TABLES / "correlation_perturbation.csv", index=False)
+
+
 def main(output_root: Path | None = None) -> None:
     """Generate all reproducible manuscript outputs.
 
@@ -573,6 +599,7 @@ def main(output_root: Path | None = None) -> None:
     make_feller_table()
     make_design_table()
     make_rate_table()
+    make_correlation_tables()
 
 
 if __name__ == "__main__":
