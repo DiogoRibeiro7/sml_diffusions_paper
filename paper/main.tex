@@ -378,41 +378,51 @@ where $\tau_K^2(x,y)$ is defined in \eqref{eq:brownian_variance_asymptotic}.
 \end{theorem}
 
 \begin{proof}
-Within each row, the $G_h$ are independent and identically distributed. By \Cref{prop:brownian_moments},
+Index the array by $n$, with $h_n=1/M_n$ and $s=1,\ldots,S_n$; within row $n$ the summands $G_{n,s}$ are independent and identically distributed. \Cref{prop:brownian_moments} at $r=2$ gives $h_n^{K/2}\E[G_{n,1}^2]\to\tau_K^2$, and $\E G_{n,1}=p(y\mid x)$ exactly for every $M$, so
 \[
-\Var(G_h)\sim \tau_K^2 h^{-K/2},
-\qquad
-\E[|G_h|^3]=O(h^{-K}).
+h_n^{K/2}\Var(G_{n,1})=h_n^{K/2}\E[G_{n,1}^2]-h_n^{K/2}p(y\mid x)^2\longrightarrow\tau_K^2 .
 \]
-The same order holds for the third absolute centred moment. The Lyapunov ratio is therefore
+At $r=3$ the same proposition gives $\E[G_{n,1}^3]=O(h_n^{-K})$, a bound on the \emph{raw} moment. Since $G_{n,1}\ge0$ and $\E G_{n,1}=p(y\mid x)$ is constant in $n$, the inequality $|a-b|^3\le4(a^3+b^3)$ for $a,b\ge0$ gives the centred bound
 \[
-\frac{S\E|G_h-\E G_h|^3}
-{\{S\Var(G_h)\}^{3/2}}
-=O\!\left(\frac{1}{\sqrt{S h^{K/2}}}\right)
-\longrightarrow0.
+\E\lvert G_{n,1}-\E G_{n,1}\rvert^3\le4\left\{\E[G_{n,1}^3]+p(y\mid x)^3\right\}=O(h_n^{-K}).
 \]
-The triangular-array Lyapunov central limit theorem applies. The variance normalisation follows from \eqref{eq:brownian_variance_asymptotic}, and the Euler bias is zero for Brownian motion.
+The Lyapunov ratio at order three is therefore
+\[
+\frac{S_n\E\lvert G_{n,1}-\E G_{n,1}\rvert^3}
+{\{S_n\Var(G_{n,1})\}^{3/2}}
+=\frac{S_nO(h_n^{-K})}{S_n^{3/2}\tau_K^3h_n^{-3K/4}\{1+o(1)\}}
+=O\!\left(\left(S_nh_n^{K/2}\right)^{-1/2}\right)\longrightarrow0
+\]
+by \eqref{eq:effective_diverge}. The triangular-array Lyapunov central limit theorem applies. Because the Euler scheme is exact for Brownian motion, $q_{M}=p$ for every $M$ and no bias term appears, so the statement may be centred at $p$ directly.
 \end{proof}
 
-The correct normalisation depends on dimension. A fixed-$M$ $\sqrt S$-CLT is valid, but it is not stable as $M\to\infty$.
+The correct normalisation depends on dimension. A fixed-$M$ $\sqrt S$ central limit theorem is valid for each $M$ separately, but it is not stable as $M\to\infty$: see \Cref{rem:not_uniform}.
 
 \section{General multidimensional diffusions}\label{sec:general}
 
-The Brownian calculation reflects a local property of Gaussian endpoint kernels. We now derive the generic moment law. The assumptions below are deliberately stronger than necessary so that the mechanism is transparent.
+The Brownian calculation reflects a local property of Gaussian endpoint kernels. We now derive the generic moment law. We state it under a clean global framework, so that every step of the proof is checkable and no condition is phrased in terms of the conclusion it is meant to deliver; \Cref{rem:localisation} explains how localisation would weaken it.
 
-Let $G_h=g_h(y\mid Z_h)$ be one summand in \eqref{eq:pedersen_estimator}. Fix $x$ and $y$.
+Throughout this section the model is time homogeneous, so that $\mu(z)$ and $V(z)$ carry no time argument. The one-step kernel \eqref{eq:one_step_kernel} is then evaluated at the preterminal state alone, and no ambiguity arises about whether coefficients are taken at time $1-h$ or at time $1$. \Cref{rem:time_inhomogeneous} records what changes otherwise.
 
-\begin{assumption}[Local regularity and domination]\label{ass:local}
-As $h\downarrow0$:
-\begin{enumerate}[label=(\roman*)]
-\item $\mu(z)$ and $V(z)$ are continuous in a neighbourhood of $y$, and $V(y)$ is positive definite;
-\item on that neighbourhood, the eigenvalues of $V(z)$ are bounded between constants $0<\underline v<\overline v<\infty$ and $\mu$ is bounded;
-\item the preterminal Euler density $r_h(z\mid x)$, which is the density of the Euler chain at time $1-h$ rather than at time $1$, converges as $h\downarrow0$ locally uniformly at $y$ to a continuous density $p(z\mid x)$, with $p(y\mid x)>0$. This is a joint requirement in time and space: it combines convergence of the Euler law to the diffusion law with continuity of $t\mapsto p_t(\cdot\mid x)$ at $t=1$ in the locally uniform topology near $y$;
-\item the family $r_h(\cdot\mid x)$ is uniformly bounded and the contribution to the moment integral from outside any fixed neighbourhood of $y$ is dominated by an integrable Gaussian envelope after multiplication by the appropriate power of $h$.
+Let $G_h=g_h(y\mid Z_h)$ be one summand in \eqref{eq:pedersen_estimator}, where $Z_h$ is the Euler chain at time $1-h$. Fix $x$ and $y$.
+
+\begin{assumption}[Global regularity]\label{ass:local}
+\begin{enumerate}[label=(A\arabic*)]
+\item\label{ass:mu} $\mu:\R^K\to\R^K$ is bounded and continuous, with $\lVert\mu\rVert_\infty=\bar\mu<\infty$.
+\item\label{ass:V} $V:\R^K\to\R^{K\times K}$ is continuous and globally uniformly elliptic: there exist constants $0<\underline v\le\overline v<\infty$ with
+\begin{equation}\label{eq:uniform_ellipticity}
+\underline v\,I_K\preceq V(z)\preceq\overline v\,I_K
+\qquad\text{for every }z\in\R^K.
+\end{equation}
+\item\label{ass:rh} For each $h\in(0,\tfrac12]$ the preterminal Euler state $Z_h$, that is the chain \eqref{eq:euler} at time $1-h$, has a density $r_h(\cdot\mid x)$ with respect to Lebesgue measure.
+\item\label{ass:bound} The family is uniformly bounded: $\sup_{0<h\le1/2}\ \sup_{z\in\R^K}r_h(z\mid x)=\bar r<\infty$.
+\item\label{ass:conv} There is a continuous density $p(\cdot\mid x)$ with $p(y\mid x)>0$ such that $r_h(\cdot\mid x)\to p(\cdot\mid x)$ uniformly on some closed ball $\overline B(y,\delta_0)$, $\delta_0>0$, as $h\downarrow0$.
 \end{enumerate}
 \end{assumption}
 
-Uniform ellipticity, bounded smooth coefficients, and standard Gaussian density bounds imply versions of these conditions. They are compatible with the regular setting used to justify Euler density expansions in \citet{BallyTalay1995,BallyTalay1996}. They are not compatible with the square-root boundaries in the later financial application; that distinction is discussed in \Cref{sec:application}.
+Two comments on the content of these conditions. \ref{ass:conv} is a joint requirement in time and space: the preterminal state lives at time $1-h$, not at time $1$, so the stated convergence combines convergence of the Euler law to the diffusion law with continuity of $t\mapsto p_t(\cdot\mid x)$ at $t=1$ in the topology of uniform convergence near $y$. The limit $p(\cdot\mid x)$ is the diffusion transition density at time $1$. And \ref{ass:bound} is not implied by \ref{ass:rh}: it is a uniform-in-$h$ statement, which for uniformly elliptic coefficients follows from the Gaussian upper bounds for Euler densities established by \citet{BallyTalay1996}, since the preterminal time $1-h\ge\tfrac12$ is bounded away from zero.
+
+\Cref{ass:local} is compatible with the regular setting used to justify Euler density expansions in \citet{BallyTalay1995,BallyTalay1996}. It is not compatible with the square-root boundaries in the later financial application, where \ref{ass:V} fails at the origin; that distinction is discussed in \Cref{sec:application}.
 
 \begin{theorem}[Local moment law]\label{thm:local_moments}
 Under \Cref{ass:local}, for every fixed $r>1$,
@@ -434,35 +444,99 @@ In particular,
 \end{theorem}
 
 \begin{proof}
-Write $z=y+\sqrt h\,u$. On a fixed neighbourhood of $y$,
+Write $m_h(z)=y-z-h\mu(z)$, so that by \eqref{eq:one_step_kernel}
+\begin{equation}\label{eq:Ghr}
+g_h(y\mid z)^r
+=(2\pi h)^{-rK/2}|V(z)|^{-r/2}
+\exp\!\left[-\frac{r}{2h}m_h(z)^{\mathsf T}V(z)^{-1}m_h(z)\right],
+\end{equation}
+and fix $\delta\in(0,\delta_0]$. Split
 \begin{align*}
-G_h^r
-&=(2\pi h)^{-rK/2}|V(z)|^{-r/2}\\
-&\quad\times
-\exp\!\left[-\frac{r}{2h}
-\{y-z-h\mu(z)\}^{\mathsf T}V(z)^{-1}
-\{y-z-h\mu(z)\}\right].
+h^{(r-1)K/2}\E[G_h^r]
+&=I_h(\delta)+T_h(\delta),\\
+I_h(\delta)&=h^{(r-1)K/2}\int_{B(y,\delta)}g_h(y\mid z)^r\,r_h(z\mid x)\,dz,\\
+T_h(\delta)&=h^{(r-1)K/2}\int_{B(y,\delta)^c}g_h(y\mid z)^r\,r_h(z\mid x)\,dz .
 \end{align*}
-Since $dz=h^{K/2}du$, multiplication by $h^{(r-1)K/2}$ cancels the powers of $h$. Pointwise in $u$,
+
+\emph{Tail term.} For $z\notin B(y,\delta)$ and $h\le\delta/(4\bar\mu+1)$, \ref{ass:mu} gives
 \[
-V(y+\sqrt h\,u)\to V(y),
-\qquad
-r_h(y+\sqrt h\,u\mid x)\to p(y\mid x),
+\lVert m_h(z)\rVert\ge\lVert y-z\rVert-h\bar\mu\ge\tfrac12\lVert y-z\rVert
+\qquad\text{and}\qquad
+\lVert m_h(z)\rVert\ge\tfrac12\delta .
 \]
-and the exponent converges to
+By \ref{ass:V} we have $V(z)^{-1}\succeq\overline v^{-1}I_K$ and $|V(z)|^{-r/2}\le\underline v^{-rK/2}$, so
 \[
--\frac r2u^{\mathsf T}V(y)^{-1}u.
+g_h(y\mid z)^r
+\le(2\pi h)^{-rK/2}\underline v^{-rK/2}
+\exp\!\left[-\frac{r\lVert m_h(z)\rVert^2}{2\overline vh}\right].
 \]
-The local eigenvalue bounds give an integrable Gaussian envelope. Dominated convergence and the tail condition yield
-\begin{align*}
-&\lim_{h\downarrow0}h^{(r-1)K/2}\E[G_h^r]\\
-&\quad=(2\pi)^{-rK/2}|V(y)|^{-r/2}p(y\mid x)
-\int_{\R^K}\exp\!\left[-\frac r2u^{\mathsf T}V(y)^{-1}u\right]du\\
-&\quad=(2\pi)^{-rK/2}|V(y)|^{-r/2}p(y\mid x)
-(2\pi/r)^{K/2}|V(y)|^{1/2},
-\end{align*}
-which is \eqref{eq:general_r_moment}.
+Splitting the exponent in half and using the two lower bounds separately,
+\[
+g_h(y\mid z)^r
+\le(2\pi h)^{-rK/2}\underline v^{-rK/2}
+\exp\!\left[-\frac{r\delta^2}{16\overline vh}\right]
+\exp\!\left[-\frac{r\lVert y-z\rVert^2}{16\overline vh}\right].
+\]
+Using \ref{ass:bound} and $\int_{\R^K}e^{-r\lVert w\rVert^2/(16\overline vh)}dw=(16\pi\overline vh/r)^{K/2}$, and collecting powers as $h^{(r-1)K/2}\cdot h^{-rK/2}\cdot h^{K/2}=1$,
+\begin{equation}\label{eq:tail_bound}
+T_h(\delta)\le
+\bar r\,\underline v^{-rK/2}(2\pi)^{-rK/2}(16\pi\overline v/r)^{K/2}
+\exp\!\left[-\frac{r\delta^2}{16\overline vh}\right]
+\xrightarrow[h\downarrow0]{}0 .
+\end{equation}
+
+\emph{Local term.} Substitute $z=z_h(u)=y+\sqrt h\,u$, so that $dz=h^{K/2}du$ and the domain becomes $\lVert u\rVert<\delta/\sqrt h$. Since $h^{(r-1)K/2}(2\pi h)^{-rK/2}h^{K/2}=(2\pi)^{-rK/2}$, every power of $h$ cancels and
+\[
+I_h(\delta)=(2\pi)^{-rK/2}\int_{\R^K}\mathbf 1\{\lVert u\rVert<\delta/\sqrt h\}\,\Psi_h(u)\,du,
+\]
+\[
+\Psi_h(u)=|V(z_h(u))|^{-r/2}r_h(z_h(u)\mid x)
+\exp\!\left[-\frac{r}{2h}m_h(z_h(u))^{\mathsf T}V(z_h(u))^{-1}m_h(z_h(u))\right].
+\]
+Here $m_h(z_h(u))=-\sqrt h\,u-h\mu(z_h(u))$, so
+\[
+\frac1hm_h(z_h(u))^{\mathsf T}V(z_h(u))^{-1}m_h(z_h(u))
+=\bigl(u+\sqrt h\,\mu(z_h(u))\bigr)^{\mathsf T}V(z_h(u))^{-1}\bigl(u+\sqrt h\,\mu(z_h(u))\bigr).
+\]
+Fix $u$. Then $z_h(u)\to y$, so continuity of $\mu$ and $V$ gives $V(z_h(u))\to V(y)$ and $\sqrt h\,\mu(z_h(u))\to0$, and the quadratic form converges to $u^{\mathsf T}V(y)^{-1}u$. For $h$ small enough that $\sqrt h\lVert u\rVert\le\delta_0$, \ref{ass:conv} and continuity of $p(\cdot\mid x)$ give $r_h(z_h(u)\mid x)\to p(y\mid x)$. Hence, pointwise in $u$,
+\[
+\Psi_h(u)\longrightarrow|V(y)|^{-r/2}p(y\mid x)\exp\!\left[-\tfrac r2u^{\mathsf T}V(y)^{-1}u\right].
+\]
+
+\emph{Domination.} Let $h\le\min\{\delta_0,(2\bar\mu)^{-2}\}$. If $\lVert u\rVert\ge2\sqrt h\,\bar\mu$ then $\lVert u+\sqrt h\,\mu(z_h(u))\rVert\ge\tfrac12\lVert u\rVert$, so by \ref{ass:V} and \ref{ass:bound}
+\[
+\Psi_h(u)\le\underline v^{-rK/2}\,\bar r\,\exp\!\left[-\frac{r\lVert u\rVert^2}{8\overline v}\right],
+\]
+while if $\lVert u\rVert<2\sqrt h\,\bar\mu\le1$ then $\Psi_h(u)\le\underline v^{-rK/2}\bar r$. The dominating function
+\[
+\Lambda(u)=\underline v^{-rK/2}\bar r\left\{\exp\!\left[-\frac{r\lVert u\rVert^2}{8\overline v}\right]+\mathbf 1\{\lVert u\rVert\le1\}\right\}
+\]
+is integrable and does not depend on $h$. Dominated convergence therefore gives
+\[
+\lim_{h\downarrow0}I_h(\delta)
+=(2\pi)^{-rK/2}|V(y)|^{-r/2}p(y\mid x)
+\int_{\R^K}\exp\!\left[-\tfrac r2u^{\mathsf T}V(y)^{-1}u\right]du .
+\]
+The Gaussian integral equals $(2\pi/r)^{K/2}|V(y)|^{1/2}$, so
+\[
+\lim_{h\downarrow0}I_h(\delta)
+=(2\pi)^{-rK/2}(2\pi/r)^{K/2}p(y\mid x)|V(y)|^{-(r-1)/2}
+=c_{r,K}\,p(y\mid x)|V(y)|^{-(r-1)/2}.
+\]
+This limit does not depend on $\delta$, and $T_h(\delta)\to0$ by \eqref{eq:tail_bound}, which proves \eqref{eq:general_r_moment}. Taking $r=2$ and using $(2\pi)^{-K/2}2^{-K/2}=(4\pi)^{-K/2}$ gives \eqref{eq:general_second}.
 \end{proof}
+
+\begin{remark}[Verification in exactly solvable cases]\label{rem:verification}
+The constant can be checked against closed forms. For standard Brownian motion $V\equiv I_K$, and substituting $p(y\mid x)=(2\pi)^{-K/2}e^{-\lVert y-x\rVert^2/2}$ into \eqref{eq:general_r_moment} reproduces the exact limit of \Cref{prop:brownian_moments} term by term. For a constant-coefficient diffusion $dY=\mu\,dt+\Sigma\,dW$ the same computation with $V=\Sigma\Sigma^{\mathsf T}$ reproduces \eqref{eq:general_r_moment} including the determinant factor. For a multidimensional Ornstein--Uhlenbeck process the preterminal law is Gaussian and the second moment is again available in closed form; \Cref{fig:ou_scaling} confirms convergence to \eqref{eq:general_second} numerically. The cases $r=2$ and $r=3$ supply exactly the second and third moments used in \Cref{thm:generic_clt}.
+\end{remark}
+
+\begin{remark}[Localisation]\label{rem:localisation}
+Only three features of \Cref{ass:local} are used: ellipticity and boundedness of $\mu$ near $y$, which drive the local term; the uniform bound \ref{ass:bound}, which drives domination; and enough global control to make the tail negligible. Global uniform ellipticity is therefore stronger than necessary. It can be replaced by ellipticity on $B(y,\delta_0)$ together with any condition forcing the contribution of $\{Z_h\notin B(y,\delta)\}$ to vanish after multiplication by $h^{(r-1)K/2}\sup_zg_h(y\mid z)^r$, for instance a Gaussian upper bound of Aronson type on $r_h$. We state the global version because it is directly verifiable and because the content of the theorem is the dimensional constant, not the weakest hypotheses.
+\end{remark}
+
+\begin{remark}[Time-inhomogeneous coefficients]\label{rem:time_inhomogeneous}
+If $\mu$ and $V$ depend on time, the one-step kernel \eqref{eq:one_step_kernel} evaluates them at time $1-h$, and the proof goes through verbatim provided $\mu$ and $V$ are jointly continuous at $(y,1)$ and \ref{ass:mu} and \ref{ass:V} hold uniformly in $t$ on a neighbourhood of $1$. The limit constant is unchanged and $V(y)$ is read as $V(y,1)$. We suppress the time argument in the statement because carrying it obscures the cancellation of powers of $h$, which is where the dimensional constant comes from.
+\end{remark}
 
 \begin{corollary}[Generic variance scale]\label{cor:generic_variance}
 Let $q_M(y\mid x)=\E[G_h]$ and suppose $q_M(y\mid x)\to p(y\mid x)$. Then
@@ -476,24 +550,65 @@ Let $q_M(y\mid x)=\E[G_h]$ and suppose $q_M(y\mid x)\to p(y\mid x)$. Then
 \end{corollary}
 
 \begin{theorem}[Generic endpoint CLT]\label{thm:generic_clt}
-Under \Cref{ass:local}, if $S h^{K/2}\to\infty$, then
-\begin{equation}\label{eq:generic_clt}
-\sqrt{S h^{K/2}}
-\left\{\widehat q_{M,S}(y\mid x)-q_M(y\mid x)\right\}
-\Longrightarrow
-\Normal(0,\tau^2(x,y)).
+Let $(M_n,S_n)$ satisfy $M_n\to\infty$ and $S_n\to\infty$, write $h_n=1/M_n$, and suppose the effective endpoint size diverges:
+\begin{equation}\label{eq:effective_diverge_general}
+R_n=S_nh_n^{K/2}=\frac{S_n}{M_n^{K/2}}\longrightarrow\infty .
 \end{equation}
+Then under \Cref{ass:local},
+\begin{equation}\label{eq:generic_clt}
+\sqrt{R_n}
+\left\{\widehat q_{M_n,S_n}(y\mid x)-q_{M_n}(y\mid x)\right\}
+\Longrightarrow
+\Normal\!\left(0,\tau^2(x,y)\right),
+\end{equation}
+where, as in \eqref{eq:generic_variance},
+\begin{equation}\label{eq:tau_restated}
+\tau^2(x,y)=(4\pi)^{-K/2}p(y\mid x)|V(y)|^{-1/2}.
+\end{equation}
+This is a statement about the simulated transition density, centred at the Euler density $q_{M_n}$ and not at the diffusion density $p$; \Cref{cor:diffusion_clt} treats the latter. It is not a statement about any parameter estimator.
 \end{theorem}
 
 \begin{proof}
-The $r=2$ and $r=3$ cases of \Cref{thm:local_moments} imply
+Define the triangular array
 \[
-\Var(G_h)\sim\tau^2h^{-K/2},
-\qquad
-\E|G_h-\E G_h|^3=O(h^{-K}).
+G_{n,s}=g_{h_n}(y\mid Z_{h_n,s}),
+\qquad s=1,\ldots,S_n,
 \]
-The Lyapunov ratio is again $O\{(S h^{K/2})^{-1/2}\}$.
+where $Z_{h_n,1},\ldots,Z_{h_n,S_n}$ are the independent preterminal draws in \eqref{eq:pedersen_estimator}. Within row $n$ these are independent and identically distributed with common mean $\E G_{n,1}=q_{M_n}(y\mid x)$, and
+\[
+\widehat q_{M_n,S_n}-q_{M_n}=\frac1{S_n}\sum_{s=1}^{S_n}\left(G_{n,s}-\E G_{n,s}\right).
+\]
+
+\emph{Variance.} \Cref{thm:local_moments} with $r=2$ gives $h_n^{K/2}\E[G_{n,1}^2]\to\tau^2$. Since $\E G_{n,1}=q_{M_n}\to p(y\mid x)$ is bounded, $h_n^{K/2}(\E G_{n,1})^2\to0$, so
+\begin{equation}\label{eq:var_asymptotic}
+h_n^{K/2}\Var(G_{n,1})\longrightarrow\tau^2,
+\qquad
+\Var\bigl(\widehat q_{M_n,S_n}\bigr)=\frac{\Var(G_{n,1})}{S_n}\sim\frac{\tau^2}{R_n}.
+\end{equation}
+
+\emph{Third centred moment.} \Cref{thm:local_moments} with $r=3$ bounds the \emph{raw} moment, $\E[G_{n,1}^3]=O(h_n^{-K})$. The centred moment does not follow from this automatically, and is obtained as follows. The summand is a Gaussian density value, hence nonnegative, so the elementary inequality $|a-b|^3\le4(a^3+b^3)$ for $a,b\ge0$ applies and
+\begin{equation}\label{eq:third_centred}
+\E\lvert G_{n,1}-\E G_{n,1}\rvert^3
+\le4\left\{\E[G_{n,1}^3]+(\E G_{n,1})^3\right\}
+=O(h_n^{-K})+O(1)=O(h_n^{-K}),
+\end{equation}
+using once more that $q_{M_n}$ is bounded. Nonnegativity of the summand is what makes this step elementary; without it the centred third moment would require a separate argument.
+
+\emph{Lyapunov condition.} Write $\sigma_n^2=\Var(G_{n,1})$, so $\sigma_n^2\sim\tau^2h_n^{-K/2}$ by \eqref{eq:var_asymptotic}. The Lyapunov ratio at order $2+\delta$ with $\delta=1$ is
+\[
+L_n=\frac{S_n\,\E\lvert G_{n,1}-\E G_{n,1}\rvert^3}{\bigl(S_n\sigma_n^2\bigr)^{3/2}}
+=\frac{S_n\,O(h_n^{-K})}{S_n^{3/2}\,\tau^3h_n^{-3K/4}\{1+o(1)\}}
+=O\!\left(S_n^{-1/2}h_n^{-K/4}\right)
+=O\!\left(R_n^{-1/2}\right),
+\]
+because $S_n^{-1/2}h_n^{-K/4}=(S_nh_n^{K/2})^{-1/2}$. Condition \eqref{eq:effective_diverge_general} gives $L_n\to0$.
+
+The Lyapunov central limit theorem for triangular arrays with row-wise independent summands therefore applies to $(S_n\sigma_n^2)^{-1/2}\sum_s(G_{n,s}-\E G_{n,s})$. Multiplying by $\sigma_nh_n^{K/4}\to\tau$ converts the normalisation $\sqrt{S_n}\,\sigma_n$ into $\sqrt{R_n}$ and yields \eqref{eq:generic_clt}.
 \end{proof}
+
+\begin{remark}[Why a fixed-$M$ central limit theorem cannot be reused]\label{rem:not_uniform}
+For fixed $M$ the summands do not change with $S$, their variance is a constant, and the classical $\sqrt S$ central limit theorem applies. The array above is genuinely triangular: the law of $G_{n,s}$ changes with $n$ through $h_n$, and its variance diverges at rate $h_n^{-K/2}$. The correct normalisation is $\sqrt{R_n}$, which coincides with $\sqrt{S_n}$ only when $K=0$. Substituting a fixed-$M$ central limit theorem and then letting $M$ grow, as in Lemma 3 of \citet{BrandtSantaClara2002}, is exactly the step that fails; the limiting variance stated there is the variance of a summand that itself depends on $M$.
+\end{remark}
 
 \begin{corollary}[CLT centred at the diffusion density]\label{cor:diffusion_clt}
 Suppose in addition that
@@ -513,15 +628,41 @@ then
 \Longrightarrow
 \Normal(0,\tau^2(x,y)).
 \end{equation}
-In terms of $M$ and $S$, the second condition is
+In terms of $M$ and $S$, the second condition in \eqref{eq:bias_negligible} is
 \begin{equation}\label{eq:correct_bias_rate}
 \frac{\sqrt S}{M^{1+K/4}}\longrightarrow0.
 \end{equation}
-For $K=4$, a feasible regime is
+For $K=4$, the two conditions together define the feasible regime
 \begin{equation}\label{eq:k4_feasible}
 M^2\ll S\ll M^4.
 \end{equation}
 \end{corollary}
+
+\begin{proof}
+Decompose
+\[
+\sqrt{Sh^{K/2}}\left\{\widehat q_{M,S}-p\right\}
+=\sqrt{Sh^{K/2}}\left\{\widehat q_{M,S}-q_M\right\}
++\sqrt{Sh^{K/2}}\left\{q_M-p\right\}.
+\]
+The first term converges to $\Normal(0,\tau^2)$ by \Cref{thm:generic_clt}. By \eqref{eq:euler_bias_expansion} the second term equals
+\[
+\sqrt{Sh^{K/2}}\left\{b(x,y)h+o(h)\right\},
+\]
+which vanishes precisely under the second condition in \eqref{eq:bias_negligible}. Slutsky's theorem gives \eqref{eq:diffusion_clt}.
+
+For the restatement, $\sqrt{Sh^{K/2}}\,h=\sqrt S\,h^{K/4+1}=\sqrt S/M^{1+K/4}$, since $h=1/M$. This is \eqref{eq:correct_bias_rate}, and squaring gives the equivalent form $S/M^{2+K/2}\to0$.
+
+For $K=4$ the first condition in \eqref{eq:bias_negligible} reads $S/M^2\to\infty$ and the second reads $S/M^{4}\to0$, which is \eqref{eq:k4_feasible}. The regime is nonempty: $S=M^3$ satisfies both.
+\end{proof}
+
+\begin{remark}[Bias negligibility is not variance consistency]\label{rem:bias_vs_variance}
+The two conditions in \eqref{eq:bias_negligible} do different work and pull in opposite directions. The first, $Sh^{K/2}\to\infty$, makes the Monte Carlo error vanish and is what \Cref{thm:generic_clt} needs; it is a lower bound on $S$ relative to $M$. The second makes the Euler bias negligible \emph{relative to the Monte Carlo standard deviation}, and because that standard deviation shrinks as $S$ grows, it is an upper bound on $S$ relative to $M$. Conflating them is the source of the difficulty in \Cref{tab:rates}: the published condition $\sqrt S/M\to0$ has the form of the second requirement but is imposed at the wrong power, and it then contradicts the first when $K\ge4$.
+\end{remark}
+
+\begin{remark}[Dependency structure]\label{rem:dependencies}
+The density-level results depend on one another as follows. \Cref{ass:local} supports \Cref{thm:local_moments}, which is used only through its cases $r=2$ and $r=3$. The case $r=2$ gives the variance scale \Cref{cor:generic_variance}; the two cases together give the Lyapunov condition in \Cref{thm:generic_clt}. \Cref{cor:diffusion_clt} adds the Euler bias expansion \eqref{eq:euler_bias_expansion}, which is an assumption imported from \citet{BallyTalay1995,BallyTalay1996} rather than proved here, and combines it with \Cref{thm:generic_clt}. \Cref{prop:optimal_m} uses \Cref{cor:generic_variance} and \eqref{eq:euler_bias_expansion} but no central limit theorem. In the Brownian benchmark, \Cref{prop:brownian_moments} replaces \Cref{thm:local_moments} with an exact computation and the bias expansion is unnecessary because the bias is zero, so \Cref{thm:brownian_clt} rests on no imported result at all. \Cref{thm:collapse} is independent of every central limit theorem above; it uses only the exact Gaussian tail bound.
+\end{remark}
 
 \begin{remark}[The dimensional conflict]
 The condition $\sqrt S/M\to0$ suppresses an $O(M^{-1})$ Euler bias under an incorrectly fixed Monte Carlo scale. Once the variance inflation $M^{K/2}$ is included, the bias must be compared with the standard deviation $M^{K/4}/\sqrt S$, producing \eqref{eq:correct_bias_rate}. In four dimensions, the lower consistency requirement and the upper bias requirement leave the nonempty interval \eqref{eq:k4_feasible}. The published condition places $S$ below the lower boundary of that interval.
@@ -1129,21 +1270,6 @@ None of these points, individually or collectively, proves that the finite-sampl
 \appendix
 
 \section{Additional proof details}\label{app:proofs}
-
-\subsection{Tail control in the local moment theorem}
-
-For completeness, suppose that $V(z)$ is globally uniformly elliptic and bounded, $\mu$ is bounded, and $r_h(z\mid x)\le C$ uniformly. Let $U$ be a neighbourhood of $y$ and let $\delta=\inf_{z\notin U}\|z-y\|>0$. For sufficiently small $h$, bounded drift gives
-\[
-\|y-z-h\mu(z)\|\ge\delta/2
-\qquad(z\notin U).
-\]
-Uniform ellipticity then implies
-\[
-g_h(y\mid z)^r
-\le C_r h^{-rK/2}\exp(-c_r/h)
-\qquad(z\notin U).
-\]
-Multiplying by $h^{(r-1)K/2}$ and integrating against the probability density $r_h$ gives a tail bound of order $h^{-K/2}e^{-c_r/h}\to0$. This verifies the tail condition in \Cref{ass:local} under one convenient global set of assumptions.
 
 \subsection{The Brownian collapse for more general subcritical paths}
 
