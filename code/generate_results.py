@@ -379,28 +379,35 @@ def make_boundary_probability_figure() -> None:
     plt.close(fig)
 
 
-def make_boundary_maximum_table() -> None:
-    """Locate the state maximising the one-step Euler negativity probability.
+def worst_case_boundary(alpha: float, beta: float, h: float) -> tuple[float, float]:
+    """Return the exact maximiser and maximum of the negativity probability.
 
-    The probability vanishes both at H = 0, where the diffusion term vanishes
-    and the drift beta^2 h is strictly positive, and for large H, where the
-    mean dominates the standard deviation.  It therefore has an interior
-    maximum, and the position of that maximum is the natural summary of where
-    the boundary problem is worst for a given step size.
+    Proposition C.1: for alpha > 0, beta > 0 and h < 1/(2 alpha),
+
+        argmax = beta^2 h / (1 - 2 alpha h),
+        max    = Phi(-sqrt(1 - 2 alpha h)).
     """
-    grid = np.logspace(-12, 0.0, 200_000)
+    if alpha <= 0.0 or beta <= 0.0:
+        raise ValueError("alpha and beta must be positive")
+    if not 0.0 < h < 1.0 / (2.0 * alpha):
+        raise ValueError("h must lie in (0, 1/(2 alpha))")
+    a = 1.0 - 2.0 * alpha * h
+    return beta**2 * h / a, float(norm.cdf(-math.sqrt(a)))
+
+
+def make_boundary_maximum_table() -> None:
+    """Tabulate the exact worst case of the one-step Euler violation."""
     rows = []
     for label, (alpha, beta) in INCOMPLETENESS_PARAMETERS.items():
-        for h, step_label in APPLICATION_STEPS:
-            probability = euler_negative_probability(grid, alpha=alpha, beta=beta, h=h)
-            index = int(np.argmax(probability))
+        for h, _ in APPLICATION_STEPS:
+            argmax, maximum = worst_case_boundary(alpha, beta, h)
             rows.append(
                 {
                     "system": label,
                     "h": h,
-                    "argmax_state": float(grid[index]),
-                    "argmax_epsilon": float(math.sqrt(grid[index])),
-                    "max_probability": float(probability[index]),
+                    "argmax_state": argmax,
+                    "argmax_epsilon": math.sqrt(argmax),
+                    "max_probability": maximum,
                 }
             )
     frame = pd.DataFrame(rows)
@@ -408,9 +415,74 @@ def make_boundary_maximum_table() -> None:
     (TABLES / "boundary_maximum.tex").write_text(
         frame.to_latex(
             index=False,
-            float_format=lambda value: f"{value:.4g}",
+            float_format=lambda value: f"{value:.6g}",
             escape=False,
             column_format="lrrrr",
+        ),
+        encoding="utf-8",
+    )
+
+
+# Table 3 estimates for the two square-root interest-rate processes in each
+# system: (label, kappa, theta, sigma).
+CIR_RATES = (
+    ("U.S. (vs. U.K.)", 0.284, 0.053, 0.028),
+    ("U.K.", 0.486, 0.074, 0.056),
+    ("U.S. (vs. Germany)", 0.305, 0.058, 0.027),
+    ("Germany", 0.088, 0.064, 0.042),
+)
+
+
+def cir_negativity(kappa: float, theta: float, sigma: float, state: float, h: float) -> dict:
+    """Return the one-step Euler negativity diagnostics for a CIR state.
+
+    Gaussian increments have full support, so this probability is strictly
+    positive from every state.  It is reported as a z-score and a base-ten
+    logarithm because direct evaluation of the tail underflows to zero in
+    double precision well before it becomes zero in fact.
+    """
+    if state <= 0.0:
+        raise ValueError("the state must be strictly positive")
+    mean = state + kappa * (theta - state) * h
+    sd = sigma * math.sqrt(state * h)
+    z = mean / sd
+    return {
+        "z_score": z,
+        "log10_probability": float(norm.logcdf(-z) / math.log(10.0)),
+        "probability": float(norm.cdf(-z)),
+        "underflows": bool(norm.cdf(-z) == 0.0),
+    }
+
+
+def make_cir_negativity_table() -> None:
+    """Quantify the interest-rate boundary probabilities at h = 1/520."""
+    h = 1.0 / 520.0
+    rows = []
+    for label, kappa, theta, sigma in CIR_RATES:
+        for state_label, state in (
+            ("long-run mean", theta),
+            ("half the mean", 0.5 * theta),
+            ("1 per cent", 0.01),
+            ("0.1 per cent", 0.001),
+        ):
+            diagnostics = cir_negativity(kappa, theta, sigma, state, h)
+            rows.append(
+                {
+                    "process": label,
+                    "state_label": state_label,
+                    "state": state,
+                    "feller_ratio": 2.0 * kappa * theta / sigma**2,
+                    **diagnostics,
+                }
+            )
+    frame = pd.DataFrame(rows)
+    frame.to_csv(TABLES / "cir_negativity.csv", index=False)
+    (TABLES / "cir_negativity.tex").write_text(
+        frame.to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.4g}",
+            escape=False,
+            column_format="llrrrrrc",
         ),
         encoding="utf-8",
     )
@@ -605,6 +677,62 @@ def make_rate_table() -> None:
     frame.to_csv(TABLES / "rate_conditions.csv", index=False)
 
 
+def make_literature_comparison_table() -> None:
+    """Write the claim-by-claim comparison with Detemple, Garcia and Rindisbacher.
+
+    The content is a fixed audit result rather than a computation, but it is
+    generated here so that the committed CSV and LaTeX cannot drift from one
+    another and so that `make verify` covers them.  See
+    docs/detemple_overlap_audit.md for the supporting quotations.
+    """
+    rows = [
+        ("Endpoint density is a Gaussian kernel with bandwidth sqrt(h)",
+         "Transition-density estimator interpreted as a kernel estimator on simulated iid data",
+         "p.32, citing Milstein-Schoenmakers-Spokoiny", "identical",
+         "no longer called the central observation; attributed"),
+        ("Optimal M ~ S^{2/(K+4)}, MSE ~ S^{-4/(K+4)}",
+         "Score rate M^{-2/(d+4)}, dimension dependent",
+         "p.32; footnote 28 p.30", "same rate family, different object",
+         "exponent attributed; contribution restricted to exact constants"),
+        ("Bias-variance trade-off gives an optimal allocation",
+         "sqrt(L)/M^{2/(d+4)} -> e1 and M^{2/(d+4)}/N -> e2",
+         "p.32", "prior work", "listed as prior work"),
+        ("The published rate condition is inadequate",
+         "These authors assume e2=0; this assumption is not sufficient",
+         "p.32, naming Pedersen and Brandt-Santa-Clara", "prior work",
+         "attributed; claim narrowed to the counterexample"),
+        ("Joint limits in data, discretisation and simulation",
+         "Joint limits in L, M, N throughout", "sections 3 and 5.2", "prior work",
+         "listed as prior work"),
+        ("Effective simulation size is S/M^{K/2}", "not stated", "-",
+         "conceptually related only", "retained, with the kernel view attributed"),
+        ("Exact finite-M Brownian moments of all orders", "not present", "-",
+         "no overlap", "retained as new"),
+        ("Exact local moment constant c_{r,K}", "not present", "-", "no overlap",
+         "retained as new"),
+        ("Collapse in probability along M=S", "not present; their negative result is exploding second-order bias",
+         "-", "no overlap", "retained as new"),
+        ("Direct refutation of Lemmas 2 and 3", "not present", "-", "no overlap",
+         "retained as new"),
+        ("Exact four-dimensional incompatibility",
+         "weaker statement that the condition is not sufficient", "p.32",
+         "stronger in the manuscript", "retained, weaker prior claim attributed"),
+        ("Analysis of the exchange-rate application", "not present", "-", "no overlap",
+         "retained as new"),
+    ]
+    frame = pd.DataFrame(
+        rows,
+        columns=["manuscript_claim", "detemple_counterpart", "location", "overlap", "correction"],
+    )
+    frame.to_csv(TABLES / "literature_comparison.csv", index=False)
+    (TABLES / "literature_comparison.tex").write_text(
+        frame[["manuscript_claim", "detemple_counterpart", "location", "overlap"]].to_latex(
+            index=False, escape=True, column_format="p{3.2cm}p{3.2cm}p{2.0cm}p{2.2cm}"
+        ),
+        encoding="utf-8",
+    )
+
+
 def make_correlation_tables() -> None:
     """Write the four-dimensional Brownian correlation audit.
 
@@ -629,6 +757,9 @@ def make_correlation_tables() -> None:
 
     perturbation = ccm.run_perturbation_audit(draws=5_000)
     perturbation.to_csv(TABLES / "correlation_perturbation.csv", index=False)
+
+    search = ccm.search_for_infeasible_psd_violation()
+    search.to_csv(TABLES / "correlation_feasible_search.csv", index=False)
 
 
 def main(output_root: Path | None = None) -> None:
@@ -657,7 +788,9 @@ def main(output_root: Path | None = None) -> None:
     make_design_table()
     make_rate_table()
     make_correlation_tables()
+    make_literature_comparison_table()
     make_boundary_maximum_table()
+    make_cir_negativity_table()
 
 
 if __name__ == "__main__":

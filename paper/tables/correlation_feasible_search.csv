@@ -1,0 +1,3 @@
+system,max_rate_multiple,worst_min_eigenvalue,rate_multiple,rate_star_multiple,epsilon_squared,volatility,violation_found
+U.S. vs. U.K.,100.0,0.012757046439665465,100.0,100.0,0.0,0.3346459646288986,False
+U.S. vs. Germany,100.0,0.012981511098179972,100.0,100.0,0.0,0.30039948462813165,False

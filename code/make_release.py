@@ -89,6 +89,32 @@ def check_no_draft_labels() -> list[str]:
     return ["\\draftmode is still defined, so the draft label will be printed"] if active else []
 
 
+# Front-matter fields that must carry real values before a release.
+METADATA_COMMANDS = ("authorname", "affiliation", "email", "orcid")
+PLACEHOLDER_MARKER = "to be supplied"
+
+
+def check_metadata_resolved() -> list[str]:
+    """Return a problem for every front-matter field still holding a placeholder.
+
+    A release build must not go out carrying "[affiliation to be supplied]".
+    This is deliberately build-blocking: the fields are the author's to fill in,
+    and inventing them would be worse than failing.
+    """
+    source = (PAPER / "main.tex").read_text(encoding="utf-8")
+    problems = []
+    for field in METADATA_COMMANDS:
+        for line in source.splitlines():
+            stripped = line.strip()
+            if stripped.startswith(f"\\newcommand{{\\{field}}}"):
+                if PLACEHOLDER_MARKER in stripped:
+                    problems.append(f"front-matter field \\{field} is still a placeholder")
+                break
+        else:
+            problems.append(f"front-matter field \\{field} is not defined")
+    return problems
+
+
 def write_zip(target: Path, members: list[Path]) -> None:
     """Write a zip archive containing ``members``, stored by repo-relative path."""
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -120,7 +146,7 @@ def main() -> int:
     parser.add_argument(
         "--allow-draft",
         action="store_true",
-        help="permit a build that still carries the draft label",
+        help="permit a build that still carries the draft label or placeholder metadata",
     )
     args = parser.parse_args()
 
@@ -129,6 +155,7 @@ def main() -> int:
     problems = check_log_is_clean()
     if not args.allow_draft:
         problems += check_no_draft_labels()
+        problems += check_metadata_resolved()
     if problems:
         for problem in problems:
             print(f"  blocking: {problem}")

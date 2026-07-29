@@ -1,0 +1,13 @@
+manuscript_claim,detemple_counterpart,location,overlap,correction
+Endpoint density is a Gaussian kernel with bandwidth sqrt(h),Transition-density estimator interpreted as a kernel estimator on simulated iid data,"p.32, citing Milstein-Schoenmakers-Spokoiny",identical,no longer called the central observation; attributed
+"Optimal M ~ S^{2/(K+4)}, MSE ~ S^{-4/(K+4)}","Score rate M^{-2/(d+4)}, dimension dependent",p.32; footnote 28 p.30,"same rate family, different object",exponent attributed; contribution restricted to exact constants
+Bias-variance trade-off gives an optimal allocation,sqrt(L)/M^{2/(d+4)} -> e1 and M^{2/(d+4)}/N -> e2,p.32,prior work,listed as prior work
+The published rate condition is inadequate,These authors assume e2=0; this assumption is not sufficient,"p.32, naming Pedersen and Brandt-Santa-Clara",prior work,attributed; claim narrowed to the counterexample
+"Joint limits in data, discretisation and simulation","Joint limits in L, M, N throughout",sections 3 and 5.2,prior work,listed as prior work
+Effective simulation size is S/M^{K/2},not stated,-,conceptually related only,"retained, with the kernel view attributed"
+Exact finite-M Brownian moments of all orders,not present,-,no overlap,retained as new
+"Exact local moment constant c_{r,K}",not present,-,no overlap,retained as new
+Collapse in probability along M=S,not present; their negative result is exploding second-order bias,-,no overlap,retained as new
+Direct refutation of Lemmas 2 and 3,not present,-,no overlap,retained as new
+Exact four-dimensional incompatibility,weaker statement that the condition is not sufficient,p.32,stronger in the manuscript,"retained, weaker prior claim attributed"
+Analysis of the exchange-rate application,not present,-,no overlap,retained as new

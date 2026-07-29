@@ -55,6 +55,11 @@ class SystemParameters:
         Long-run interest-rate means, used as the reference state.
     mean_volatility:
         Sample mean of the observed exchange-rate volatility.
+    currency_quadratic:
+        The constant currency-risk quadratic form
+        ``C = psi^2 + psi*^2 - 2 rho_zz* psi psi*`` under constant risk prices.
+        Table 3 reports ``psi^2 - rho_zz* psi psi*`` and
+        ``psi*^2 - rho_zz* psi psi*`` separately, and ``C`` is their sum.
     """
 
     name: str
@@ -67,6 +72,7 @@ class SystemParameters:
     theta: float
     theta_star: float
     mean_volatility: float
+    currency_quadratic: float
 
 
 # Table 3 of Brandt and Santa-Clara (2002); mean volatilities from their
@@ -82,6 +88,7 @@ US_UK = SystemParameters(
     theta=0.053,
     theta_star=0.074,
     mean_volatility=0.103,
+    currency_quadratic=0.024 + (-0.021),
 )
 
 US_DE = SystemParameters(
@@ -95,6 +102,7 @@ US_DE = SystemParameters(
     theta=0.058,
     theta_star=0.064,
     mean_volatility=0.107,
+    currency_quadratic=(-0.010) + 0.013,
 )
 
 
@@ -123,27 +131,58 @@ def implied_correlations(
     )
 
 
+def interest_rate_quadratic(
+    parameters: SystemParameters,
+    rate: float,
+    rate_star: float,
+) -> float:
+    """Return ``Q_t = phi_t^2 + phi*_t^2 - 2 rho_ww* phi_t phi*_t``."""
+    if rate < 0.0 or rate_star < 0.0:
+        raise ValueError("interest rates must be nonnegative")
+    phi_t = parameters.phi * math.sqrt(rate)
+    phi_star_t = parameters.phi_star * math.sqrt(rate_star)
+    return phi_t**2 + phi_star_t**2 - 2.0 * parameters.rho_ww_star * phi_t * phi_star_t
+
+
 def minimum_feasible_volatility(
     parameters: SystemParameters,
     rate: float,
     rate_star: float,
 ) -> float:
-    """Return the smallest volatility consistent with the variance identity.
+    """Return the smallest volatility the *complete* variance identity permits.
 
-    Equation (29) decomposes ``v_t^2`` into an interest-rate quadratic form, a
-    currency quadratic form and ``eps_t^2``.  The last two are nonnegative, so
+    Equation (29) is
 
-        v_t^2 >= phi_t^2 + phi*_t^2 - 2 rho_ww* phi_t phi*_t =: Q_t,
+        v_t^2 = Q_t + C_t + eps_t^2,
 
-    and states with ``v_t < sqrt(Q_t)`` are not reachable by the model.  This
-    matters for the audit: such states produce implied correlations outside
-    ``[-1, 1]``, but they are excluded by the model rather than evidence
-    against it.
+    with ``Q_t`` the interest-rate quadratic form, ``C_t`` the currency-risk
+    quadratic form and ``eps_t^2`` the incompleteness state.  Setting
+    ``eps_t^2 = 0`` gives the feasible minimum
+
+        v_min^2 = Q_t + C_t.
+
+    An earlier version of this audit used ``sqrt(Q_t)`` instead.  That is only
+    a necessary lower bound, attained solely when ``C_t = 0`` as well; at the
+    reported estimates ``C_t = 0.003 > 0``, so states at ``sqrt(Q_t)`` are not
+    reachable by the calibrated model.
     """
-    phi_t = parameters.phi * math.sqrt(rate)
-    phi_star_t = parameters.phi_star * math.sqrt(rate_star)
-    quadratic = phi_t**2 + phi_star_t**2 - 2.0 * parameters.rho_ww_star * phi_t * phi_star_t
-    return math.sqrt(max(quadratic, 0.0))
+    quadratic = interest_rate_quadratic(parameters, rate, rate_star)
+    return math.sqrt(max(quadratic + parameters.currency_quadratic, 0.0))
+
+
+def variance_identity_residual(
+    parameters: SystemParameters,
+    rate: float,
+    rate_star: float,
+    volatility: float,
+) -> float:
+    """Return the implied ``eps_t^2 = v_t^2 - Q_t - C_t``.
+
+    A negative value means the state violates the variance identity and is
+    outside the model, whatever else may be true of it.
+    """
+    quadratic = interest_rate_quadratic(parameters, rate, rate_star)
+    return volatility**2 - quadratic - parameters.currency_quadratic
 
 
 def induced_xy_correlation(
@@ -151,22 +190,22 @@ def induced_xy_correlation(
     rate: float,
     rate_star: float,
 ) -> float:
-    """Return the correlation of ``X`` with ``Y`` forced at the volatility floor.
+    """Return the correlation of ``X`` with ``Y`` forced when ``C_t = eps_t^2 = 0``.
 
-    At ``v_t = sqrt(Q_t)`` the currency quadratic form and ``eps_t^2`` both
-    vanish, so equation (28) reduces to ``v dX = phi_t dW - phi*_t dW*`` and
-    ``X`` is a deterministic combination of ``W`` and ``W*``.  Its correlation
-    with ``Y`` is then no longer free but equal to
+    In that degenerate configuration equation (28) reduces to
+    ``v dX = phi_t dW - phi*_t dW*``, so ``X`` is a deterministic combination
+    of ``W`` and ``W*`` and its correlation with ``Y`` is no longer free but
+    equal to ``(phi_t rho_wy - phi*_t rho_w*y) / v_t``.
 
-        (phi_t rho_wy - phi*_t rho_w*y) / v_t.
-
-    The model estimates ``rho_xy`` as a free parameter, so a mismatch between
-    the estimate and this induced value makes the 4x4 matrix indefinite even
-    though every entry lies in ``[-1, 1]``.
+    This is a conditional algebraic statement.  It is **not** reached by the
+    calibrated model: at the reported estimates ``C_t = 0.003 > 0``, so the
+    configuration requires a parameter vector the application does not report.
+    The function therefore takes ``sqrt(Q_t)`` as its reference volatility,
+    which is the degenerate value rather than the feasible minimum.
     """
-    floor = minimum_feasible_volatility(parameters, rate, rate_star)
+    floor = math.sqrt(max(interest_rate_quadratic(parameters, rate, rate_star), 0.0))
     if floor <= 0.0:
-        raise ValueError("the volatility floor is zero, so X is not determined")
+        raise ValueError("the interest-rate quadratic form is zero, so X is not determined")
     phi_t = parameters.phi * math.sqrt(rate)
     phi_star_t = parameters.phi_star * math.sqrt(rate_star)
     return (phi_t * parameters.rho_wy - phi_star_t * parameters.rho_w_star_y) / floor
@@ -289,47 +328,107 @@ def nearest_correlation(
 
 
 def _state_grid(parameters: SystemParameters) -> list[tuple[str, float, float, float]]:
-    """Return reference states at which to evaluate the matrix."""
+    """Return reference states at which to evaluate the matrix.
+
+    A nonpositive volatility is a request to use the feasible minimum implied
+    by the complete variance identity at those rates.
+    """
     theta, theta_star = parameters.theta, parameters.theta_star
     volatility = parameters.mean_volatility
     return [
-        ("long-run means", theta, theta_star, volatility),
-        ("rates doubled", 2.0 * theta, 2.0 * theta_star, volatility),
-        ("rates halved", 0.5 * theta, 0.5 * theta_star, volatility),
-        ("volatility halved", theta, theta_star, 0.5 * volatility),
-        ("volatility at 4 per cent", theta, theta_star, 0.04),
-        ("rates tripled, volatility 4 per cent", 3.0 * theta, 3.0 * theta_star, 0.04),
-        ("rates tripled, volatility at its floor", 3.0 * theta, 3.0 * theta_star, -1.0),
+        ("long-run means, mean volatility", theta, theta_star, volatility),
+        ("long-run means, v at feasible minimum", theta, theta_star, -1.0),
+        ("rates doubled, v at feasible minimum", 2.0 * theta, 2.0 * theta_star, -1.0),
+        ("rates tripled, v at feasible minimum", 3.0 * theta, 3.0 * theta_star, -1.0),
+        ("rates x10, v at feasible minimum", 10.0 * theta, 10.0 * theta_star, -1.0),
+        ("rates x100, v at feasible minimum", 100.0 * theta, 100.0 * theta_star, -1.0),
+        ("rates tripled, v at sqrt(Q) [INFEASIBLE]", 3.0 * theta, 3.0 * theta_star, -2.0),
     ]
 
 
 def run_state_audit() -> pd.DataFrame:
     """Evaluate the matrix across reference states for both systems.
 
-    A state with ``volatility <= 0`` in the grid is a request to use the
-    smallest volatility the variance identity permits at those rates.  States
-    below that floor are reported with ``feasible = False``: they produce
-    invalid matrices, but they are excluded by the model, so they are evidence
-    about the audit rather than about the model.
+    Every row reports the complete decomposition v^2 = Q + C + eps^2, so a
+    state can be judged feasible or not on the identity itself rather than on
+    the necessary-but-insufficient bound v^2 >= Q.
     """
     rows = []
     for parameters in (US_UK, US_DE):
         for label, rate, rate_star, volatility in _state_grid(parameters):
-            floor = minimum_feasible_volatility(parameters, rate, rate_star)
-            if volatility <= 0.0:
-                volatility = floor
+            quadratic = interest_rate_quadratic(parameters, rate, rate_star)
+            feasible_min = minimum_feasible_volatility(parameters, rate, rate_star)
+            if volatility == -1.0:
+                volatility = feasible_min
+            elif volatility == -2.0:
+                # The degenerate value sqrt(Q), which requires C = 0 and is
+                # therefore not reachable at the reported estimates.
+                volatility = math.sqrt(max(quadratic, 0.0))
+            residual = variance_identity_residual(parameters, rate, rate_star, volatility)
             matrix = build_matrix(parameters, rate, rate_star, volatility)
             diagnostics = audit(matrix)
             rows.append(
                 {
                     "system": parameters.name,
                     "state": label,
+                    "Q": quadratic,
+                    "C": parameters.currency_quadratic,
+                    "epsilon_squared": residual,
                     "volatility": volatility,
-                    "volatility_floor": floor,
-                    "feasible": bool(volatility >= floor - TOLERANCE),
+                    "feasible_min_volatility": feasible_min,
+                    "feasible": bool(residual >= -1e-12),
                     **diagnostics,
                 }
             )
+    return pd.DataFrame(rows)
+
+
+def search_for_infeasible_psd_violation(
+    max_rate_multiple: float = 100.0,
+    grid: int = 201,
+) -> pd.DataFrame:
+    """Search the feasible state space for a negative eigenvalue.
+
+    Sweeps both interest rates over multiples of their long-run means and the
+    incompleteness state over a range, always taking v from the complete
+    variance identity, and reports the worst minimum eigenvalue found.  A
+    positive result means no model-feasible counterexample exists in the range
+    searched; it is not a proof that none exists anywhere.
+    """
+    rows = []
+    multiples = np.linspace(0.0, max_rate_multiple, grid)
+    for parameters in (US_UK, US_DE):
+        worst = math.inf
+        worst_state = None
+        for domestic in multiples:
+            for foreign in multiples:
+                rate = domestic * parameters.theta
+                rate_star = foreign * parameters.theta_star
+                base = minimum_feasible_volatility(parameters, rate, rate_star)
+                if base <= 0.0:
+                    continue
+                for epsilon_squared in (0.0, 0.005, 0.02, 0.10):
+                    volatility = math.sqrt(base**2 + epsilon_squared)
+                    eigenvalue = float(
+                        np.linalg.eigvalsh(
+                            build_matrix(parameters, rate, rate_star, volatility)
+                        ).min()
+                    )
+                    if eigenvalue < worst:
+                        worst = eigenvalue
+                        worst_state = (domestic, foreign, epsilon_squared, volatility)
+        rows.append(
+            {
+                "system": parameters.name,
+                "max_rate_multiple": max_rate_multiple,
+                "worst_min_eigenvalue": worst,
+                "rate_multiple": worst_state[0],
+                "rate_star_multiple": worst_state[1],
+                "epsilon_squared": worst_state[2],
+                "volatility": worst_state[3],
+                "violation_found": bool(worst < 0.0),
+            }
+        )
     return pd.DataFrame(rows)
 
 
@@ -367,6 +466,7 @@ def run_perturbation_audit(
                 theta=parameters.theta,
                 theta_star=parameters.theta_star,
                 mean_volatility=parameters.mean_volatility,
+                currency_quadratic=parameters.currency_quadratic,
             )
             matrix = build_matrix(
                 perturbed,
@@ -402,17 +502,20 @@ def main() -> int:
 
     states = run_state_audit()
     perturbations = run_perturbation_audit(draws=args.draws)
+    search = search_for_infeasible_psd_violation()
 
     states.to_csv(args.output_root / "correlation_audit.csv", index=False)
     perturbations.to_csv(args.output_root / "correlation_perturbation.csv", index=False)
+    search.to_csv(args.output_root / "correlation_feasible_search.csv", index=False)
 
-    columns = ["system", "state", "max_abs_off_diagonal", "min_eigenvalue", "schur_complement"]
+    columns = ["system", "state", "Q", "C", "epsilon_squared", "volatility",
+               "feasible", "max_abs_off_diagonal", "min_eigenvalue"]
     (args.output_root / "correlation_audit.tex").write_text(
         states[columns].to_latex(
             index=False,
             float_format=lambda value: f"{value:.4f}",
             escape=False,
-            column_format="llrrr",
+            column_format="llrrrrcrr",
         ),
         encoding="utf-8",
     )
@@ -421,6 +524,8 @@ def main() -> int:
     print(states.to_string(index=False, float_format=lambda v: f"{v:.4f}"))
     print()
     print(perturbations.to_string(index=False, float_format=lambda v: f"{v:.6f}"))
+    print()
+    print(search.to_string(index=False, float_format=lambda v: f"{v:.6f}"))
     return 0
 
 

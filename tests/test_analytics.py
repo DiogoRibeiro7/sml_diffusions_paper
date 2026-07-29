@@ -361,17 +361,75 @@ def test_entrywise_validity_is_automatic_above_the_floor() -> None:
                 assert abs(right) <= 1.0 + 1e-12
 
 
-def test_induced_correlation_differs_from_the_estimate() -> None:
-    """Proposition E.2: at the floor rho_xy is forced, and differs from Table 3."""
+def test_degenerate_configuration_is_infeasible_at_the_estimates() -> None:
+    """The sqrt(Q) configuration requires C = 0, which the estimates contradict.
+
+    An earlier version of this audit treated sqrt(Q_t) as the volatility floor
+    and reported an indefinite matrix there.  The complete variance identity is
+    v^2 = Q + C + eps^2, so that state implies eps^2 = -C < 0.
+    """
+    for parameters in (ccm.US_UK, ccm.US_DE):
+        assert parameters.currency_quadratic > 0.0
+        rate, rate_star = 3.0 * parameters.theta, 3.0 * parameters.theta_star
+        degenerate = math.sqrt(ccm.interest_rate_quadratic(parameters, rate, rate_star))
+        residual = ccm.variance_identity_residual(parameters, rate, rate_star, degenerate)
+        assert residual == pytest.approx(-parameters.currency_quadratic, rel=1e-9)
+        assert residual < 0.0  # infeasible
+        # It is indeed indefinite there, which is why the distinction matters.
+        report = ccm.audit(ccm.build_matrix(parameters, rate, rate_star, degenerate))
+        assert report["entries_in_range"]
+        assert not report["positive_semidefinite"]
+
+
+def test_feasible_minimum_volatility_gives_a_valid_matrix() -> None:
+    """At the true feasible minimum the matrix is positive definite."""
+    for parameters in (ccm.US_UK, ccm.US_DE):
+        for multiple in (1.0, 2.0, 3.0, 10.0, 100.0):
+            rate = multiple * parameters.theta
+            rate_star = multiple * parameters.theta_star
+            floor = ccm.minimum_feasible_volatility(parameters, rate, rate_star)
+            residual = ccm.variance_identity_residual(parameters, rate, rate_star, floor)
+            assert residual == pytest.approx(0.0, abs=1e-12)
+            report = ccm.audit(ccm.build_matrix(parameters, rate, rate_star, floor))
+            assert report["entries_in_range"]
+            assert report["positive_definite"], (parameters.name, multiple)
+
+
+def test_no_feasible_psd_violation_in_the_searched_range() -> None:
+    """The systematic search finds no model-feasible indefinite matrix."""
+    results = ccm.search_for_infeasible_psd_violation(max_rate_multiple=100.0, grid=41)
+    assert not results["violation_found"].any()
+    assert (results["worst_min_eigenvalue"] > 0.0).all()
+
+
+def test_induced_correlation_is_a_conditional_statement() -> None:
+    """Proposition E.2 binds only in the degenerate configuration.
+
+    The induced value differs materially from the reported estimate, which is
+    why the specification would need to impose it; but the configuration is not
+    reached at the reported parameters, so this is conditional algebra and not
+    a defect in the estimates.
+    """
     for parameters in (ccm.US_UK, ccm.US_DE):
         rate, rate_star = 3.0 * parameters.theta, 3.0 * parameters.theta_star
         induced = ccm.induced_xy_correlation(parameters, rate, rate_star)
         assert abs(induced - parameters.rho_xy) > 0.03
-        floor = ccm.minimum_feasible_volatility(parameters, rate, rate_star)
-        matrix = ccm.build_matrix(parameters, rate, rate_star, floor)
-        report = ccm.audit(matrix)
-        assert report["entries_in_range"]
-        assert not report["positive_semidefinite"]
+        # ... but the configuration it applies to is infeasible here.
+        degenerate = math.sqrt(ccm.interest_rate_quadratic(parameters, rate, rate_star))
+        assert ccm.variance_identity_residual(parameters, rate, rate_star, degenerate) < 0.0
+
+
+def test_setting_rho_xy_to_the_induced_value_restores_validity() -> None:
+    """Imposing the compatibility condition makes the degenerate matrix valid."""
+    for parameters in (ccm.US_UK, ccm.US_DE):
+        rate, rate_star = 3.0 * parameters.theta, 3.0 * parameters.theta_star
+        induced = ccm.induced_xy_correlation(parameters, rate, rate_star)
+        repaired = ccm.SystemParameters(
+            **{**parameters.__dict__, "rho_xy": induced}
+        )
+        degenerate = math.sqrt(ccm.interest_rate_quadratic(parameters, rate, rate_star))
+        report = ccm.audit(ccm.build_matrix(repaired, rate, rate_star, degenerate))
+        assert report["min_eigenvalue"] > -1e-9
 
 
 def test_nearest_correlation_is_not_applied_silently() -> None:
@@ -517,3 +575,95 @@ def test_nearest_atom_sandwich_bound() -> None:
             + n_obs * h * dimension * math.log(2.0 * math.pi * h)
         )
         assert lower - 1e-9 <= quantity <= 1e-9
+
+
+# ---------------------------------------------------------------------------
+# 11. Second-round corrections
+# ---------------------------------------------------------------------------
+
+
+def test_exact_worst_case_matches_numerical_optimiser_and_simulation() -> None:
+    """Proposition C.1: closed form against a grid search and Monte Carlo."""
+    rng = np.random.default_rng(17)
+    for alpha, beta in ((0.320, 0.088), (0.338, 0.101), (1.5, 0.4)):
+        for h in (1.0 / 520.0, 1.0 / 1040.0, 0.02):
+            argmax, maximum = gr.worst_case_boundary(alpha, beta, h)
+            # closed form against a fine grid
+            grid = np.logspace(math.log10(argmax) - 3, math.log10(argmax) + 3, 200_000)
+            values = gr.euler_negative_probability(grid, alpha=alpha, beta=beta, h=h)
+            assert values.max() == pytest.approx(maximum, rel=1e-6)
+            assert grid[int(np.argmax(values))] == pytest.approx(argmax, rel=1e-3)
+            # closed form against direct simulation at the maximiser
+            draws = 200_000
+            step = (
+                argmax
+                + (beta**2 - 2.0 * alpha * argmax) * h
+                + 2.0 * beta * math.sqrt(argmax * h) * rng.normal(size=draws)
+            )
+            empirical = float(np.mean(step < 0.0))
+            se = math.sqrt(empirical * (1.0 - empirical) / draws)
+            assert abs(maximum - empirical) < 4.0 * se
+
+
+def test_worst_case_rejects_a_step_that_is_too_coarse() -> None:
+    """The closed form requires h < 1/(2 alpha)."""
+    with pytest.raises(ValueError):
+        gr.worst_case_boundary(alpha=1.0, beta=0.1, h=0.75)
+    with pytest.raises(ValueError):
+        gr.worst_case_boundary(alpha=-1.0, beta=0.1, h=0.01)
+
+
+def test_cir_negativity_is_positive_but_negligible() -> None:
+    """Gaussian tails are never exactly zero, however small."""
+    h = 1.0 / 520.0
+    for _, kappa, theta, sigma in gr.CIR_RATES:
+        at_mean = gr.cir_negativity(kappa, theta, sigma, theta, h)
+        assert at_mean["z_score"] > 100.0
+        assert at_mean["log10_probability"] < -2000.0
+        assert at_mean["underflows"]  # not representable, but not zero
+        low = gr.cir_negativity(kappa, theta, sigma, 0.001, h)
+        assert low["probability"] > 0.0
+        assert low["log10_probability"] > at_mean["log10_probability"]
+
+
+def test_antithetic_pair_is_identical_at_a_coincident_endpoint() -> None:
+    """Proposition 8.1: at y = x the antithetic partner equals its twin."""
+    rng = np.random.default_rng(23)
+    for dimension in (1, 4):
+        for m_steps in (10, 100):
+            h = 1.0 / m_steps
+            z = rng.normal(0.0, math.sqrt(1.0 - h), size=(50_000, dimension))
+            kernel = lambda w: (2.0 * math.pi * h) ** (-dimension / 2.0) * np.exp(
+                -(w**2).sum(1) / (2.0 * h)
+            )
+            assert np.allclose(kernel(z), kernel(-z), rtol=0.0, atol=0.0)
+
+
+def test_antithetic_correlation_is_not_minus_one_away_from_the_endpoint() -> None:
+    """Away from y = x the antithetic correlation is neither -1 nor always negative."""
+    rng = np.random.default_rng(29)
+    h, dimension = 0.1, 4
+    correlations = []
+    for distance in (0.5, 1.5):
+        target = np.zeros(dimension)
+        target[0] = distance
+        z = rng.normal(0.0, math.sqrt(1.0 - h), size=(400_000, dimension))
+        kernel = lambda w: np.exp(-((target - w) ** 2).sum(1) / (2.0 * h))
+        correlations.append(float(np.corrcoef(kernel(z), kernel(-z))[0, 1]))
+    assert all(c > -0.99 for c in correlations)
+    assert max(correlations) > -0.2  # not uniformly strongly negative
+
+
+def test_lemma3_divergence() -> None:
+    """Corollary 3.5: sqrt(S)(q_hat - p) diverges to -infinity along M = S."""
+    rng = np.random.default_rng(20260729)
+    truth = gr.true_brownian_density_at_origin(4)
+    medians = []
+    for m in (16, 64, 256):
+        estimates = gr.simulate_brownian_estimator(
+            dimension=4, m_steps=m, simulations=m, replications=4_000, rng=rng
+        )
+        medians.append(float(np.median(math.sqrt(m) * (estimates - truth))))
+    # The median of sqrt(S)(q_hat - p) should march towards -sqrt(S) p.
+    assert medians[0] > medians[1] > medians[2]
+    assert medians[-1] < -0.5 * math.sqrt(256) * truth
