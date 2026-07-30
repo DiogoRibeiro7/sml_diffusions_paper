@@ -1,0 +1,56 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+type: article
+title: "Dimensional Asymptotics of Euler-Based Simulated Likelihood for Multidimensional Diffusions"
+abstract: >-
+  A widely used simulation method for likelihood inference in discretely observed
+  diffusions approximates each transition density by simulating an Euler scheme to one
+  step before the observed endpoint and averaging the final Gaussian density. This work
+  shows that the endpoint estimator is a shrinking-bandwidth kernel estimator whose
+  effective simulation size is S/M^(K/2) rather than S, where K is the state dimension,
+  M the number of Euler substeps and S the number of simulations. It derives exact
+  Brownian moments, the general local moment law, the corrected density-level
+  normalisation, and the pointwise mean squared error, minimised at M ~ S^(2/(K+4)). It
+  then gives a direct counterexample to the joint transition-density statements of
+  Brandt and Santa-Clara (2002): along M = S, a sequence satisfying their own rate
+  condition and regularity assumptions, the simulated density converges in probability
+  to zero for every K > 2 although the true density is strictly positive. This refutes
+  the consistency asserted in their Lemma 2 and the central-limit statement of their
+  Lemma 3, so the proofs of their parameter-estimator theorems fail. Inconsistency of
+  the resulting argmax estimator is not proved, and what such a proof would require is
+  set out explicitly. Issues specific to the exchange-rate application are analysed in
+  appendices.
+authors:
+  - family-names: Ribeiro
+    given-names: Diogo
+    email: dfr@esmad.ipp.pt
+    affiliation: "ESMAD -- IPP"
+    orcid: "https://orcid.org/0009-0001-2022-7072"
+keywords:
+  - simulated maximum likelihood
+  - diffusion processes
+  - Euler scheme
+  - transition density
+  - Monte Carlo variance
+  - curse of dimensionality
+  - diffusion bridges
+  - nonregular inference
+license: CC-BY-4.0
+repository-code: "https://github.com/DiogoRibeiro7/sml_diffusions_paper"
+date-released: 2026-07-30
+references:
+  - type: article
+    scope: "The article analysed and corrected by this work."
+    title: "Simulated Likelihood Estimation of Diffusions with an Application to Exchange Rate Dynamics in Incomplete Markets"
+    authors:
+      - family-names: Brandt
+        given-names: "Michael W."
+      - family-names: Santa-Clara
+        given-names: Pedro
+    journal: "Journal of Financial Economics"
+    volume: 63
+    issue: 2
+    start: 161
+    end: 210
+    year: 2002
+    doi: "10.1016/S0304-405X(01)00093-9"

@@ -11,6 +11,7 @@ authors, editors, repositories or any external service.
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
 import subprocess
 import sys
@@ -28,6 +29,8 @@ SOURCE_MEMBERS = [
     "Makefile",
     "README.md",
     "requirements.txt",
+    "LICENSE",
+    "CITATION.cff",
 ]
 
 REPRODUCIBILITY_DIRS = ["code", "tests", "docs", "notes"]
@@ -94,6 +97,53 @@ METADATA_COMMANDS = ("authorname", "affiliation", "email", "orcid")
 PLACEHOLDER_MARKER = "to be supplied"
 
 
+def check_deposit_metadata() -> list[str]:
+    """Return a problem for every archiving file that is missing or unusable.
+
+    Depositing a record openly without a licence leaves it all-rights-reserved by
+    default, which contradicts the deposit; and Zenodo requires a licence selection.
+    ``CITATION.cff`` and ``.zenodo.json`` are parsed rather than merely counted, so a
+    malformed file blocks the release instead of surfacing at the deposit form.
+    """
+    problems: list[str] = []
+
+    if not (ROOT / "LICENSE").exists():
+        problems.append("LICENSE is absent; a deposit needs an explicit licence")
+
+    citation = ROOT / "CITATION.cff"
+    if not citation.exists():
+        problems.append("CITATION.cff is absent")
+    else:
+        try:
+            import yaml
+
+            loaded = yaml.safe_load(citation.read_text(encoding="utf-8"))
+        except ImportError:
+            loaded = None
+        except Exception as error:  # noqa: BLE001 - report any parse failure verbatim
+            problems.append(f"CITATION.cff does not parse: {error}")
+            loaded = None
+        if isinstance(loaded, dict):
+            for field in ("cff-version", "title", "authors", "license"):
+                if field not in loaded:
+                    problems.append(f"CITATION.cff lacks the {field!r} field")
+
+    zenodo = ROOT / ".zenodo.json"
+    if not zenodo.exists():
+        problems.append(".zenodo.json is absent")
+    else:
+        try:
+            metadata = json.loads(zenodo.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as error:
+            problems.append(f".zenodo.json does not parse: {error}")
+        else:
+            for field in ("title", "upload_type", "creators", "license"):
+                if field not in metadata:
+                    problems.append(f".zenodo.json lacks the {field!r} field")
+
+    return problems
+
+
 def check_metadata_resolved() -> list[str]:
     """Return a problem for every front-matter field still holding a placeholder.
 
@@ -153,6 +203,7 @@ def main() -> int:
     run_checks(args.skip_checks)
 
     problems = check_log_is_clean()
+    problems += check_deposit_metadata()
     if not args.allow_draft:
         problems += check_no_draft_labels()
         problems += check_metadata_resolved()
@@ -174,7 +225,13 @@ def main() -> int:
     repro_members: list[Path] = []
     for directory in REPRODUCIBILITY_DIRS:
         repro_members += collect(directory)
-    repro_members += [ROOT / "Makefile", ROOT / "requirements.txt", ROOT / "README.md"]
+    repro_members += [
+        ROOT / "Makefile",
+        ROOT / "requirements.txt",
+        ROOT / "README.md",
+        ROOT / "LICENSE",
+        ROOT / "CITATION.cff",
+    ]
     write_zip(DIST / "reproducibility.zip", [m for m in repro_members if m.exists()])
 
     for artefact in ("main.pdf", "source.zip", "reproducibility.zip"):

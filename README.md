@@ -103,3 +103,41 @@ release document is present. Artefacts land in `dist/`.
 The gate passes. Front-matter metadata is set in `paper/main.tex` and flows into both the title
 block and the PDF document properties. Pass `--allow-draft` to bypass the metadata and draft-label
 checks when assembling intermediate artefacts.
+
+## Archiving
+
+The record is deposited on Zenodo. `.zenodo.json` holds the deposit metadata: description,
+creators, keywords, and the related identifiers, which register this work as reviewing
+`10.1016/S0304-405X(01)00093-9` and citing the four asymptotic analyses it is positioned against.
+Because the repository is private, the deposit is made manually rather than through the
+GitHub–Zenodo integration, which requires a public repository; `.zenodo.json` therefore serves as
+the source for what is entered in the deposit form rather than being read automatically.
+
+Three files make up the deposit, all produced by `code/make_release.py`:
+
+| File | Contents |
+| --- | --- |
+| `dist/main.pdf` | the manuscript |
+| `dist/source.zip` | LaTeX and Python sources, figures, tables, tests, documents |
+| `dist/reproducibility.zip` | the code and manifest needed to regenerate every artefact |
+
+Zenodo mints a concept DOI that always resolves to the newest version, alongside a DOI for each
+individual version. Later revisions should be published as new versions of the same record rather
+than as separate deposits, so that the concept DOI continues to resolve correctly.
+
+## Licence
+
+Everything in this repository, the manuscript and the code alike, is released under the
+[Creative Commons Attribution 4.0 International Licence](https://creativecommons.org/licenses/by/4.0/).
+See `LICENSE` for the full text. You may share and adapt the material for any purpose, including
+commercially, provided you give appropriate credit.
+
+The article under review is not part of this repository and carries its own copyright. The local
+`reference/` directory is gitignored and is never committed or distributed.
+
+## Citation
+
+`CITATION.cff` carries the citation metadata in Citation File Format, which GitHub renders as a
+"Cite this repository" control and which converts to BibTeX, RIS and other formats with
+`cffconvert`. Once the Zenodo record exists, add its DOI to `CITATION.cff` as an `identifiers`
+entry and to this section.

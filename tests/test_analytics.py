@@ -733,3 +733,72 @@ def test_time_varying_audit_finds_no_psd_violation() -> None:
     frame = ccm.run_time_varying_audit(rate_multiples=8, fx_points=9)
     assert not frame["violation_found"].any()
     assert (frame["worst_min_eigenvalue"] > 0.0).all()
+
+
+# ---------------------------------------------------------------------------
+# Deposit metadata
+# ---------------------------------------------------------------------------
+
+
+def test_deposit_metadata_files_are_present_and_parse() -> None:
+    """LICENSE, CITATION.cff and .zenodo.json must all be usable at release time."""
+    import make_release as mr
+
+    assert mr.check_deposit_metadata() == []
+
+
+def test_deposit_gate_reports_every_missing_file() -> None:
+    """An empty tree must produce one problem per required file, not silence."""
+    import tempfile
+
+    import make_release as mr
+
+    original = mr.ROOT
+    try:
+        mr.ROOT = Path(tempfile.mkdtemp())
+        problems = mr.check_deposit_metadata()
+    finally:
+        mr.ROOT = original
+    assert len(problems) == 3
+    assert any("LICENSE" in problem for problem in problems)
+    assert any("CITATION.cff" in problem for problem in problems)
+    assert any(".zenodo.json" in problem for problem in problems)
+
+
+def test_citation_and_zenodo_agree_with_the_manuscript() -> None:
+    """The three records of title, author and licence must not drift apart."""
+    import json
+
+    yaml = pytest.importorskip("yaml")
+
+    citation = yaml.safe_load((ROOT / "CITATION.cff").read_text(encoding="utf-8"))
+    zenodo = json.loads((ROOT / ".zenodo.json").read_text(encoding="utf-8"))
+    manuscript = (ROOT / "paper" / "main.tex").read_text(encoding="utf-8")
+
+    assert citation["title"] == zenodo["title"]
+    assert rf"\newcommand{{\papertitle}}{{{citation['title']}}}" in manuscript
+
+    assert citation["license"] == "CC-BY-4.0"
+    assert zenodo["license"] == "cc-by-4.0"
+
+    orcid = "0009-0001-2022-7072"
+    assert citation["authors"][0]["orcid"].endswith(orcid)
+    assert zenodo["creators"][0]["orcid"] == orcid
+    assert orcid in manuscript
+
+
+def test_zenodo_registers_the_reviewed_article() -> None:
+    """The deposit must point at the article it corrects, by DOI."""
+    import json
+
+    zenodo = json.loads((ROOT / ".zenodo.json").read_text(encoding="utf-8"))
+    reviewed = [
+        entry
+        for entry in zenodo["related_identifiers"]
+        if entry["relation"] == "reviews"
+    ]
+    assert len(reviewed) == 1
+    assert reviewed[0]["identifier"] == "10.1016/S0304-405X(01)00093-9"
+    assert reviewed[0]["identifier"] in (ROOT / "paper" / "references.bib").read_text(
+        encoding="utf-8"
+    )
