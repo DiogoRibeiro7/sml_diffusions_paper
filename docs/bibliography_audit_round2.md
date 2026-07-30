@@ -10,16 +10,25 @@ recorded here; entries verified in round one and unchanged since are not repeate
 | Authors | Jerome Detemple, René Garcia, Marcel Rindisbacher | title page of CIRANO working paper 2003s-11 |
 | Title | Asymptotic properties of Monte Carlo estimators of diffusion processes | publisher record and RePEc |
 | Journal, volume, issue, pages, year | Journal of Econometrics, 134(1), 1–68, September 2006 | RePEc listing and Elsevier author page, two independent sources |
-| DOI | `10.1016/j.jeconom.2005.06.019` | **not resolved** — see below |
+| DOI | `10.1016/j.jeconom.2005.06.028` | Crossref registry, title and authors matched |
 
 **Accent.** Rendered `Garcia, Ren{\'e}` in the `.bib`, which typesets as "René Garcia". Confirmed
 in the compiled bibliography.
 
-**DOI caveat.** The ScienceDirect landing page returns HTTP 403 to automated requests, so the DOI
-could not be confirmed by resolution. Volume, issue, page range and year are confirmed from two
-independent sources. The DOI is retained because it follows Elsevier's registered pattern for this
-volume and matches the article's PII, but it is recorded here as unresolved rather than verified,
-and a human should click it once before circulation.
+**DOI corrected.** The first round recorded `10.1016/j.jeconom.2005.06.019`, inferred from the
+volume rather than verified, and flagged it as unresolved. It was wrong. That DOI belongs to
+Escanciano and Velasco, "Generalized spectral tests for the martingale difference hypothesis",
+*Journal of Econometrics* 134(1), 151-185 - the same volume, a different paper. The correct DOI is
+`10.1016/j.jeconom.2005.06.028`, obtained from Crossref, which returns the exact title, all three
+authors, volume 134, issue 1 and pages 1-68.
+
+Because one guessed DOI turned out to be wrong, every DOI in the bibliography was then checked
+individually against Crossref by comparing the registered title with the title in the `.bib`. The
+script is `doicheck` in the scratch directory; the result is 24 of 24 matching, no mismatches. Four
+entries carry no DOI: Hall and Heyde (1980), a 1980 monograph for which Crossref registers only
+chapter-level identifiers; Pedersen (1995a) and Miasojedow et al. (2016), whose journals appear not
+to register them; and formerly Stramer and Yan (2007b), whose DOI was located in the course of this
+check and added.
 
 **Full text.** Read in the openly available CIRANO working-paper version 2003s-11 (67 pages,
 April 2003). All quotations in `docs/detemple_overlap_audit.md` are from that version with page
@@ -40,13 +49,26 @@ density to it, so it is the primary source for a claim the manuscript previously
 unattributed. Note the spelling: Detemple et al. cite it as "Milshtein ... (2001)", referring to
 the working-paper version; the published surname is Milstein and the year is 2004.
 
-## Stramer and Yan, 2007b
+## Stramer and Yan, both 2007 papers
 
-Searched for a DOI without success. The article is *Journal of Computational and Graphical
-Statistics* 16(3), 672–691 (2007); volume, issue, pages and year are confirmed, and the entry is
-retained without a DOI rather than carrying an invented one. It remains clearly distinguished from
-`StramerYan2007a`, the Methodology and Computing in Applied Probability paper, by key, title,
-journal and the description in Section 1.1.
+**2007b, DOI found and added.** `10.1198/106186007x237306`, located through a Crossref
+bibliographic query and verified by title, volume 16 and pages 672–691. The first round searched
+without success and left the entry without one.
+
+**2007a, record confirmed, full text still unread.** *Methodology and Computing in Applied
+Probability* 9(4), 483–496, DOI `10.1007/s11009-006-9006-2`, all confirmed against Crossref. No
+open version was located: Springer redirects automated requests to an authorisation endpoint, and
+Semantic Scholar reports the abstract as elided by the publisher. This remains the one reference in
+the bibliography whose full text has not been read.
+
+The residual risk is structurally small. The estimator analysed there is the modified Brownian
+bridge importance sampler, not the unconditioned endpoint estimator this manuscript studies, and
+Section 1.1 states that distinction. Nothing in the manuscript depends on the detail of its
+results; it is cited for the existence of a discretisation-versus-Monte-Carlo trade-off and an
+efficient allocation, both of which are also in Detemple et al., which has been read in full.
+
+The two papers remain clearly distinguished by key, title, journal, DOI and their descriptions in
+Section 1.1.
 
 ## Re-verified without change
 

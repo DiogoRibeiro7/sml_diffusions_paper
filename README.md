@@ -17,6 +17,7 @@ code/
   check_correlation_matrix.py  Brownian correlation-matrix audit
   argmax_counterexample.py     the argmax investigation
   verify_reproducibility.py    regeneration check used by `make verify`
+  verify_dois.py               checks every bibliography DOI against Crossref
   make_release.py              release artefacts under dist/
 tests/                  pytest suite for every analytical formula
 docs/

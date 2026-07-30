@@ -156,11 +156,15 @@ Stated in the manuscript, not only here.
 3. **The Euler bias expansion** is imported from Bally and Talay, not proved here.
 4. **Uniform integrability** in Proposition 6.1 is assumed.
 5. **Implementation safeguards** are unknown and labelled so.
-6. **Two references not read in full**: Stramer and Yan (2007a) and Milstein, Schoenmakers and
-   Spokoiny (2004), both paywalled. Nothing depends on their detail, and question 1 above records
-   the residual risk.
-7. **One DOI unresolved by fetching**: Detemple et al., because ScienceDirect refuses automated
-   requests. Volume, issue, pages and year confirmed from two sources.
+6. **One reference not read in full**: Stramer and Yan (2007a), paywalled, with no open version
+   located. Milstein, Schoenmakers and Spokoiny (2004) has since been read in full; see question 1.
+   The residual risk from Stramer and Yan is structurally smaller: the estimator they analyse is
+   the modified Brownian bridge sampler, not the unconditioned endpoint estimator, and the
+   manuscript states that distinction. Their bibliographic record is confirmed against Crossref.
+7. ~~One DOI unresolved.~~ **Resolved, and it was wrong.** The recorded Detemple DOI had been
+   guessed and belonged to a different article in the same volume. Every DOI in the bibliography is
+   now verified by title against the Crossref registry; 24 of 24 match and the four entries without
+   a DOI are books or journals that register none.
 8. ~~Author metadata unresolved.~~ **Resolved.** Affiliation, email and ORCID were supplied by
    the author and the release gate now passes.
 

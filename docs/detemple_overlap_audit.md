@@ -157,6 +157,57 @@ Each of these was searched for in the full text and is absent.
    constants, and an explicit admissible sequence along which the simulated density converges to
    the wrong value.
 
+## Milstein, Schoenmakers and Spokoiny: read in full
+
+The residual risk recorded in the first version of this audit is now resolved. The paper was read
+in full in the authors' institutional version (WIAS, 43 pages), which carries the same title,
+abstract and results as the *Bernoulli* article. The questions and answers:
+
+**(a) Does it derive exact finite-discretisation moments of a Gaussian endpoint kernel?**
+**No.** Its explicit analysis, Section 5, is one-dimensional and concerns the *forward–reverse*
+estimator, not the plain forward one. Sections 6 and 7, the general accuracy analysis, open by
+saying: "here and in Section 7 we will disregard the discretization bias caused by numerical
+integration of SDE's and will only concentrate on the loss due to the particular structure of the
+new estimators. We thus assume in sections 6,7 that all random variables involved are due to exact
+solutions of the respective SDE's." There are therefore no finite-discretisation moments of any
+order anywhere in the paper.
+
+**(b) Does it analyse the Pedersen-type endpoint estimator?**
+**No**, and not merely by omission — the estimator is different. Their equation (1.5) is
+
+    p̂(t,x,T,y) = N⁻¹ Σ_n φ_h(X̄_n − y),   φ_h(z) = (2πh²)^(−d/2) exp(−|z|²/(2h²)),
+
+where `X̄_n` are Euler realisations at the **terminal** time `T`. Two differences from Pedersen:
+the path is simulated all the way to `T` rather than stopping one step short, and the kernel is an
+imposed smoother of bandwidth `h`, hence variance `h²`, rather than the model's own one-step
+transition density of covariance `hV`, hence bandwidth `√h`.
+
+That second difference is decisive for the exponent. Their effective sample size is `N δ^d = N h^d`;
+the endpoint estimator's is `S h^{K/2}`. The `K/2` in this manuscript arises precisely because the
+Pedersen kernel inherits its width from the diffusion's own one-step law. The words "Pedersen",
+"Brandt", "Santa-Clara", "endpoint", "penultimate", "last step" and "final step" do not occur
+anywhere in the paper.
+
+**(c) Are there dimension-dependent rates?**
+**Yes, but they are the textbook ones and are attributed as such.** Their introduction states that
+"the optimal bandwidth δ is of order N^{−1/(4+d)} leading to the accuracy of order N^{−2/(4+d)}",
+citing Scott (1992) and Silverman (1986), and calls the phenomenon the curse of dimensionality.
+This is the classical Parzen–Rosenblatt rate for a *free* bandwidth, not a result about a bandwidth
+tied to the discretisation level. Their own contribution runs the other way: the forward–reverse
+estimator is "generally root-N consistent and thus avoids the curse of dimensionality problem".
+
+**(d) Exact moments of any order r?** **No.**
+
+**(e) What is the forward–reverse estimator?** A construction based on reverse diffusion equations,
+combining forward simulation from `x` with reverse simulation from `y` and matching them through a
+kernel in the middle, which attains root-`N` accuracy in any dimension.
+
+**Conclusion.** The kernel *interpretation* is genuinely theirs and the manuscript attributes it to
+them. Novelty claim (a) of Section 1.1, exact finite-`M` moments for the multidimensional endpoint
+summand, is unaffected: the paper contains no finite-discretisation moments, and its estimator has
+a different bandwidth scaling. Section 1.1 now states the distinction explicitly rather than
+leaving the two constructions to be conflated.
+
 ## Bibliographic verification
 
 | Field | Value | Source |
@@ -165,13 +216,16 @@ Each of these was searched for in the full text and is absent.
 | Title | Asymptotic properties of Monte Carlo estimators of diffusion processes | publisher record |
 | Journal | Journal of Econometrics | publisher record |
 | Volume, issue, pages, year | 134(1), 1–68, September 2006 | publisher record, RePEc |
-| DOI | `10.1016/j.jeconom.2005.06.019` | see caveat below |
+| DOI | `10.1016/j.jeconom.2005.06.028` | Crossref registry |
 
-**DOI caveat.** The ScienceDirect landing page returns HTTP 403 to automated fetches, so the DOI
-could not be resolved directly against the publisher. It is recorded here as unverified-by-
-resolution, although volume, issue, page range and year are confirmed from two independent
-sources. `René Garcia` is rendered with the correct accent in the bibliography as
-`Garcia, Ren{\'e}`.
+**DOI corrected.** The first version of this audit recorded `10.1016/j.jeconom.2005.06.019`,
+guessed from the volume, and flagged it as unresolved. It is wrong: that DOI belongs to Escanciano
+and Velasco, "Generalized spectral tests for the martingale difference hypothesis", in the same
+volume at pages 151-185. The correct DOI, `10.1016/j.jeconom.2005.06.028`, comes from the Crossref
+registry, which returns the exact title, all three authors, volume 134, issue 1 and pages 1-68.
+Every DOI in the bibliography has since been checked the same way; see
+`docs/bibliography_audit_round2.md`. The author name is rendered with the correct accent as
+`Garcia, Ren{'e}`.
 
 Added to the bibliography as a result of this audit:
 
