@@ -667,3 +667,69 @@ def test_lemma3_divergence() -> None:
     # The median of sqrt(S)(q_hat - p) should march towards -sqrt(S) p.
     assert medians[0] > medians[1] > medians[2]
     assert medians[-1] < -0.5 * math.sqrt(256) * truth
+
+
+def test_model_b_has_no_volatility_loading() -> None:
+    """Model B carries three coefficients per risk price, model C four."""
+    for system in ("U.S. vs. U.K.", "U.S. vs. Germany"):
+        coefficients, coefficients_star, _ = ccm.TIME_VARYING[(system, "B")]
+        assert len(coefficients) == 3 and len(coefficients_star) == 3
+        coefficients, coefficients_star, _ = ccm.TIME_VARYING[(system, "C")]
+        assert len(coefficients) == 4 and len(coefficients_star) == 4
+
+
+def test_model_b_branch_is_unique_and_satisfies_the_identity() -> None:
+    """With no volatility loading the identity is solved by a square root."""
+    for parameters in (ccm.US_UK, ccm.US_DE):
+        for log_fx in (-1.0, 0.0, 0.5):
+            for epsilon_squared in (0.0, 0.01):
+                branches = ccm.volatility_branches(
+                    parameters, "B", parameters.theta, parameters.theta_star,
+                    log_fx, epsilon_squared,
+                )
+                assert len(branches) == 1
+                assert branches[0] > 0.0
+
+
+def test_model_c_branches_are_never_exactly_one_when_kappa_exceeds_one() -> None:
+    """Proposition D.1(ii), checked across the swept state space."""
+    parameters = ccm.US_UK  # kappa_b ~ 1.998 > 1
+    counts = {0: 0, 2: 0}
+    for domestic in np.linspace(0.05, 5.0, 12):
+        for log_fx in np.linspace(-2.0, 2.0, 15):
+            for epsilon_squared in (0.0, 0.01):
+                n = len(
+                    ccm.volatility_branches(
+                        parameters, "C",
+                        domestic * parameters.theta, domestic * parameters.theta_star,
+                        log_fx, epsilon_squared,
+                    )
+                )
+                assert n in (0, 2), f"got {n} branches"
+                counts[n] += 1
+    assert counts[0] > 0 and counts[2] > 0  # both regimes occur
+
+
+def test_more_incompleteness_shrinks_the_model_c_branch_region() -> None:
+    """Larger eps^2 makes a positive branch harder to exist when kappa_b > 1."""
+    parameters = ccm.US_UK
+    previous = None
+    for epsilon_squared in (0.0, 0.002, 0.01, 0.05):
+        available = sum(
+            1
+            for log_fx in np.linspace(-2.0, 2.0, 41)
+            if ccm.volatility_branches(
+                parameters, "C", parameters.theta, parameters.theta_star,
+                log_fx, epsilon_squared,
+            )
+        )
+        if previous is not None:
+            assert available <= previous
+        previous = available
+
+
+def test_time_varying_audit_finds_no_psd_violation() -> None:
+    """No swept feasible state gives an indefinite matrix in any specification."""
+    frame = ccm.run_time_varying_audit(rate_multiples=8, fx_points=9)
+    assert not frame["violation_found"].any()
+    assert (frame["worst_min_eigenvalue"] > 0.0).all()

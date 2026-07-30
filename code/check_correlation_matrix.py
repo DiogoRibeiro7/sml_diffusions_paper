@@ -531,3 +531,156 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+# ---------------------------------------------------------------------------
+# Time-varying risk prices: models B and C of Table 4
+# ---------------------------------------------------------------------------
+
+# Table 4 loadings.  Model B has three coefficients per risk price and no
+# volatility loading; model C has four, the last being the loading on v_t.
+# Table 4 does not re-report the interest-rate risk prices or the free
+# correlations, so those are taken from Table 3 and that is an assumption.
+TIME_VARYING = {
+    ("U.S. vs. U.K.", "B"): ((0.062, 0.117, -0.263), (-0.101, 0.418, 0.135), 0.54),
+    ("U.S. vs. Germany", "B"): ((-0.140, 0.066, -0.197), (0.089, -0.003, 0.251), 0.36),
+    ("U.S. vs. U.K.", "C"): (
+        (-0.026, 0.019, 0.134, 1.514), (0.065, 0.002, -0.329, 2.581), 0.89
+    ),
+    ("U.S. vs. Germany", "C"): (
+        (-0.072, -0.073, 0.006, -0.142), (0.029, 0.028, 0.238, 0.127), 0.94
+    ),
+}
+
+
+def volatility_branches(
+    parameters: SystemParameters,
+    model: str,
+    rate: float,
+    rate_star: float,
+    log_fx: float,
+    epsilon_squared: float,
+) -> list[float]:
+    """Return the positive volatilities consistent with the variance identity.
+
+    Under model B the currency-risk quadratic form ``C_t`` depends only on the
+    interest-rate differential and the log exchange rate, so ``v`` follows by
+    taking a square root.  Under model C the risk prices load on ``v`` itself,
+    and the identity becomes the quadratic of Appendix D,
+
+        (1 - kappa_b) v^2 - 2 eta_t v - (Q_t + zeta^a_t + eps^2) = 0,
+
+    so ``v`` is determined by the remaining state rather than being a free
+    unknown.  There is therefore no circularity to obstruct the analysis: the
+    fixed point is solvable in closed form.  By Proposition D.1 the number of
+    positive roots is one when ``kappa_b < 1`` and zero or two when
+    ``kappa_b > 1``.
+    """
+    if model not in {"B", "C"}:
+        raise ValueError("model must be 'B' or 'C'")
+    if epsilon_squared < 0.0:
+        raise ValueError("epsilon_squared must be nonnegative")
+    coefficients, coefficients_star, rho = TIME_VARYING[(parameters.name, model)]
+    quadratic = interest_rate_quadratic(parameters, rate, rate_star)
+    differential = rate - rate_star
+
+    intercept = coefficients[0] + coefficients[1] * differential + coefficients[2] * log_fx
+    intercept_star = (
+        coefficients_star[0]
+        + coefficients_star[1] * differential
+        + coefficients_star[2] * log_fx
+    )
+
+    if model == "B":
+        currency = (
+            intercept**2 + intercept_star**2 - 2.0 * rho * intercept * intercept_star
+        )
+        total = quadratic + currency + epsilon_squared
+        return [math.sqrt(total)] if total > 0.0 else []
+
+    loading, loading_star = coefficients[3], coefficients_star[3]
+    kappa_b = loading**2 + loading_star**2 - 2.0 * rho * loading * loading_star
+    eta = (
+        intercept * loading
+        + intercept_star * loading_star
+        - rho * (intercept * loading_star + intercept_star * loading)
+    )
+    zeta_a = (
+        intercept**2 + intercept_star**2 - 2.0 * rho * intercept * intercept_star
+    )
+    a = 1.0 - kappa_b
+    b = -2.0 * eta
+    c = -(quadratic + zeta_a + epsilon_squared)
+    if abs(a) < 1e-15:
+        return [-c / b] if b != 0.0 and -c / b > 0.0 else []
+    discriminant = b * b - 4.0 * a * c
+    if discriminant < 0.0:
+        return []
+    root = math.sqrt(discriminant)
+    return sorted(v for v in ((-b + root) / (2.0 * a), (-b - root) / (2.0 * a)) if v > 1e-12)
+
+
+def run_time_varying_audit(
+    rate_multiples: int = 26,
+    fx_points: int = 21,
+    max_rate_multiple: float = 5.0,
+    fx_range: float = 2.0,
+) -> pd.DataFrame:
+    """Audit models B and C over a box of states, without the observed series.
+
+    The log exchange rate is swept rather than read from data, which makes the
+    conclusion a statement about the reachable state space rather than about
+    one realised path.  For each state the volatility is obtained from
+    ``volatility_branches``, so every evaluated matrix satisfies the complete
+    variance identity by construction.
+    """
+    rates = np.linspace(0.05, max_rate_multiple, rate_multiples)
+    fx_grid = np.linspace(-fx_range, fx_range, fx_points)
+    epsilons = (0.0, 0.002, 0.01, 0.05)
+    rows = []
+    for parameters in (US_UK, US_DE):
+        for model in ("B", "C"):
+            worst = math.inf
+            worst_state = None
+            states = evaluated = no_branch = two_branches = 0
+            for domestic in rates:
+                for foreign in rates:
+                    rate = domestic * parameters.theta
+                    rate_star = foreign * parameters.theta_star
+                    for log_fx in fx_grid:
+                        for epsilon_squared in epsilons:
+                            states += 1
+                            branches = volatility_branches(
+                                parameters, model, rate, rate_star, log_fx, epsilon_squared
+                            )
+                            if not branches:
+                                no_branch += 1
+                            elif len(branches) == 2:
+                                two_branches += 1
+                            for volatility in branches:
+                                evaluated += 1
+                                eigenvalue = float(
+                                    np.linalg.eigvalsh(
+                                        build_matrix(parameters, rate, rate_star, volatility)
+                                    ).min()
+                                )
+                                if eigenvalue < worst:
+                                    worst = eigenvalue
+                                    worst_state = (domestic, foreign, log_fx, epsilon_squared)
+            rows.append(
+                {
+                    "system": parameters.name,
+                    "model": model,
+                    "states": states,
+                    "matrices_evaluated": evaluated,
+                    "states_with_no_branch": no_branch,
+                    "states_with_two_branches": two_branches,
+                    "worst_min_eigenvalue": worst if evaluated else float("nan"),
+                    "violation_found": bool(evaluated and worst < 0.0),
+                    "rate_multiple": None if worst_state is None else worst_state[0],
+                    "rate_star_multiple": None if worst_state is None else worst_state[1],
+                    "log_fx": None if worst_state is None else worst_state[2],
+                    "epsilon_squared": None if worst_state is None else worst_state[3],
+                }
+            )
+    return pd.DataFrame(rows)

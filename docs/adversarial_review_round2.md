@@ -52,11 +52,15 @@ The systematic search sweeps rates to 100× their long-run means and `ε² ∈ {
 always taking `v` from the identity, and finds a worst minimum eigenvalue of `+0.0128`. Verified
 independently in `test_no_feasible_psd_violation_in_the_searched_range`.
 
-**Limitation, disclosed in the appendix.** `C` is read from Table 3, which is the constant-risk-price
-specification. For models B and C, `C_t` is state dependent and in model C depends on `v_t` itself,
-so feasibility cannot be evaluated without the observed state series. Appendix E says this and
-makes no claim about B and C. A referee could reasonably ask for the analysis to be completed with
-the data; it cannot be completed without them.
+**Extended to models B and C.** The earlier limitation, that feasibility for the time-varying
+specifications needed the observed state series, was overstated and has been removed. Model B
+carries no volatility loading, so `C_t` is explicit in the state; model C's apparent circularity is
+exactly the Appendix D quadratic, so `v` is determined by the rest of the state in closed form. The
+only unobserved input is the level of the log exchange rate, which is swept rather than read from
+data, giving a statement about the reachable state space rather than one realised path. Over
+56,784 states per specification, no indefinite matrix arises in any of the four. The one
+assumption is that the interest-rate risk prices and the three free correlations carry over from
+Table 3, which Table 4 does not re-report.
 
 ### 4. Does Proposition F.1 rely on unproved convexity?
 
@@ -150,9 +154,9 @@ Stated in the manuscript, not only here.
 1. **The argmax question.** No counterexample to consistency of the simulated-likelihood maximiser.
    The nearest-neighbour limit that would settle it is a conjecture requiring uniform-in-`θ`
    asymptotics for exchangeable atoms.
-2. **Models B and C feasibility.** `C_t` is state dependent there and, in model C, depends on `v_t`,
-   so Appendix E's feasibility analysis covers only the constant-risk-price specification. The
-   observed state series would be required.
+2. ~~Models B and C feasibility.~~ **Closed.** Now covered by a swept-state-space audit; see
+   question 3. A residual assumption remains: the interest-rate risk prices and free correlations
+   are taken from Table 3, since Table 4 does not re-report them.
 3. **The Euler bias expansion** is imported from Bally and Talay, not proved here.
 4. **Uniform integrability** in Proposition 6.1 is assumed.
 5. **Implementation safeguards** are unknown and labelled so.

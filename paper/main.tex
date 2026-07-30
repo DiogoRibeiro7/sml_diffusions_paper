@@ -1032,7 +1032,7 @@ None of what follows is an asymptotic theorem. These are calculations about one 
 \item \emph{The coefficients are outside the assumptions, but not equally so.} The interest rates follow square-root processes, which violate \ref{ass:V} at the origin. At the reported estimates this is a gap in proof coverage rather than a numerical hazard: the Feller ratios range from $6.4$ to $48.5$, so the origin is unattainable, and although the one-step Euler negativity probabilities are strictly positive they are of order $10^{-2667}$ or smaller at the long-run means. The incompleteness state is different. Its Feller ratio is exactly $1/2$ for every admissible parameter value, so no estimate can move it away from its boundary, and the worst-case one-step Euler negativity probability equals $\Phi(-\sqrt{1-2\alpha h})$ exactly, which tends to $\Phi(-1)\approx0.16$ as the step is refined rather than falling. See \Cref{app:sqrt}.
 \item \emph{The estimator does not simulate the state whose boundary is at issue.} The implementation eliminates the incompleteness state and simulates $(r,r^*,e,v)$, recovering $\epsilon_t$ from a square root of the variance identity. Every Euler substep therefore requires that radicand to stay nonnegative at a \emph{simulated} state, not merely at the observed data, and a violation makes the next substep's coefficients complex rather than merely inaccurate. See \Cref{app:reality}.
 \item \emph{The two state representations are not interchangeable.} Taking volatility as primitive, which is what the estimator does, the variance identity reconstructs incompleteness uniquely. Taking incompleteness as primitive, recovering positive volatility requires solving a quadratic, and at the reported U.S.--U.K. loadings the inverse map is not globally single-valued: the quadratic has either no positive root or two. A branch-selection condition would be needed to read the specification that way, and none is supplied. See \Cref{app:invert}.
-\item \emph{Correlation validity holds wherever we can check it; only the global guarantee is missing.} The reported matrices are positive definite at every model-feasible reference state examined, with minimum eigenvalues from $0.68$ down to $0.013$ at rates a hundred times their long-run means, and no violation arose in $5{,}000$ perturbation draws per system. We find no model-feasible state at which the matrix is indefinite. What remains is that the variance identity already forces every individual correlation into $[-1,1]$, so the entrywise constraint the paper imposes adds nothing, while the joint condition is nowhere enforced. See \Cref{app:psd}.
+\item \emph{Correlation validity holds wherever we can check it; only the global guarantee is missing.} The reported matrices are positive definite at every model-feasible reference state examined, with minimum eigenvalues from $0.68$ down to $0.013$ at rates a hundred times their long-run means, and no violation arose in $5{,}000$ perturbation draws per system. We find no model-feasible state at which the matrix is indefinite, in any of the three specifications, once the time-varying cases are evaluated by solving the variance identity for volatility rather than reading it from data. What remains is that the variance identity already forces every individual correlation into $[-1,1]$, so the entrywise constraint the paper imposes adds nothing, while the joint condition is nowhere enforced. A separate finding emerges from the same sweep: for the U.S.--U.K. model-C loadings, two thirds of the swept states admit no positive volatility at all, and none admits exactly one. See \Cref{app:psd}.
 \item \emph{Identification is by a corner rule, not by the likelihood.} The minimum-incompleteness criterion is affine in the selected parameter, so its optimum is a vertex of the feasible set. Which constraint is active depends on the full feasible set, including range and semidefiniteness restrictions. See \Cref{app:mincomp}.
 \item \emph{The final estimator is not the one the theorem describes.} It combines simulated likelihood, auxiliary least squares, a corner selection rule, and inequality constraints that the paper reports as binding. See \Cref{app:constrained}.
 \end{enumerate}
@@ -1552,7 +1552,41 @@ C_{\text{Germany}}=(-0.010)+0.013=0.003 .
 \]
 Both are strictly positive, so at the reported estimates the degenerate configuration is \emph{not} reachable: the feasible minimum volatility exceeds $\sqrt{Q_t}$ by a margin that does not vanish. At the long-run mean rates the feasible minimum is $0.0640$ for the U.S.--U.K. system against $\sqrt{Q_t}=0.0330$, and $0.0622$ against $0.0295$ for the U.S.--Germany system.
 
-For the time-varying specifications $C_t$ is state dependent, and in model C it depends on $v_t$ itself through \eqref{eq:risk_price_v}, which is the invertibility problem of \Cref{app:invert}. Evaluating feasibility there requires the observed state series, which we do not have. The analysis below is therefore carried out for the constant-risk-price specification, where $C$ is reported, and no claim is made about models B and C.
+For the time-varying specifications $C_t$ is state dependent, and in model C it depends on $v_t$ itself through \eqref{eq:risk_price_v}. That looks like an obstruction and is not one, for two reasons.
+
+First, model B carries no volatility loading: Table 4 reports three coefficients per risk price for that specification against four for model C, so under model B the quantity $C_t$ is an explicit function of the interest-rate differential and the log exchange rate, and $v_t$ follows from \eqref{eq:full_variance_identity} by taking a square root.
+
+Second, the apparent circularity in model C is exactly the quadratic of \Cref{app:invert}. Substituting \eqref{eq:risk_price_v} into $C_t$ and then into \eqref{eq:full_variance_identity} gives
+\begin{equation}\label{eq:model_c_fixed_point}
+(1-\kappa_b)v_t^2-2\eta_tv_t-\left(Q_t+\zeta^a_t+\epsilon_t^2\right)=0,
+\qquad
+\zeta^a_t=a_t^2+a_t^{*2}-2\rho a_ta_t^*,
+\end{equation}
+so $v_t$ is \emph{determined} by $(r_t,r_t^*,e_t,\epsilon_t^2)$ rather than being an independent unknown. The fixed point is solvable in closed form, and by \Cref{prop:vol_branch} it has one positive solution when $\kappa_b<1$ and either none or two when $\kappa_b>1$.
+
+What remains genuinely unobserved is only the level of the log exchange rate $e_t$. Rather than requiring its realised path we sweep it, which yields a statement about the reachable state space rather than about one realisation, and is therefore stronger than a check against the observed series would be. \Cref{tab:time_varying} reports the result over a grid of $56{,}784$ states per specification, spanning interest rates from $0.05$ to $5$ times their long-run means, $e_t\in[-2,2]$, and $\epsilon_t^2\in\{0,0.002,0.01,0.05\}$. Because Table 4 does not re-report the interest-rate risk prices or the three free correlations, those are taken from Table 3; that is an assumption, and it is the only one.
+
+Three of the four specifications are unproblematic. For model B in both systems and for model C in the U.S.--Germany system, every swept state admits exactly one positive volatility and the correlation matrix is positive definite at all of them, with worst minimum eigenvalues of $0.070$, $0.135$ and $0.088$ respectively.
+
+The U.S.--U.K. model C specification behaves differently, and the behaviour sharpens \Cref{prop:vol_branch} from a statement about branch counts into a statement about how much of the state space is covered at all. Of the $56{,}784$ states swept, $37{,}536$, or $66\%$, admit \emph{no positive volatility whatsoever}; the remaining $19{,}248$ admit exactly two. Not one state admits exactly one, which is \Cref{prop:vol_branch}(ii) confirmed as an empirical fact rather than a possibility. Where a branch does exist the correlation matrix is comfortably valid, with minimum eigenvalue at least $0.445$, so this is a well-posedness failure rather than a correlation failure. Moreover the region shrinks as incompleteness grows: at the long-run mean rates a branch exists only for $e_t\gtrsim0.3$ when $\epsilon_t^2=0$, and for no $e_t$ in the swept range once $\epsilon_t^2=0.05$. Read as a generative diffusion in the incompleteness state, that specification is therefore undefined on most of the state space it would need to traverse.
+
+\begin{table}[t]
+\centering
+\caption{Feasibility of the time-varying specifications over a swept state space, using the Table 4 loadings together with the Table 3 interest-rate risk prices and correlations. Volatility is obtained from \eqref{eq:full_variance_identity}, through \eqref{eq:model_c_fixed_point} under model C, so every matrix evaluated satisfies the variance identity by construction. No state with an indefinite matrix was found in any specification.}
+\label{tab:time_varying}
+\small
+\begin{tabular}{llrrrrr}
+\toprule
+System & Model & States & No branch & Two branches & Matrices & $\min\lambda_{\min}$ \\
+\midrule
+U.S. vs. U.K. & B & 56{,}784 & 0 & 0 & 56{,}784 & $+0.0699$ \\
+ & C & 56{,}784 & 37{,}536 & 19{,}248 & 38{,}496 & $+0.4455$ \\
+\midrule
+U.S. vs. Germany & B & 56{,}784 & 0 & 0 & 56{,}784 & $+0.1351$ \\
+ & C & 56{,}784 & 0 & 0 & 56{,}784 & $+0.0880$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Validity at reported reference states}\label{app:psd_reported}
 

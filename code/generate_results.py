@@ -755,6 +755,9 @@ def make_correlation_tables() -> None:
         encoding="utf-8",
     )
 
+    time_varying = ccm.run_time_varying_audit()
+    time_varying.to_csv(TABLES / "time_varying_feasibility.csv", index=False)
+
     perturbation = ccm.run_perturbation_audit(draws=5_000)
     perturbation.to_csv(TABLES / "correlation_perturbation.csv", index=False)
 
