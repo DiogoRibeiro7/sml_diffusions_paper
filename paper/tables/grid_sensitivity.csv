@@ -1,0 +1,7 @@
+design,rate_values,fx_values,fx_range,epsilon_levels,rate_spacing,candidate_points,no_positive_root,one_positive_root,two_positive_roots,repeated_roots,branch_matrices,worst_min_eigenvalue,indefinite_found
+baseline,26,21,2.0,4,linear,56784,37536,0,19248,0,38496,0.4454976625983267,False
+denser,41,33,2.0,4,linear,221892,148021,0,73871,0,147742,0.43798098706228344,False
+wider fx,26,21,4.0,4,linear,56784,32804,0,23980,0,47960,0.4454976625983267,False
+narrower fx,26,21,0.5,4,linear,56784,54542,0,2242,0,4484,0.405929382881663,False
+log rates,26,21,2.0,4,log,56784,37065,0,19719,0,39438,0.44595025630062973,False
+more eps,26,21,2.0,6,linear,85176,56416,0,28760,0,57520,0.4454976625983267,False

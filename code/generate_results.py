@@ -758,6 +758,34 @@ def make_correlation_tables() -> None:
     time_varying = ccm.run_time_varying_audit()
     time_varying.to_csv(TABLES / "time_varying_feasibility.csv", index=False)
 
+    sensitivity = ccm.run_grid_sensitivity()
+    sensitivity.to_csv(TABLES / "grid_sensitivity.csv", index=False)
+    display = pd.DataFrame(
+        {
+            "Design": sensitivity["design"],
+            "Rates": sensitivity["rate_values"],
+            "Spacing": sensitivity["rate_spacing"],
+            "$e$ values": sensitivity["fx_values"],
+            "$|e|\\le$": sensitivity["fx_range"],
+            "$\\epsilon^2$ levels": sensitivity["epsilon_levels"],
+            "Points": sensitivity["candidate_points"],
+            "No root": sensitivity["no_positive_root"],
+            "One": sensitivity["one_positive_root"],
+            "Two": sensitivity["two_positive_roots"],
+            "Matrices": sensitivity["branch_matrices"],
+            "$\\min\\lambda_{\\min}$": sensitivity["worst_min_eigenvalue"],
+        }
+    )
+    (TABLES / "grid_sensitivity.tex").write_text(
+        display.to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.4f}",
+            escape=False,
+            column_format="lrlrrrrrrrrr",
+        ),
+        encoding="utf-8",
+    )
+
     perturbation = ccm.run_perturbation_audit(draws=5_000)
     perturbation.to_csv(TABLES / "correlation_perturbation.csv", index=False)
 

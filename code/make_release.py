@@ -97,6 +97,21 @@ METADATA_COMMANDS = ("authorname", "affiliation", "email", "orcid")
 PLACEHOLDER_MARKER = "to be supplied"
 
 
+def check_forbidden_phrases() -> list[str]:
+    """Return a problem for each retracted phrase that has reappeared.
+
+    A release must not reintroduce wording that an earlier review round removed
+    as an overstatement.  The patterns live in ``code/check_forbidden_phrases``.
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import check_forbidden_phrases as checker
+
+    return [
+        f"forbidden phrase {text!r} at {relative}:{number} ({reason})"
+        for relative, number, text, reason in checker.scan()
+    ]
+
+
 def check_deposit_metadata() -> list[str]:
     """Return a problem for every archiving file that is missing or unusable.
 
@@ -204,6 +219,7 @@ def main() -> int:
 
     problems = check_log_is_clean()
     problems += check_deposit_metadata()
+    problems += check_forbidden_phrases()
     if not args.allow_draft:
         problems += check_no_draft_labels()
         problems += check_metadata_resolved()
@@ -240,9 +256,13 @@ def main() -> int:
     hand_written = (
         "change_log.md",
         "change_log_round2.md",
+        "change_log_final.md",
         "mathematical_claims_matrix.md",
         "literature_novelty_matrix.md",
         "application_feasibility_matrix.md",
+        "application_diagnostic_matrix.md",
+        "final_claim_dependency_audit.md",
+        "final_adversarial_review.md",
     )
     missing = [name for name in hand_written if not (DIST / name).exists()]
     for name in hand_written:

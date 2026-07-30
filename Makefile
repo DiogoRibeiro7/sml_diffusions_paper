@@ -28,7 +28,11 @@ verify:
 test:
 	python -m pytest tests -q
 
-check: test verify
+# Fail if wording retracted in an earlier review round has reappeared.
+phrases:
+	python code/check_forbidden_phrases.py
+
+check: test verify phrases
 
 # -c removes auxiliary files but keeps main.pdf, which is tracked.
 clean:
