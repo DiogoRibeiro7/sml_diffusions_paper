@@ -174,13 +174,25 @@ Stated in the manuscript, not only here.
 4. **Uniform integrability** in Proposition 6.1 is assumed.
 5. **Implementation safeguards** are unknown and labelled so.
 6. ~~References not read in full.~~ **Closed.** Every reference in the bibliography has now been
-   read in full. Stramer and Yan (2007a), the last outstanding one, was supplied by the author
-   after automated retrieval failed. Reading it added three items to the list of things Section 1.1
-   disclaims as prior work: that the endpoint estimator's importance-weight variance may be
-   unbounded in `M`, that a huge `N` may not rescue it, and that its error grows with `M` at fixed
-   `N`. No novelty claim required withdrawal; the collapse theorem remains a statement of a
-   different kind, exhibiting an admissible path to a wrong limit rather than asserting that the
-   estimator may be bad.
+   read in full. The two Stramer and Yan papers, the last outstanding ones, were supplied by the
+   author after automated retrieval failed.
+
+   Reading **2007a** added three items to the list of things Section 1.1 disclaims as prior work:
+   that the endpoint estimator's importance-weight variance may be unbounded in `M`, that a huge
+   `N` may not rescue it, and that its error grows with `M` at fixed `N`. No novelty claim required
+   withdrawal; the collapse theorem remains a statement of a different kind, exhibiting an
+   admissible path to a wrong limit rather than asserting that the estimator may be bad.
+
+   Reading **2007b** required no disclaimer but did expose two errors of this manuscript's own
+   making, both over-attributions to a paper that had been characterised from its abstract. It is
+   univariate throughout; its subject is the modified Brownian bridge against closed-form
+   expansions, not the endpoint estimator, which it mentions once in passing; and it fixes
+   `K = M²` throughout its experiments, reporting that increasing both "reduces the approximation
+   bias and variance" — the opposite of the error-grows-with-`M` finding it had been cited for.
+   Section 1.1 and the novelty matrix are corrected, and the paper now appears in Table 1 with its
+   actual scope. The episode is worth recording as a general point: characterising a reference from
+   its abstract produced errors that were *generous* to the reference and unfair to the present
+   contribution, not the reverse.
 
 7. ~~One DOI unresolved.~~ **Resolved, and it was wrong.** The recorded Detemple DOI had been
    guessed and belonged to a different article in the same volume. Every DOI in the bibliography is

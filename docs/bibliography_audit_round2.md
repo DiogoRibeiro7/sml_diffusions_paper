@@ -51,9 +51,33 @@ the working-paper version; the published surname is Milstein and the year is 200
 
 ## Stramer and Yan, both 2007 papers
 
-**2007b, DOI found and added.** `10.1198/106186007x237306`, located through a Crossref
-bibliographic query and verified by title, volume 16 and pages 672–691. The first round searched
-without success and left the entry without one.
+**2007b, DOI found and added, full text read.** `10.1198/106186007x237306`, located through a
+Crossref bibliographic query and verified by title, volume 16 and pages 672–691. The first round
+searched without success and left the entry without one. The published article, "On simulated
+likelihood of discretely observed diffusion processes and comparison to closed-form approximation",
+*Journal of Computational and Graphical Statistics* 16(3), was subsequently supplied by the author
+and read in full.
+
+Reading it required correcting two of this manuscript's own attributions, in the direction of
+narrowing rather than withdrawal:
+
+1. Section 1.1 described it as comparing "the endpoint estimator numerically with a closed-form
+   expansion". It does not. Its two methods are the *modified Brownian bridge* importance sampler
+   and the closed-form expansion; the endpoint (Pedersen) sampler appears once, at equation (9),
+   as one that "ignores the end point information". Corrected.
+2. `dist/literature_novelty_matrix.md` credited it, alongside 2007a, with the numerical observation
+   that the endpoint error grows with `M` at fixed simulation size. It does not make that
+   observation. It fixes `K = M²` throughout — citing 2007a for that allocation — and reports the
+   opposite behaviour for its own sampler, that "increasing M and K reduces the approximation bias
+   and variance". Both rows narrowed to 2007a alone.
+
+It is univariate throughout ("univariate diffusions" in the opening sentence), contains no
+finite-discretisation moments and no dimension-dependent result, so no novelty claim is affected.
+Its Proposition 1, that the modified Brownian bridge is exactly a Brownian bridge under constant
+volatility, is recorded in the novelty matrix as prior work not claimed here. One passage is now
+cited affirmatively at the head of Section 7, as contemporaneous evidence that the published
+theorems were treated as an established base: a rigorous proof for the bridge sampler "would extend
+the results of Pedersen (1995) and Brandt and Santa-Clara (2002b)".
 
 **2007a, record confirmed and full text read.** *Methodology and Computing in Applied
 Probability* 9(4), 483-496, DOI `10.1007/s11009-006-9006-2`, all confirmed against Crossref. The
