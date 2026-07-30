@@ -180,7 +180,20 @@ def main() -> int:
     for artefact in ("main.pdf", "source.zip", "reproducibility.zip"):
         size = (DIST / artefact).stat().st_size
         print(f"  wrote dist/{artefact} ({size:,} bytes)")
-    print("  dist/change_log.md and dist/mathematical_claims_matrix.md are maintained by hand")
+    hand_written = (
+        "change_log.md",
+        "change_log_round2.md",
+        "mathematical_claims_matrix.md",
+        "literature_novelty_matrix.md",
+        "application_feasibility_matrix.md",
+    )
+    missing = [name for name in hand_written if not (DIST / name).exists()]
+    for name in hand_written:
+        if name not in missing:
+            print(f"  present dist/{name}")
+    if missing:
+        print("  MISSING hand-written release documents: " + ", ".join(missing))
+        raise SystemExit("release refused: missing release documents")
     return 0
 
 

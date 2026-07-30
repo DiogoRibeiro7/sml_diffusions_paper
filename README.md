@@ -21,8 +21,12 @@ code/
 tests/                  pytest suite for every analytical formula
 docs/
   repository_audit.md              build and reproducibility baseline
-  bibliography_audit.md            every reference checked against primary sources
-  adversarial_mathematical_review.md  verification table and open items
+  bibliography_audit.md            references checked against primary sources
+  bibliography_audit_round2.md     second-round reference checks
+  detemple_overlap_audit.md        overlap with Detemple, Garcia and Rindisbacher
+  application_claims_dependency_matrix.md  what each application claim rests on
+  adversarial_mathematical_review.md  first-round verification table
+  adversarial_review_round2.md     second-round verification table
 notes/
   argmax_counterexample.md  the argmax investigation and its go/no-go conclusion
 reference/              literature under review; local only, never committed
@@ -84,3 +88,18 @@ and central-limit rates for the endpoint estimator, records that the implemented
 design does not satisfy the published rate conditions, and analyses the mathematical status of
 the four-dimensional exchange-rate application. It does not claim that the published
 finite-sample empirical estimates are necessarily incorrect.
+
+## Release
+
+```bash
+python code/make_release.py
+```
+
+Runs the test suite and the reproducibility check, verifies the LaTeX log is clean, and refuses to
+build unless the front-matter metadata is resolved and no draft label would be printed. Artefacts
+land in `dist/`.
+
+**The release gate currently blocks**, because the affiliation, email and ORCID commands in
+`paper/main.tex` still read "to be supplied". These are the author's to fill in; they were
+deliberately not invented. Pass `--allow-draft` to assemble candidate artefacts anyway for
+inspection.
