@@ -96,10 +96,9 @@ python code/make_release.py
 ```
 
 Runs the test suite and the reproducibility check, verifies the LaTeX log is clean, and refuses to
-build unless the front-matter metadata is resolved and no draft label would be printed. Artefacts
-land in `dist/`.
+build unless the front-matter metadata is resolved, no draft label would be printed, and every
+release document is present. Artefacts land in `dist/`.
 
-**The release gate currently blocks**, because the affiliation, email and ORCID commands in
-`paper/main.tex` still read "to be supplied". These are the author's to fill in; they were
-deliberately not invented. Pass `--allow-draft` to assemble candidate artefacts anyway for
-inspection.
+The gate passes. Front-matter metadata is set in `paper/main.tex` and flows into both the title
+block and the PDF document properties. Pass `--allow-draft` to bypass the metadata and draft-label
+checks when assembling intermediate artefacts.

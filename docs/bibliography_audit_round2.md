@@ -66,7 +66,19 @@ PDF metadata is now set through `hyperset` from the same commands that typeset t
 so the document properties cannot drift from the visible front matter: `pdftitle`, `pdfauthor`,
 `pdfsubject` and `pdfkeywords`.
 
-`code/make_release.py` gained a build-blocking check. A release build now fails if any of
+`code/make_release.py` gained a build-blocking check. A release build fails if any of
 `\authorname`, `\affiliation`, `\email` or `\orcid` still contains the marker "to be supplied", or
-if any of them is undefined. Affiliation, email and ORCID are currently placeholders and must be
-supplied by the author; they were deliberately not invented.
+if any of them is undefined.
+
+All four are now supplied by the author and the gate passes:
+
+| Field | Value |
+| --- | --- |
+| `\authorname` | Diogo Ribeiro |
+| `\affiliation` | ESMAD – IPP |
+| `\email` | `dfr@esmad.ipp.pt`, linked as `mailto:` |
+| `\orcid` | 0009-0001-2022-7072, linked to `https://orcid.org/0009-0001-2022-7072` |
+
+The ORCID iD passes the ISO 7064 MOD 11-2 checksum used for ORCID identifiers, which is a
+structural check only and not confirmation that the record belongs to the named author. The
+affiliation is recorded exactly as supplied, without expanding the acronym.

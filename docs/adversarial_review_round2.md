@@ -161,7 +161,8 @@ Stated in the manuscript, not only here.
    the residual risk.
 7. **One DOI unresolved by fetching**: Detemple et al., because ScienceDirect refuses automated
    requests. Volume, issue, pages and year confirmed from two sources.
-8. **Author metadata** is unresolved by design; the release gate blocks on it.
+8. ~~Author metadata unresolved.~~ **Resolved.** Affiliation, email and ORCID were supplied by
+   the author and the release gate now passes.
 
 ## Conclusion
 

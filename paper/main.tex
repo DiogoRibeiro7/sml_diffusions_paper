@@ -70,12 +70,14 @@
 \newcommand{\BS}{Brandt and Santa-Clara}
 
 % ---------------------------------------------------------------------------
-% Front-matter metadata.  Fill these in; do not leave placeholder text in a
-% release build.  \draftlabel is printed only when \draftmode is set below.
+% Front-matter metadata.  Do not leave placeholder text in a release build;
+% code/make_release.py blocks on it.  \draftlabel is printed only when
+% \draftmode is set below.
 \newcommand{\authorname}{Diogo Ribeiro}
-\newcommand{\affiliation}{\textsc{[affiliation to be supplied]}}
-\newcommand{\email}{\texttt{[email to be supplied]}}
-\newcommand{\orcid}{\textsc{[ORCID to be supplied]}}
+\newcommand{\affiliation}{ESMAD -- IPP}
+\newcommand{\email}{\href{mailto:dfr@esmad.ipp.pt}{\texttt{dfr@esmad.ipp.pt}}}
+\newcommand{\orcidid}{0009-0001-2022-7072}
+\newcommand{\orcid}{ORCID \href{https://orcid.org/\orcidid}{\texttt{\orcidid}}}
 
 % Uncomment the next line for a draft build; it must stay commented for a release.
 %\newcommand{\draftmode}{}
@@ -95,8 +97,8 @@
 % ---------------------------------------------------------------------------
 
 \title{\textbf{\papertitle}}
-\author{\authorname\\[0.2em]\small\affiliation\\[0.1em]\small\email\ \ \orcid\draftlabel}
-\date{29 July 2026}
+\author{\authorname\\[0.2em]\small\affiliation\\[0.1em]\small\email\quad\textperiodcentered\quad\orcid\draftlabel}
+\date{30 July 2026}
 
 \begin{document}
 \maketitle
