@@ -55,17 +55,21 @@ the working-paper version; the published surname is Milstein and the year is 200
 bibliographic query and verified by title, volume 16 and pages 672–691. The first round searched
 without success and left the entry without one.
 
-**2007a, record confirmed, full text still unread.** *Methodology and Computing in Applied
-Probability* 9(4), 483–496, DOI `10.1007/s11009-006-9006-2`, all confirmed against Crossref. No
-open version was located: Springer redirects automated requests to an authorisation endpoint, and
-Semantic Scholar reports the abstract as elided by the publisher. This remains the one reference in
-the bibliography whose full text has not been read.
+**2007a, record confirmed and full text read.** *Methodology and Computing in Applied
+Probability* 9(4), 483-496, DOI `10.1007/s11009-006-9006-2`, all confirmed against Crossref. The
+published article was supplied by the author after automated retrieval failed; Springer redirects
+to an authorisation endpoint and Semantic Scholar reports the abstract as elided. Every reference
+in the bibliography has now been read in full.
 
-The residual risk is structurally small. The estimator analysed there is the modified Brownian
-bridge importance sampler, not the unconditioned endpoint estimator this manuscript studies, and
-Section 1.1 states that distinction. Nothing in the manuscript depends on the detail of its
-results; it is cited for the existence of a discretisation-versus-Monte-Carlo trade-off and an
-efficient allocation, both of which are also in Detemple et al., which has been read in full.
+Its contents bear on the novelty claims and are treated in Section 1.1. In summary: Theorem 1
+concerns the modified Brownian bridge sampler, proves its importance-weight variance is bounded
+uniformly in `M`, gives the optimal allocation `N ~ M^2`, and holds "regardless of the dimension
+d". About the endpoint sampler it records three qualitative observations, all of which are now
+disclaimed as prior work in Section 1.1: that its importance-weight variance may be unbounded;
+that "a limiting quantity for G_M does not exist and, therefore, even a huge number N can give
+poor approximations"; and that numerically its error "increases as M increases" at fixed `N`. It
+also states the kernel connection for the endpoint estimator specifically, with the evaluation
+points taken at time `Delta - h`.
 
 The two papers remain clearly distinguished by key, title, journal, DOI and their descriptions in
 Section 1.1.

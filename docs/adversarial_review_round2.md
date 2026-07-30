@@ -22,12 +22,25 @@ What remains claimed — exact finite-`M` moments, the exact local constant `c_{
 sequence, the refutation of Lemmas 2 and 3, the four-dimensional incompatibility, and the
 application analysis — was searched for in the full text and is absent.
 
-**Residual risk, disclosed.** Detemple et al. attribute the kernel reading to Milstein,
-Schoenmakers and Spokoiny. That paper was not read in full; only its abstract and publisher record
-were consulted. If it contains exact finite-discretisation moments for the multidimensional
-Gaussian endpoint kernel, claim (a) in §1.1 would need narrowing further. Its abstract describes a
-forward–reverse estimator that is root-`N` consistent in any dimension, which is a different
-construction, so this is judged unlikely but not excluded.
+**Residual risk: closed on both counts.** Two references were initially judged rather than read,
+and both have since been read in full.
+
+*Milstein, Schoenmakers and Spokoiny*, read in the authors' institutional version, contains no
+finite-discretisation moments of any order: its explicit analysis is one-dimensional and concerns
+the forward–reverse estimator, and its general accuracy analysis states that it disregards
+discretisation bias and assumes exact solutions. Its estimator also differs, simulating to the
+terminal time and applying an imposed smoother of bandwidth `h`, against the endpoint estimator's
+own one-step density of bandwidth `√h`. That difference is where the `K/2` exponent originates, and
+§1.1 now says so.
+
+*Stramer and Yan (2007a)*, supplied by the author after automated retrieval failed, proved the more
+consequential of the two. Its Theorem 1 is about the modified Brownian bridge and is dimension-free,
+so it does not touch the exponent. But its remarks about the endpoint sampler are pointed, and three
+of them are now disclaimed as prior work in §1.1: that the importance-weight variance may be
+unbounded, that "even a huge number N can give poor approximations", and that the error grows with
+`M` at fixed `N`. No novelty claim needed withdrawal. The collapse theorem survives as a statement
+of a different kind: prior work says the estimator may be bad, whereas Theorem 3.3 exhibits an
+admissible sequence along which it converges to a specific wrong value.
 
 ### 2. Are Lemmas 2 and 3 identified correctly as directly refuted?
 
@@ -160,11 +173,15 @@ Stated in the manuscript, not only here.
 3. **The Euler bias expansion** is imported from Bally and Talay, not proved here.
 4. **Uniform integrability** in Proposition 6.1 is assumed.
 5. **Implementation safeguards** are unknown and labelled so.
-6. **One reference not read in full**: Stramer and Yan (2007a), paywalled, with no open version
-   located. Milstein, Schoenmakers and Spokoiny (2004) has since been read in full; see question 1.
-   The residual risk from Stramer and Yan is structurally smaller: the estimator they analyse is
-   the modified Brownian bridge sampler, not the unconditioned endpoint estimator, and the
-   manuscript states that distinction. Their bibliographic record is confirmed against Crossref.
+6. ~~References not read in full.~~ **Closed.** Every reference in the bibliography has now been
+   read in full. Stramer and Yan (2007a), the last outstanding one, was supplied by the author
+   after automated retrieval failed. Reading it added three items to the list of things Section 1.1
+   disclaims as prior work: that the endpoint estimator's importance-weight variance may be
+   unbounded in `M`, that a huge `N` may not rescue it, and that its error grows with `M` at fixed
+   `N`. No novelty claim required withdrawal; the collapse theorem remains a statement of a
+   different kind, exhibiting an admissible path to a wrong limit rather than asserting that the
+   estimator may be bad.
+
 7. ~~One DOI unresolved.~~ **Resolved, and it was wrong.** The recorded Detemple DOI had been
    guessed and belonged to a different article in the same volume. Every DOI in the bibliography is
    now verified by title against the Crossref registry; 24 of 24 match and the four entries without
