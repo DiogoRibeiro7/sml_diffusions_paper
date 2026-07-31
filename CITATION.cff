@@ -24,7 +24,7 @@ authors:
   - family-names: Ribeiro
     given-names: Diogo
     email: dfr@esmad.ipp.pt
-    affiliation: "Escola Superior de Media Artes e Design (ESMAD), IPP"
+    affiliation: "School of Media Arts and Design, Polytechnic of Porto"
     orcid: "https://orcid.org/0009-0001-2022-7072"
 keywords:
   - simulated maximum likelihood
@@ -37,7 +37,20 @@ keywords:
   - nonregular inference
 license: CC-BY-4.0
 repository-code: "https://github.com/DiogoRibeiro7/sml_diffusions_paper"
-date-released: 2026-07-30
+date-released: 2026-07-31
+version: v1.0.0
+doi: 10.5281/zenodo.21719868
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.21719868
+    description: >-
+      Concept DOI. Represents every version of this work and always resolves to
+      the most recent one. Cite this unless you need to pin a specific version.
+  - type: doi
+    value: 10.5281/zenodo.21719869
+    description: >-
+      Version DOI for v1.0.0. Cite this to refer to exactly the archived
+      snapshot released on 31 July 2026.
 references:
   - type: article
     scope: "The article analysed and corrected by this work."

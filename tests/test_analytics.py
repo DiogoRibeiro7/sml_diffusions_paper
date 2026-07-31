@@ -787,10 +787,45 @@ def test_citation_and_zenodo_agree_with_the_manuscript() -> None:
     assert zenodo["creators"][0]["orcid"] == orcid
     assert orcid in manuscript
 
-    affiliation = "Escola Superior de Media Artes e Design (ESMAD), IPP"
+    affiliation = "School of Media Arts and Design, Polytechnic of Porto"
     assert citation["authors"][0]["affiliation"] == affiliation
     assert zenodo["creators"][0]["affiliation"] == affiliation
     assert f"\\newcommand{{\\affiliation}}{{{affiliation}}}" in manuscript
+
+
+def test_zenodo_dois_are_recorded_consistently() -> None:
+    """The concept and version DOIs must agree across CITATION.cff and README.
+
+    The concept DOI resolves to the newest version and is the one to cite; the
+    version DOI pins v1.0.0.  They differ by one digit, which is exactly the
+    kind of pair that gets transposed, so both are checked in both files.
+    """
+    yaml = pytest.importorskip("yaml")
+
+    concept = "10.5281/zenodo.21719868"
+    version = "10.5281/zenodo.21719869"
+    assert concept != version
+
+    citation = yaml.safe_load((ROOT / "CITATION.cff").read_text(encoding="utf-8"))
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+
+    # The top-level doi field must be the concept DOI, not the version DOI.
+    assert citation["doi"] == concept
+
+    recorded = {entry["value"]: entry for entry in citation["identifiers"]}
+    assert set(recorded) == {concept, version}
+    assert all(entry["type"] == "doi" for entry in recorded.values())
+    assert "always resolves" in recorded[concept]["description"]
+    assert "v1.0.0" in recorded[version]["description"]
+
+    assert concept in readme
+    assert version in readme
+    # The BibTeX entry must carry the concept DOI so citations follow the work.
+    bibtex_start = readme.index("@misc{")
+    bibtex_end = readme.index("}\n```", bibtex_start)
+    bibtex = readme[bibtex_start:bibtex_end]
+    assert concept in bibtex
+    assert version not in bibtex
 
 
 def test_zenodo_registers_the_reviewed_article() -> None:

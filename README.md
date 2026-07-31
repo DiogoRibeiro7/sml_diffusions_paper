@@ -175,10 +175,35 @@ The article under review is not part of this repository and carries its own copy
 
 ## Citation
 
-`CITATION.cff` carries the metadata in Citation File Format, which GitHub renders as a "Cite this
-repository" control and which `cffconvert` turns into BibTeX, RIS and other formats. It also records
-Brandt and Santa-Clara (2002) as the article under review.
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21719868.svg)](https://doi.org/10.5281/zenodo.21719868)
 
-Once the Zenodo record exists, add its DOI to `CITATION.cff` as an `identifiers` entry and to this
-section. A test asserts that the title, author ORCID, affiliation and licence agree across
-`CITATION.cff`, `.zenodo.json` and `paper/main.tex`, so those four cannot drift apart.
+Cite the **concept DOI**, which represents every version and always resolves to the most recent one:
+
+> Ribeiro, D. (2026). *Dimensional Asymptotics of Euler-Based Simulated Likelihood for
+> Multidimensional Diffusions*. Zenodo. <https://doi.org/10.5281/zenodo.21719868>
+
+```bibtex
+@misc{Ribeiro2026DimensionalAsymptotics,
+  author    = {Ribeiro, Diogo},
+  title     = {Dimensional Asymptotics of {Euler}-Based Simulated Likelihood
+               for Multidimensional Diffusions},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.21719868},
+  url       = {https://doi.org/10.5281/zenodo.21719868}
+}
+```
+
+| DOI | Refers to |
+| --- | --- |
+| [`10.5281/zenodo.21719868`](https://doi.org/10.5281/zenodo.21719868) | all versions; resolves to the latest |
+| [`10.5281/zenodo.21719869`](https://doi.org/10.5281/zenodo.21719869) | v1.0.0 specifically, released 31 July 2026 |
+
+Pin the version DOI only when you need the exact archived snapshot, for instance when quoting a page
+or theorem number that a later revision could move.
+
+`CITATION.cff` carries the same metadata in Citation File Format, which GitHub renders as a "Cite
+this repository" control and which `cffconvert` turns into BibTeX, RIS and other formats. It also
+records Brandt and Santa-Clara (2002) as the article under review. A test asserts that the title,
+author ORCID, affiliation, licence and DOI agree across `CITATION.cff`, `.zenodo.json` and
+`paper/main.tex`, so they cannot drift apart.
