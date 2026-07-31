@@ -263,6 +263,7 @@ def main() -> int:
         "application_diagnostic_matrix.md",
         "final_claim_dependency_audit.md",
         "final_adversarial_review.md",
+        "targeted_final_review.md",
     )
     missing = [name for name in hand_written if not (DIST / name).exists()]
     for name in hand_written:

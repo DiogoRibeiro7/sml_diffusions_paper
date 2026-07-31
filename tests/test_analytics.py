@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import pytest
 from scipy import integrate
 from scipy.stats import norm
@@ -807,3 +808,67 @@ def test_zenodo_registers_the_reviewed_article() -> None:
     assert reviewed[0]["identifier"] in (ROOT / "paper" / "references.bib").read_text(
         encoding="utf-8"
     )
+
+
+# ---------------------------------------------------------------------------
+# CIR boundary diagnostics
+# ---------------------------------------------------------------------------
+
+
+def test_cir_log_tail_agrees_with_the_gaussian_asymptotic() -> None:
+    """log10 Phi(-z) must match the standard Gaussian tail expansion.
+
+    The table reports base-ten logarithms because direct evaluation underflows.
+    This checks the stable log-CDF against the classical asymptotic
+    Phi(-z) ~ phi(z)/z, which is accurate to O(z^-2) relative error for large z.
+    """
+    for z in (10.0, 26.5, 50.0, 100.0, 187.5, 203.4):
+        stable = norm.logcdf(-z) / math.log(10.0)
+        asymptotic = (
+            -0.5 * z * z / math.log(10.0)
+            - math.log(z * math.sqrt(2.0 * math.pi)) / math.log(10.0)
+        )
+        assert stable == pytest.approx(asymptotic, rel=1e-3)
+
+
+def test_cir_direct_evaluation_underflows_exactly_where_recorded() -> None:
+    """The underflow flag must agree with double-precision evaluation."""
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "cir_negativity.csv")
+    for _, row in frame.iterrows():
+        direct = float(norm.cdf(-row["z_score"]))
+        assert bool(row["underflows"]) == (direct == 0.0)
+        # Underflow is a property of binary64, not of the mathematics: the
+        # log-probability is always finite and strictly negative.
+        assert math.isfinite(row["log10_probability"])
+        assert row["log10_probability"] < 0.0
+
+
+def test_cir_probability_is_strictly_positive_in_exact_arithmetic() -> None:
+    """Every recorded log-probability corresponds to a positive number."""
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "cir_negativity.csv")
+    # 10**x > 0 for every finite x, so the claim reduces to finiteness.
+    assert frame["log10_probability"].apply(math.isfinite).all()
+    assert (frame["z_score"] > 0.0).all()
+
+
+def test_manuscript_cir_table_matches_the_generated_values() -> None:
+    """The hand-typed Table 5 must not drift from the computed diagnostics."""
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "cir_negativity.csv")
+    manuscript = (ROOT / "paper" / "main.tex").read_text(encoding="utf-8")
+
+    lookup = {
+        ("U.S. (vs. U.K.)", "long-run mean"): ("187.5", "-7636", "yes"),
+        ("U.S. (vs. U.K.)", "0.1 per cent"): ("26.5", "-154", "no"),
+        ("U.K.", "long-run mean"): ("110.8", "-2667", "yes"),
+        ("U.K.", "0.1 per cent"): ("13.8", "-42.6", "no"),
+        ("U.S. (vs. Germany)", "long-run mean"): ("203.4", "-8986", "yes"),
+        ("Germany", "long-run mean"): ("137.4", "-4099", "yes"),
+    }
+    for (process, state), (z_text, log_text, underflow_text) in lookup.items():
+        row = frame[
+            (frame["process"] == process) & (frame["state_label"] == state)
+        ].iloc[0]
+        assert float(z_text) == pytest.approx(row["z_score"], abs=0.05)
+        assert float(log_text) == pytest.approx(row["log10_probability"], rel=1e-3)
+        assert (underflow_text == "yes") == bool(row["underflows"])
+        assert z_text in manuscript, f"{z_text} missing from the manuscript"

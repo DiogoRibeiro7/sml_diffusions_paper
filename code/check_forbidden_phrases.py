@@ -127,6 +127,30 @@ FORBIDDEN = (
         r"is the (exact )?effective (simulation )?size of the antithetic",
         "P/M^{K/2} is an independent-pair diagnostic, not an exact variance equivalence",
     ),
+    Forbidden(
+        r"boundary is never approached",
+        "unattainable is not unapproachable; claims hold at the displayed states only",
+    ),
+    Forbidden(
+        r"five free correlations",
+        "four entries of R_t are free; rho_zz* is primitive but enters C_t, not R_t",
+    ),
+    Forbidden(
+        r"\\Cref\{prop:min_incomplete\} (shows|proves) that the boundary is[^.]*attained exactly",
+        "exact binding is proved only for the constant case under its conditions",
+    ),
+    Forbidden(
+        r"no bound in the useful direction",
+        "a union bound always exists; it is merely trivial at these probabilities",
+    ),
+    Forbidden(
+        r"model[- ]feasible (state|reference state)",
+        "use algebraically feasible: the grid establishes no dynamic accessibility",
+    ),
+    Forbidden(
+        r"the calibrated model (can )?reach",
+        "algebraic feasibility is not dynamic accessibility",
+    ),
 )
 
 
