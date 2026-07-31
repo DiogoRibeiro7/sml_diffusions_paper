@@ -201,10 +201,13 @@ Cite the **concept DOI**, which represents every version and always resolves to 
 | DOI | Refers to |
 | --- | --- |
 | [`10.5281/zenodo.21719868`](https://doi.org/10.5281/zenodo.21719868) | all versions; resolves to the latest |
-| [`10.5281/zenodo.21719869`](https://doi.org/10.5281/zenodo.21719869) | v1.0.0 specifically, released 31 July 2026 |
+| [`10.5281/zenodo.21728285`](https://doi.org/10.5281/zenodo.21728285) | v1.0.1, the current release |
+| [`10.5281/zenodo.21719869`](https://doi.org/10.5281/zenodo.21719869) | v1.0.0, superseded |
 
-Pin the version DOI only when you need the exact archived snapshot, for instance when quoting a page
-or theorem number that a later revision could move.
+Pin a version DOI only when you need that exact archived snapshot, for instance when quoting a page
+or theorem number that a later revision could move. **Do not cite v1.0.0**: it states the limit in
+Proposition C.1 in the wrong direction, which v1.0.1 corrects. Zenodo records are immutable, so the
+superseded version remains resolvable and is listed here for completeness.
 
 `CITATION.cff` carries the same metadata in Citation File Format, which GitHub renders as a "Cite
 this repository" control and which `cffconvert` turns into BibTeX, RIS and other formats. It also

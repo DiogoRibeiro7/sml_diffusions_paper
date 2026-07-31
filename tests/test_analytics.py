@@ -803,29 +803,33 @@ def test_zenodo_dois_are_recorded_consistently() -> None:
     yaml = pytest.importorskip("yaml")
 
     concept = "10.5281/zenodo.21719868"
-    version = "10.5281/zenodo.21719869"
-    assert concept != version
+    current = "10.5281/zenodo.21728285"
+    superseded = "10.5281/zenodo.21719869"
+    assert len({concept, current, superseded}) == 3
 
     citation = yaml.safe_load((ROOT / "CITATION.cff").read_text(encoding="utf-8"))
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
-    # The top-level doi field must be the concept DOI, not the version DOI.
+    # The top-level doi field must be the concept DOI, not a version DOI.
     assert citation["doi"] == concept
+    assert citation["version"] == "v1.0.1"
 
     recorded = {entry["value"]: entry for entry in citation["identifiers"]}
-    assert set(recorded) == {concept, version}
+    assert set(recorded) == {concept, current, superseded}
     assert all(entry["type"] == "doi" for entry in recorded.values())
     assert "always resolves" in recorded[concept]["description"]
-    assert "v1.0.0" in recorded[version]["description"]
+    assert "v1.0.1" in recorded[current]["description"]
+    assert "superseded" in recorded[superseded]["description"]
 
-    assert concept in readme
-    assert version in readme
+    for value in (concept, current, superseded):
+        assert value in readme
     # The BibTeX entry must carry the concept DOI so citations follow the work.
     bibtex_start = readme.index("@misc{")
     bibtex_end = readme.index("}\n```", bibtex_start)
     bibtex = readme[bibtex_start:bibtex_end]
     assert concept in bibtex
-    assert version not in bibtex
+    assert current not in bibtex
+    assert superseded not in bibtex
 
 
 def test_zenodo_registers_the_reviewed_article() -> None:
