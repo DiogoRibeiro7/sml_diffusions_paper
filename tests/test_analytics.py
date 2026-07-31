@@ -907,3 +907,61 @@ def test_manuscript_cir_table_matches_the_generated_values() -> None:
         assert float(log_text) == pytest.approx(row["log10_probability"], rel=1e-3)
         assert (underflow_text == "yes") == bool(row["underflows"])
         assert z_text in manuscript, f"{z_text} missing from the manuscript"
+
+
+def test_worst_case_boundary_decreases_as_the_step_is_refined() -> None:
+    """Proposition C.1: sup_x P_h(x) is strictly increasing in h.
+
+    Refining the mesh therefore lowers the worst case, converging down to
+    Phi(-1) from above rather than up to it from below.  An earlier version of
+    the manuscript described the direction the wrong way round.
+    """
+    limit = float(norm.cdf(-1.0))
+    for alpha in (0.320, 0.338, 0.5, 1.0):
+        steps = [0.02, 1 / 520, 1 / 1040, 1e-5, 1e-9]
+        values = [gr.worst_case_boundary(alpha, 0.088, h)[1] for h in steps]
+
+        # Strictly decreasing as h decreases, and bounded below by Phi(-1).
+        for earlier, later in zip(values, values[1:]):
+            assert later < earlier, f"alpha={alpha}: not decreasing"
+            assert later > limit - 1e-12, f"alpha={alpha}: fell below Phi(-1)"
+
+        assert values[-1] == pytest.approx(limit, abs=1e-9)
+        assert values[0] > limit
+
+
+def test_worst_case_boundary_matches_the_closed_form_and_the_table() -> None:
+    """The generated values reproduce 0.1602 > 0.1588 > 0.1587 as stated."""
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "boundary_maximum.csv")
+
+    # Within each process the maximum must fall strictly as the step is refined,
+    # and stay above the limit Phi(-1).
+    limit = float(norm.cdf(-1.0))
+    for system, block in frame.groupby("system"):
+        ordered = block.sort_values("h", ascending=False)
+        maxima = ordered["max_probability"].tolist()
+        assert all(b < a for a, b in zip(maxima, maxima[1:])), f"{system}: {maxima}"
+        assert all(value > limit for value in maxima), f"{system}: below Phi(-1)"
+
+    # The three values quoted in the manuscript's prose.
+    rounded = sorted({round(value, 4) for value in frame["max_probability"]})
+    assert 0.1587 in rounded and 0.1588 in rounded and 0.1602 in rounded
+
+
+def test_worst_case_derivative_is_positive() -> None:
+    """f'(h) > 0 on (0, 1/(2 alpha)), checked against a numerical derivative."""
+    for alpha in (0.320, 0.5, 2.0):
+        upper = 1.0 / (2.0 * alpha)
+        for h in np.linspace(0.05 * upper, 0.9 * upper, 25):
+            analytic = float(
+                norm.pdf(math.sqrt(1.0 - 2.0 * alpha * h))
+                * alpha
+                / math.sqrt(1.0 - 2.0 * alpha * h)
+            )
+            step = 1e-7 * upper
+            numeric = (
+                float(norm.cdf(-math.sqrt(1.0 - 2.0 * alpha * (h + step))))
+                - float(norm.cdf(-math.sqrt(1.0 - 2.0 * alpha * (h - step))))
+            ) / (2.0 * step)
+            assert analytic > 0.0
+            assert analytic == pytest.approx(numeric, rel=1e-4)

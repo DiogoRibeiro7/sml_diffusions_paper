@@ -269,3 +269,84 @@ def test_coincident_endpoint_gives_identical_partners() -> None:
         assert np.allclose(plus, minus, rtol=0, atol=1e-12)
         correlation = np.corrcoef(plus, minus)[0, 1]
         assert correlation == pytest.approx(1.0, abs=1e-9)
+
+
+# ---------------------------------------------------------------------------
+# R_pair halves mechanically; R_var need not
+# ---------------------------------------------------------------------------
+
+
+def r_pair(pairs: int, m_steps: int, dimension: int) -> float:
+    """Independent-pair scaling diagnostic P / M^{K/2}."""
+    return pairs / m_steps ** (dimension / 2.0)
+
+
+def r_var(pairs: int, m_steps: int, dimension: int, rho: float) -> float:
+    """Variance-equivalent scaling diagnostic N_eff / M^{K/2}."""
+    return n_eff(pairs, rho) / m_steps ** (dimension / 2.0)
+
+
+def test_doubling_p_and_m_halves_r_pair_in_four_dimensions() -> None:
+    """The only quantity that halves mechanically is P / M^2."""
+    before = r_pair(5_000, 10, 4)
+    after = r_pair(10_000, 20, 4)
+    assert before == pytest.approx(50.0)
+    assert after == pytest.approx(25.0)
+    assert after == pytest.approx(before / 2.0)
+
+
+def test_r_var_need_not_halve_when_rho_changes_with_m() -> None:
+    """If rho_A varies with M, R_var can move by any factor.
+
+    Two scenarios are enough to show that the halving of R_pair carries no
+    implication for R_var without transition-specific covariance information.
+    """
+    # Scenario one: rho_A falls from +1 to 0 as M doubles.  R_pair halves,
+    # while R_var is unchanged, because N_eff doubles at the same time.
+    before = r_var(5_000, 10, 4, rho=1.0)
+    after = r_var(10_000, 20, 4, rho=0.0)
+    assert r_pair(10_000, 20, 4) == pytest.approx(r_pair(5_000, 10, 4) / 2.0)
+    assert after == pytest.approx(before), "R_var unchanged while R_pair halved"
+
+    # Scenario two: rho_A rises from -0.5 to +1.  R_pair still halves, but
+    # R_var falls to an eighth, from 200 to 25.
+    before_two = r_var(5_000, 10, 4, rho=-0.5)
+    after_two = r_var(10_000, 20, 4, rho=1.0)
+    assert before_two == pytest.approx(200.0)
+    assert after_two == pytest.approx(25.0)
+    assert after_two == pytest.approx(before_two / 8.0)
+
+
+def test_r_var_is_never_below_r_pair() -> None:
+    """rho_A <= 1 forces R_var >= R_pair, so R_pair is the conservative one."""
+    for rho in np.linspace(-0.99, 1.0, 100):
+        assert r_var(5_000, 10, 4, float(rho)) >= r_pair(5_000, 10, 4) - 1e-9
+
+
+def test_lemma_bounds_the_constant_but_not_the_clt() -> None:
+    """Lemma 8.3 gives the exponent within a factor of two, and no more.
+
+    The sandwich fixes the moment order; it does not pin the limiting constant,
+    so it cannot by itself supply a Lyapunov ratio or a pair-level CLT.  This
+    records the gap numerically: two couplings with the same marginals and the
+    same exponent have different second-moment constants.
+    """
+    rng = np.random.default_rng(4)
+    h, draws, dimension = 1 / 40, 120_000, 2
+    start = np.zeros(dimension)
+
+    coincident = np.zeros(dimension)
+    noise = rng.normal(size=(draws, dimension))
+    plus = endpoint_summand(start + math.sqrt(1.0 - h) * noise, coincident, h)
+    minus = endpoint_summand(start - math.sqrt(1.0 - h) * noise, coincident, h)
+    identical_constant = float((0.5 * (plus + minus) ** 2).mean())
+
+    distant = np.full(dimension, 1.5)
+    noise = rng.normal(size=(draws, dimension))
+    plus = endpoint_summand(start + math.sqrt(1.0 - h) * noise, distant, h)
+    minus = endpoint_summand(start - math.sqrt(1.0 - h) * noise, distant, h)
+    other_constant = float((0.5 * (plus + minus) ** 2).mean())
+
+    # Same order in h, different constants: the lemma cannot supply the latter.
+    assert identical_constant > 0.0 and other_constant > 0.0
+    assert identical_constant != pytest.approx(other_constant, rel=0.5)

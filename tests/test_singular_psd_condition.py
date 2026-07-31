@@ -16,6 +16,7 @@ against the algebraic condition it is meant to characterise.
 
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
 
@@ -305,3 +306,79 @@ def test_reported_estimates_are_far_from_the_degenerate_configuration() -> None:
     """
     for parameters in (ccm.US_UK, ccm.US_DE):
         assert parameters.currency_quadratic > 0.0
+
+
+# ---------------------------------------------------------------------------
+# Proposition E.2 requires v_t > 0
+# ---------------------------------------------------------------------------
+
+
+def implied_correlations(
+    phi: float, phi_star: float, rho_ww: float, volatility: float
+) -> tuple[float, float]:
+    """Return the two implied correlations of equation (28).
+
+    Both divide by the volatility, so the caller must supply a strictly
+    positive value; this is the hypothesis Proposition E.2 states.
+    """
+    if volatility <= 0.0:
+        raise ValueError("the implied correlations require v_t > 0")
+    return (
+        (phi - rho_ww * phi_star) / volatility,
+        (rho_ww * phi - phi_star) / volatility,
+    )
+
+
+def test_implied_correlations_are_bounded_when_volatility_is_positive() -> None:
+    """With v_t > 0 and v_t^2 >= Q_t, both implied correlations are in [-1, 1]."""
+    rng = np.random.default_rng(6060)
+    for _ in range(2000):
+        phi, phi_star = rng.uniform(0.001, 0.09, 2)
+        rho_ww = rng.uniform(-0.97, 0.97)
+        quadratic = phi**2 + phi_star**2 - 2.0 * rho_ww * phi * phi_star
+        # Any volatility at or above the floor, and strictly positive.
+        volatility = math.sqrt(quadratic) * rng.uniform(1.0, 4.0)
+        assert volatility > 0.0
+        first, second = implied_correlations(phi, phi_star, rho_ww, volatility)
+        assert abs(first) <= 1.0 + 1e-12
+        assert abs(second) <= 1.0 + 1e-12
+
+
+def test_bound_is_attained_at_the_floor() -> None:
+    """At v_t^2 = Q_t the bound can be tight, so it cannot be improved."""
+    phi, phi_star, rho_ww = 0.03, 0.0, 0.0
+    quadratic = phi**2 + phi_star**2 - 2.0 * rho_ww * phi * phi_star
+    volatility = math.sqrt(quadratic)
+    first, second = implied_correlations(phi, phi_star, rho_ww, volatility)
+    assert first == pytest.approx(1.0)
+    assert second == pytest.approx(0.0)
+
+
+def test_positive_volatility_with_zero_quadratic_is_admissible() -> None:
+    """Q_t = 0 with v_t > 0 is fine: the correlations are zero, not undefined."""
+    first, second = implied_correlations(0.0, 0.0, 0.3, 0.05)
+    assert first == pytest.approx(0.0)
+    assert second == pytest.approx(0.0)
+
+
+def test_zero_volatility_is_excluded() -> None:
+    """v_t = 0 must be rejected rather than silently dividing by zero.
+
+    The hypothesis v_t^2 >= Q_t alone permits v_t = Q_t = 0, at which the
+    formulas of equation (28) are undefined.  Proposition E.2 therefore
+    assumes v_t > 0 explicitly.
+    """
+    with pytest.raises(ValueError):
+        implied_correlations(0.0, 0.0, 0.3, 0.0)
+    with pytest.raises(ValueError):
+        implied_correlations(0.03, 0.02, 0.3, -1e-16)
+
+
+def test_the_degenerate_case_satisfies_the_hypothesis() -> None:
+    """Where the manuscript applies the proposition, v_t is strictly positive."""
+    for parameters in (ccm.US_UK, ccm.US_DE):
+        quadratic = ccm.interest_rate_quadratic(
+            parameters, parameters.theta, parameters.theta_star
+        )
+        floor = math.sqrt(quadratic + parameters.currency_quadratic)
+        assert floor > 0.0

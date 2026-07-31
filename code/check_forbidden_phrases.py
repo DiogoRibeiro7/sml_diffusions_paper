@@ -151,6 +151,56 @@ FORBIDDEN = (
         r"the calibrated model (can )?reach",
         "algebraic feasibility is not dynamic accessibility",
     ),
+    Forbidden(
+        r"rises (very slightly )?tow(a|)rds \$?\\Phi\(-1\)",
+        "the worst case DECREASES to Phi(-1) from above as h is refined",
+    ),
+    Forbidden(
+        r"without lowering (its|the) peak",
+        "refinement does lower the peak, towards the positive limit Phi(-1)",
+    ),
+    Forbidden(
+        r"halves the effective endpoint size",
+        "only R_pair = P/M^2 halves mechanically; R_var depends on rho_A",
+    ),
+    Forbidden(
+        r"maximiser is (thus )?governed by a nearest",
+        "Proposition H.2 is a uniform comparison, not a statement about maximisers",
+    ),
+    Forbidden(
+        # Asserting form only: the manuscript records the withdrawal in words
+        # that necessarily quote the retracted claim.
+        r"therefore negligible relative to \$?D_N",
+        "the relative order of the slack against D_N is unproved",
+    ),
+    Forbidden(
+        r"no admissible sequence exists",
+        "admissible sequences abound; none is also density-consistent in K >= 4",
+    ),
+    Forbidden(
+        r"Three entries of \$R_t\$ are free",
+        "four entries of R_t are free, including rho_ww*",
+    ),
+    Forbidden(
+        r"binding constraints imply nonregular inference",
+        "nonregularity is possible, not demonstrated; the interior argument is incomplete",
+    ),
+    Forbidden(
+        r"interest-rate states are far from the boundary",
+        "unattainable is not unapproachable; claims hold at displayed states only",
+    ),
+    Forbidden(
+        r"All but the last of these underflow",
+        "several rows do not underflow; Table 5 records it state by state",
+    ),
+    Forbidden(
+        r"cannot be excluded by strengthening the hypotheses",
+        "it is excluded by a rate condition; only regularity assumptions cannot fix it",
+    ),
+    Forbidden(
+        r"specifications are unproblematic",
+        "a finite grid does not establish global validity",
+    ),
 )
 
 
