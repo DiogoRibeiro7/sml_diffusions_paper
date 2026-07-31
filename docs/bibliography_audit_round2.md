@@ -125,7 +125,7 @@ All four are now supplied by the author and the gate passes:
 | Field | Value |
 | --- | --- |
 | `\authorname` | Diogo Ribeiro |
-| `\affiliation` | ESMAD – IPP |
+| `\affiliation` | Escola Superior de Media Arte e Design (ESMAD), IPP |
 | `\email` | `dfr@esmad.ipp.pt`, linked as `mailto:` |
 | `\orcid` | 0009-0001-2022-7072, linked to `https://orcid.org/0009-0001-2022-7072` |
 
