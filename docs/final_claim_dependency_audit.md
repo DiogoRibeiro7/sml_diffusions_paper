@@ -46,7 +46,13 @@ constraints (**Cpub**); mathematically complete model constraints (**Cmath**).
 | --- | --- | --- | --- | --- | --- |
 | The implemented ratios are not small | G | Table 3, `N=544`, `M=10`, `P=5,000` | impV | yes, `P`/`E` split | yes |
 | Antithetic pairs are identical at a coincident endpoint | A | Prop. 8.1 | gen | yes, `P`/`E` | yes |
-| `E/M^{K/2}` is not an effective size | A | Prop. 8.1, eq. (antithetic variance) | gen | new | yes |
+| `N_eff = E/(1+ρ_A)` | A | Def. 8.2, from Prop. 8.1 | gen | **new** | yes |
+| `E` overstates the effective count by `1+ρ_A` | A | eq. (two ratios) | gen | **corrected** | yes |
+| `E` overstates it by `2/(1+ρ_A)` | — | **withdrawn as false** | — | **yes** | that ratio is `N_eff/P`, and equals 1 at `ρ_A=1` |
+| `P/M^{K/2}` is the effective size of the antithetic design | — | **withdrawn** | — | **yes** | now `R_pair`, an independent-pair diagnostic |
+| `R_var ≥ R_pair` always | A | `ρ_A ≤ 1` | gen | new | yes |
+| A single `N_eff` applies to the whole likelihood | — | **not claimed** | gen | new | disclaimed: `ρ_A` varies by transition |
+| Antithetic pairing preserves the `h^{−K/2}` exponent | A | Lemma 8.2 | gen | **new** | yes |
 | Interest-rate Feller ratios are comfortable | G | Table 6 | dirH | no | yes |
 | The incompleteness Feller ratio is exactly 1/2 | A | App. C | dirH | no | yes |
 | Direct Euler on `H` is not positivity preserving | A | Prop. C.1 | **dirH** | yes, scope list added | yes |
@@ -88,6 +94,11 @@ constraints (**Cpub**); mathematically complete model constraints (**Cmath**).
 | Direct-`H` results not applied to the implemented chain | pass, gated |
 | Shrinking region not said to imply lower occupation | pass, gated |
 | `P` and `E` used for pairs and evaluations | pass |
+| `N_eff = E/(1+ρ_A)` appears correctly | pass |
+| `E/N_eff` distinguished from `N_eff/P` | pass, gated |
+| At `ρ_A = 1`, `E` said to overstate by two | pass |
+| `P/M^{K/2}` called a diagnostic, not an exact effective size | pass, gated |
+| The `h^{−K/2}` exponent proved to survive pairing | pass, Lemma 8.2 |
 | Milstein covariance and bandwidth wording correct | pass |
 | No unsupported novelty claim | pass |
 | Conclusion does not reintroduce removed overstatements | pass, gated |

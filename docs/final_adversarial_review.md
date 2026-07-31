@@ -155,6 +155,31 @@ The subsection simultaneously said `S` was the number of evaluations and the num
 `P` and `E = 2P` now used there, with the variance formula proved and Table 3 carrying both.
 **Resolved.**
 
+### 18a. Antithetic variance-equivalent count — **was major, introduced by the round-three fix**
+The `P`/`E` rewrite proved the variance formula correctly and then misread it. It stated that `E`
+"overstates the independent count by the factor `2/(1+ρ_A)`, which at a coincident endpoint is
+exactly two". Two errors in one sentence: the overstatement factor is `E/N_eff = 1 + ρ_A`, not
+`2/(1+ρ_A)`, and the quoted expression equals **one** at `ρ_A = 1`, so the sentence contradicted its
+own numerical claim. The ratio `2/(1+ρ_A)` is `N_eff/P`, a different comparison.
+
+The variance-equivalent count is now defined explicitly as `N_eff = E/(1+ρ_A) = 2P/(1+ρ_A)`, both
+ratios are written out side by side, and the four cases are stated: `ρ_A = 1` gives `N_eff = P`, so
+`E` overstates by two; `ρ_A = 0` gives `N_eff = E`; `ρ_A < 0` gives `N_eff > E`; and `ρ_A → −1` makes
+`N_eff` diverge, which is flagged as a variance-equivalence convention rather than a literal count.
+
+Two consequences. First, `P/M^{K/2}` is no longer called an effective size: it is `R_pair`, an
+independent-pair diagnostic requiring no knowledge of `ρ_A`, alongside `R_var = N_eff/M^{K/2}`.
+Second, because `ρ_A` depends on the endpoint, the initial state, the dimension, the discretisation
+level, the coefficients and the parameter, no single `N_eff` applies to a 544-term likelihood, so
+Table 3 reports `R_var` at two reference values of `ρ_A` rather than one assumed value.
+
+A new Lemma 8.2 proves that the coupling cannot touch the exponent. For nonnegative partners with
+identical marginals, `(a²+b²)/4 ≤ A² ≤ (a²+b²)/2` pathwise, so `E[G²]/2 ≤ E[A²] ≤ E[G²]`, and
+`E[G²] ≍ h^{−K/2}` gives `E[A²] ≍ h^{−K/2}` whatever the dependence. Nonnegativity is used only for
+the lower bound. Since `E[A] = E[G] = O(1)` while the second moment diverges, the same order carries
+to the variance. **Resolved.** 26 tests in `tests/test_antithetic.py`, including simulated recovery
+of `N_eff` and the moment-order check across decreasing `h` in dimensions 1 to 4.
+
 ## Editorial
 
 ### 19. René Garcia — **was major, now resolved**

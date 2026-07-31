@@ -1168,36 +1168,95 @@ so the pair is perfectly \emph{positively} correlated and provides no variance r
 At $\rho_A=+1$ this equals $\sigma^2/P$, the variance of only $P$ independent evaluations, although $E=2P$ were computed. At $\rho_A=-1$ it is zero.
 \end{proposition}
 
+\begin{definition}[Variance-equivalent evaluation count]\label{def:neff}
+For an antithetic design of $P$ pairs and $E=2P$ evaluations with pair correlation $\rho_A\in(-1,1]$, the \emph{variance-equivalent number of independent evaluations} is the number $N_{\mathrm{eff}}$ of independent draws whose average would have the same variance:
+\begin{equation}\label{eq:neff}
+N_{\mathrm{eff}}(\rho_A)=\frac{E}{1+\rho_A}=\frac{2P}{1+\rho_A} .
+\end{equation}
+\end{definition}
+
+Two ratios follow from \eqref{eq:neff}, and they must not be confused, because they move in opposite directions:
+\begin{equation}\label{eq:neff_ratios}
+\frac{E}{N_{\mathrm{eff}}}=1+\rho_A,
+\qquad
+\frac{N_{\mathrm{eff}}}{P}=\frac{2}{1+\rho_A} .
+\end{equation}
+The first says how far the raw evaluation count $E$ misstates the effective count; the second compares the effective count with the number of independent units. At $\rho_A=+1$ the first is $2$ and the second is $1$.
+
+The interpretation in the four cases is as follows.
+\begin{itemize}
+\item $\rho_A=+1$: $N_{\mathrm{eff}}=P=E/2$. The $E$ density evaluations have the variance of only $P$ independent evaluations, so counting $E$ as independent overstates the variance-equivalent count by a factor of two.
+\item $\rho_A=0$: $N_{\mathrm{eff}}=E$. The antithetic evaluations perform exactly like $E$ independent ones.
+\item $-1<\rho_A<0$: $N_{\mathrm{eff}}>E$. Pairing delivers variance reduction beyond what $E$ independent evaluations would give, which is the case antithetic sampling is designed for.
+\item $\rho_A\to-1$: $N_{\mathrm{eff}}$ diverges, because the idealised pair average has variance tending to zero. This is a statement about a variance-equivalence convention, not a literal count of independent observations; no finite design produces infinitely many of those.
+\end{itemize}
+In short, $E$ overstates the effective count by the factor $1+\rho_A$ when $\rho_A>0$, equals it when $\rho_A=0$, and understates it when $\rho_A<0$.
+
 \begin{proof}
 Reflecting every innovation maps the preterminal state $Z=x+\sqrt{1-h}\,\xi$ to $Z^-=x-\sqrt{1-h}\,\xi$, so $Z^--x=-(Z-x)$. The summand depends on $Z$ only through $\lVert y-Z\rVert^2$, and at $y=x$ this is $\lVert x-Z\rVert^2=\lVert Z-x\rVert^2$, which is invariant under $Z-x\mapsto-(Z-x)$. Hence $G^{-}=G^{+}$ pointwise, giving \eqref{eq:antithetic_identical} and $\rho_A=+1$. For \eqref{eq:antithetic_variance}, $\Var(G_i^{+}+G_i^{-})=2\sigma^2(1+\rho_A)$, so $\Var(A_i)=\tfrac14\cdot2\sigma^2(1+\rho_A)=\sigma^2(1+\rho_A)/2$; the pairs are independent across $i$, so the average of $P$ of them divides this by $P$.
 \end{proof}
 
-The comparison that matters is with the two designs of equal cost and equal count. Against $E=2P$ \emph{independent} evaluations, whose average has variance $\sigma^2/(2P)$, the antithetic design pays a factor $1+\rho_A$. Against $P$ independent evaluations, at variance $\sigma^2/P$, it gains whenever $\rho_A<0$. \Cref{prop:antithetic} is the case $\rho_A=+1$, where the $E$ evaluations buy exactly what $P$ would have bought. Numerically, at $h=1/10$ and $K=4$, $\rho_A$ is $+1$ at $\lVert y-x\rVert=0$, $+0.063$ at $\lVert y-x\rVert=0.5$ and $-0.012$ at $\lVert y-x\rVert=1.5$; at $K=1$ and $\lVert y-x\rVert=0.5$ it is $-0.479$. These values are illustrative of the mechanism at particular endpoints, not summaries of the estimator's behaviour over a sample. Antithetic sampling therefore helps for some endpoints and hurts for others, and the effect is on the variance \emph{constant}, never on the dimensional exponent: the rate remains governed by the number of independent units divided by $M^{K/2}$, however the pairs are correlated.
+\Cref{prop:antithetic} is the case $\rho_A=+1$, where the $E$ evaluations buy exactly what $P$ would have bought. Numerically, at $h=1/10$ and $K=4$, $\rho_A$ is $+1$ at $\lVert y-x\rVert=0$, $+0.063$ at $\lVert y-x\rVert=0.5$ and $-0.012$ at $\lVert y-x\rVert=1.5$; at $K=1$ and $\lVert y-x\rVert=0.5$ it is $-0.479$. These values are illustrative of the mechanism at particular endpoints, not summaries of the estimator's behaviour over a sample.
 
-For the reported design this gives $P=5{,}000$ independent pairs and $E=10{,}000$ endpoint-density evaluations. \Cref{tab:design} reports both, together with $P/M^{K/2}$ and $E/M^{K/2}$. Only the first is an effective simulation size in the sense of \Cref{def:effective_size}: $E/M^{K/2}$ counts evaluations, not independent units, and by \eqref{eq:antithetic_variance} it overstates the independent count by the factor $2/(1+\rho_A)$, which at a coincident endpoint is exactly two. In the theoretical sections $S$ continues to mean the number of independent contributions, and the substitution $S\mapsto P$ is the one that carries the results of \Cref{sec:general} over to an antithetic implementation.
+That last point needs emphasis, because it is what stops $N_{\mathrm{eff}}$ from being a single number for a given design. The pair correlation $\rho_A$ depends on the endpoint $y$, the initial state $x$, the state dimension $K$, the discretisation level $h$, the diffusion coefficients and the parameter value. Every transition in the likelihood therefore carries its own $\rho_A$, and a single variance-equivalent count for a $544$-term log likelihood does not exist without evaluating the pair covariance transition by transition. What can be said without that evaluation is that $\rho_A\le1$ always, so $N_{\mathrm{eff}}\ge E/2=P$, and the coincident-endpoint case attains the bound.
+
+Accordingly we report two distinct scaling diagnostics rather than one effective size:
+\begin{equation}\label{eq:two_diagnostics}
+R_{\mathrm{pair}}=\frac{P}{M^{K/2}},
+\qquad
+R_{\mathrm{var}}=\frac{N_{\mathrm{eff}}}{M^{K/2}}=\frac{2P}{(1+\rho_A)M^{K/2}} .
+\end{equation}
+$R_{\mathrm{pair}}$ counts independent units and requires no knowledge of $\rho_A$; it is the quantity to which the theory of \Cref{sec:general} applies directly under the substitution $S\mapsto P$, and it is the conservative diagnostic in the sense that $R_{\mathrm{var}}\ge R_{\mathrm{pair}}$ always. $R_{\mathrm{var}}$ is the variance-equivalent diagnostic and is known only once $\rho_A$ is. Neither quantity is an exact variance equivalence for the antithetic design taken as a whole: \Cref{def:effective_size} is stated for independent contributions, so $R_{\mathrm{pair}}$ is its literal instance under the substitution $S\mapsto P$, and $R_{\mathrm{var}}$ is a per-transition quantity that varies with $\rho_A$.
+
+For the reported design, $P=5{,}000$ independent pairs and $E=10{,}000$ endpoint-density evaluations. \Cref{tab:design} reports both, with $R_{\mathrm{pair}}$ and with $R_{\mathrm{var}}$ evaluated at two reference values of $\rho_A$ rather than at a single assumed one.
+
+Finally, none of this touches the dimensional exponent. Pairing changes the variance constant and can change it in either direction, but the $h^{-K/2}$ growth of the second moment survives it.
+
+\begin{lemma}[Antithetic pairing preserves the endpoint moment exponent]\label{lem:antithetic_exponent}
+Let $G_h^{+}$ and $G_h^{-}$ be nonnegative with identical marginal laws and let $A_h=\tfrac12(G_h^{+}+G_h^{-})$, with no assumption on their dependence. Then
+\begin{equation}\label{eq:antithetic_sandwich}
+\tfrac12\,\E\bigl[G_h^2\bigr]\ \le\ \E\bigl[A_h^2\bigr]\ \le\ \E\bigl[G_h^2\bigr],
+\end{equation}
+where $G_h$ denotes the common marginal. Consequently, if $\E[G_h^2]\asymp h^{-K/2}$ then $\E[A_h^2]\asymp h^{-K/2}$; and if in addition $\E[A_h]=O(1)$, then $\Var(A_h)\asymp h^{-K/2}$.
+\end{lemma}
+
+\begin{proof}
+Write $a=G_h^{+}$ and $b=G_h^{-}$, both nonnegative. Then $4A_h^2=(a+b)^2=a^2+b^2+2ab$. Since $ab\ge0$, we get $4A_h^2\ge a^2+b^2$; and since $2ab\le a^2+b^2$, we get $4A_h^2\le2(a^2+b^2)$. Hence
+\[
+\frac{a^2+b^2}{4}\ \le\ A_h^2\ \le\ \frac{a^2+b^2}{2},
+\]
+where nonnegativity is used only for the lower bound. Taking expectations and using $\E[a^2]=\E[b^2]=\E[G_h^2]$ gives \eqref{eq:antithetic_sandwich}. Both bounds are constants free of $h$ and of the dependence structure, so the two second moments have the same order, and $\E[A_h^2]\asymp h^{-K/2}$ follows from $\E[G_h^2]\asymp h^{-K/2}$.
+
+For the variance statement, $\Var(A_h)=\E[A_h^2]-\E[A_h]^2$. The subtracted term is $O(1)$ by hypothesis while $\E[A_h^2]$ diverges at rate $h^{-K/2}$, so it is negligible and $\Var(A_h)\asymp h^{-K/2}$. The hypothesis $\E[A_h]=O(1)$ holds in the present setting because $\E[A_h]=\E[G_h]$, which converges to the transition density.
+\end{proof}
+
+So the dimensional law of \Cref{thm:local_moments} is untouched by the coupling: only the constant in front of $h^{-K/2}$ responds to $\rho_A$, and \Cref{lem:antithetic_exponent} bounds that response within a factor of two of the independent case. In the theoretical sections $S$ continues to mean the number of independent contributions.
 
 \begin{table}[htbp]
 \centering
-\caption{Finite-sample scaling ratios for the implemented design and three variations, at $N=544$ and $K=4$. Here $S=P$ is the number of independent units, equal to the number of antithetic pairs, and $E=2P$ is the number of endpoint-density evaluations. The effective endpoint size is $R_{M,S}=S/M^{2}$ from \Cref{def:effective_size}, computed from independent units. The column $E/M^2$ is shown for comparison and is \emph{not} an effective simulation size: it counts evaluations, and by \eqref{eq:antithetic_variance} it overstates the independent count by $2/(1+\rho_A)$, a factor of two at a coincident endpoint. These are diagnostics: the columns record how the implementation is placed, not whether any limit holds.}
+\caption{Finite-sample scaling ratios for the implemented design and three variations, at $N=544$ and $K=4$. Here $P=S$ is the number of independent units, equal to the number of antithetic pairs, and $E=2P$ the number of endpoint-density evaluations. $R_{\mathrm{pair}}=P/M^2$ counts independent units and needs no knowledge of $\rho_A$; it is \Cref{def:effective_size} under the substitution $S\mapsto P$, and is a conservative diagnostic rather than an exact variance equivalence. $R_{\mathrm{var}}=N_{\mathrm{eff}}/M^2$ with $N_{\mathrm{eff}}=E/(1+\rho_A)$ is the variance-equivalent diagnostic, and it is reported at \emph{two reference values} of $\rho_A$ because no single value applies to a $544$-term likelihood: $\rho_A=1$ is the worst case, attained at a coincident endpoint, and $\rho_A=0$ the neutral case in which pairing neither helps nor hurts. Any $\rho_A<0$ gives $R_{\mathrm{var}}$ larger than both columns shown, and $R_{\mathrm{var}}\ge R_{\mathrm{pair}}$ always. These are diagnostics: the columns record how the implementation is placed, not whether any limit holds.}
 \label{tab:design}
-\small
-\begin{tabular}{lrrrrrrr}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrrrr}
 \toprule
-Scenario & $M$ & $P=S$ & $E=2P$ & $R_{M,S}=P/M^2$ & $E/M^2$ & $\sqrt S/M$ & $N/S^{1/4}$ \\
+& & & & & \multicolumn{2}{c}{$R_{\mathrm{var}}=N_{\mathrm{eff}}/M^2$} & & \\
+\cmidrule(lr){6-7}
+Scenario & $M$ & $P=S$ & $E=2P$ & $R_{\mathrm{pair}}$ & $\rho_A=1$ & $\rho_A=0$ & $\sqrt P/M$ & $N/P^{1/4}$ \\
 \midrule
-Implemented & 10 & 5{,}000 & 10{,}000 & 50.0 & 100.0 & 7.07 & 64.7 \\
-Double $M$ and $S$ & 20 & 10{,}000 & 20{,}000 & 25.0 & 50.0 & 5.00 & 54.4 \\
-Double $M$, $S$ fixed & 20 & 5{,}000 & 10{,}000 & 12.5 & 25.0 & 3.54 & 64.7 \\
-Double $M$, quadruple $S$ & 20 & 20{,}000 & 40{,}000 & 50.0 & 100.0 & 7.07 & 45.7 \\
+Implemented & 10 & 5{,}000 & 10{,}000 & 50.0 & 50.0 & 100.0 & 7.07 & 64.7 \\
+Double $M$ and $P$ & 20 & 10{,}000 & 20{,}000 & 25.0 & 25.0 & 50.0 & 5.00 & 54.4 \\
+Double $M$, $P$ fixed & 20 & 5{,}000 & 10{,}000 & 12.5 & 12.5 & 25.0 & 3.54 & 64.7 \\
+Double $M$, quadruple $P$ & 20 & 20{,}000 & 40{,}000 & 50.0 & 50.0 & 100.0 & 7.07 & 45.7 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The dimensional diagnostic of \Cref{def:effective_size} gives the complementary reading. With $K=4$, $M=10$ and $S=5{,}000$,
+The dimensional diagnostic of \Cref{def:effective_size} gives the complementary reading. With $K=4$, $M=10$ and $P=5{,}000$ independent pairs,
 \begin{equation}\label{eq:implemented_effective_size}
-R_{M,S}=\frac{S}{M^{K/2}}=\frac{5{,}000}{100}=50 .
+R_{\mathrm{pair}}=\frac{P}{M^{K/2}}=\frac{5{,}000}{100}=50 .
 \end{equation}
-Each transition density in a $544$-term log likelihood is therefore resolved by an effective endpoint sample of order $10^2$, not $10^4$. Again this is a scaling statement and not a verdict: an effective size of $50$ may well be adequate at these parameter values, and the exact Brownian formulas of \Cref{sec:brownian} would be the way to check that for a given target density.
+Each transition density in a $544$-term log likelihood is therefore resolved by an independent-pair count of order $10^2$, not the $10^4$ that the raw evaluation total suggests. The variance-equivalent figure $R_{\mathrm{var}}$ lies between $50$ and $100$ wherever $\rho_A\ge0$ and above $100$ wherever $\rho_A<0$, so the order of magnitude is $10^2$ on any reading short of near-perfect negative pairing. Again this is a scaling statement and not a verdict: a count of $50$ may well be adequate at these parameter values, and the exact Brownian formulas of \Cref{sec:brownian} would be the way to check that for a given target density.
 
 The last three rows of \Cref{tab:design} record how $R_{M,S}$ responds to refinement, because the arithmetic is easy to get wrong. In four dimensions $R_{M,S}=S/M^2$, so
 \begin{equation}\label{eq:doubling_arithmetic}

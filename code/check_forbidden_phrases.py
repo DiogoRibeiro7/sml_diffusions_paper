@@ -114,6 +114,19 @@ FORBIDDEN = (
         r"deterministic implication about any pair of maximisers",
         "Proposition 6.2's hypotheses are probabilistic",
     ),
+    Forbidden(
+        r"overstates the independent count by (the factor )?\$?2/\(1\+\\rho_A\)",
+        "E overstates the effective count by 1 + rho_A; 2/(1+rho_A) is N_eff/P",
+    ),
+    Forbidden(
+        r"2/\(1\+\\rho_A\)\$?,? (which )?(at a coincident endpoint )?is exactly two",
+        "at rho_A = 1 the expression 2/(1+rho_A) equals one, not two",
+    ),
+    Forbidden(
+        # Only the asserting form: the manuscript legitimately denies this.
+        r"is the (exact )?effective (simulation )?size of the antithetic",
+        "P/M^{K/2} is an independent-pair diagnostic, not an exact variance equivalence",
+    ),
 )
 
 

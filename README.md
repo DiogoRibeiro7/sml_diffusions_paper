@@ -44,7 +44,7 @@ make            # regenerate figures and tables, then build the PDF
 make check      # tests, reproducibility, forbidden-phrase gate
 ```
 
-The manuscript builds to `paper/main.pdf` (54 pages). Python 3.11+, NumPy, SciPy, pandas and
+The manuscript builds to `paper/main.pdf` (55 pages). Python 3.11+, NumPy, SciPy, pandas and
 Matplotlib; LaTeX with `latexmk` and `biber`.
 
 ## Layout
@@ -67,6 +67,7 @@ code/
 tests/
   test_analytics.py             every analytical formula, checked independently
   test_singular_psd_condition.py the block PSD lemma of Appendix E
+  test_antithetic.py            the pair-average variance and the h-exponent
 docs/                     audit trail; see below
 notes/                    the argmax investigation and its go/no-go conclusion
 reference/                literature under review; local only, never committed
@@ -83,9 +84,9 @@ gates keep the manuscript and the code from drifting apart.
 
 | Gate | Command | What it enforces |
 | --- | --- | --- |
-| Tests | `make test` | 167 tests. Every closed form is checked against an independent computation: numerical integration, direct Monte Carlo, or brute force. Tolerances are stated at each assertion. |
+| Tests | `make test` | 193 tests. Every closed form is checked against an independent computation: numerical integration, direct Monte Carlo, or brute force. Tolerances are stated at each assertion. |
 | Reproducibility | `make verify` | 33 artefacts regenerated into a scratch directory and compared with the committed copies. CSV field-wise at `1e-9`; PDF and PNG by SHA-256. Figure output carries no embedded timestamp, so the comparison is exact. |
-| Wording | `make phrases` | 19 patterns for claims retracted in an earlier review round. Guards against an overstatement removed from one section reappearing in another later. |
+| Wording | `make phrases` | 22 patterns for claims retracted in an earlier review round. Guards against an overstatement removed from one section reappearing in another later. |
 | Release | `python code/make_release.py` | All of the above, plus a clean LaTeX log, resolved front-matter metadata, no draft label, deposit metadata that parses, and every release document present. |
 
 `make check` runs the first three. The release gate refuses to build if any fails; `--allow-draft`
