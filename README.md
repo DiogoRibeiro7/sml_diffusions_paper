@@ -144,23 +144,24 @@ All `make` targets: `all`, `figures`, `pdf` (alias `paper`), `test`, `verify`, `
 
 ## Archiving
 
-The record is deposited on Zenodo. `.zenodo.json` holds the deposit metadata, including the related
-identifiers that register this work as **reviewing** `10.1016/S0304-405X(01)00093-9` and citing the
-four asymptotic analyses it is positioned against. The repository is private, so the deposit is made
-manually; the GitHub–Zenodo integration requires a public repository, and `.zenodo.json` therefore
-serves as the source for the deposit form rather than being read automatically.
+The repository is linked to Zenodo, which archives it automatically on every GitHub release.
+`.zenodo.json` is read by that integration and supplies the deposit metadata: description, creators,
+keywords, licence, and the related identifiers that register this work as **reviewing**
+`10.1016/S0304-405X(01)00093-9` and citing the four asymptotic analyses it is positioned against.
 
-Three files make up the deposit, all produced by `code/make_release.py`:
+What Zenodo archives is a snapshot of the repository at the tagged commit, not the contents of
+`dist/`, which is gitignored. That snapshot is self-contained: it carries `paper/main.tex` and the
+compiled `paper/main.pdf`, the generated figures and tables, all of `code/` and `tests/`, and the
+audit documents in `docs/`. Anyone with the tarball can rebuild the manuscript and reproduce every
+artefact. The bundles under `dist/` remain useful for sending the paper to a person rather than to an
+archive, and `code/make_release.py` still produces them.
 
-| File | Contents |
-| --- | --- |
-| `dist/main.pdf` | the manuscript |
-| `dist/source.zip` | LaTeX and Python sources, figures, tables, tests, documents |
-| `dist/reproducibility.zip` | the code and manifest needed to regenerate every artefact |
+To publish a new version, tag a release. Zenodo mints a fresh version DOI and updates the concept
+DOI, which always resolves to the newest version. Later revisions should go out as new releases of
+the same repository rather than as separate deposits, so the concept DOI keeps resolving correctly.
 
-Zenodo mints a concept DOI that always resolves to the newest version, alongside a DOI per version.
-Later revisions should be published as new versions of the same record rather than as separate
-deposits, so the concept DOI keeps resolving correctly.
+The article under review is not in the repository and never has been: `reference/` is gitignored and
+appears in no commit on any branch, so nothing third-party is archived.
 
 ## Licence
 

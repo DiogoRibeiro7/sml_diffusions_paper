@@ -55,5 +55,5 @@
       "scheme": "doi"
     }
   ],
-  "notes": "JEL classifications: C13; C15; C32; G12; G15. The repository is private; this record was deposited manually rather than through the GitHub-Zenodo integration."
+  "notes": "JEL classifications: C13; C15; C32; G12; G15. This record is archived automatically from the linked GitHub repository on each release, so it contains the full source: the LaTeX manuscript and its compiled PDF, the Python code that generates every figure and table, the test suite, and the audit documents. All 33 figures and tables regenerate bit-for-bit from the included code via 'make verify'."
 }
