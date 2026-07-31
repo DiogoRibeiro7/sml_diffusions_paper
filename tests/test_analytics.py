@@ -786,6 +786,11 @@ def test_citation_and_zenodo_agree_with_the_manuscript() -> None:
     assert zenodo["creators"][0]["orcid"] == orcid
     assert orcid in manuscript
 
+    affiliation = "Escola Superior de Media Artes e Design (ESMAD), IPP"
+    assert citation["authors"][0]["affiliation"] == affiliation
+    assert zenodo["creators"][0]["affiliation"] == affiliation
+    assert f"\\newcommand{{\\affiliation}}{{{affiliation}}}" in manuscript
+
 
 def test_zenodo_registers_the_reviewed_article() -> None:
     """The deposit must point at the article it corrects, by DOI."""

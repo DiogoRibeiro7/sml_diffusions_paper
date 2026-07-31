@@ -628,9 +628,11 @@ def run_time_varying_audit(
 ) -> pd.DataFrame:
     """Audit models B and C over a box of states, without the observed series.
 
-    The log exchange rate is swept rather than read from data, which makes the
-    conclusion a statement about the reachable state space rather than about
-    one realised path.  For each state the volatility is obtained from
+    The log exchange rate is swept rather than read from data.  The result is an
+    algebraic-domain diagnostic evaluated at a finite collection of candidate
+    points: it records whether the inverse variance identity admits no positive
+    volatility, one, or two, and it says nothing about whether the diffusion
+    visits those points.  For each candidate the volatility is obtained from
     ``volatility_branches``, so every evaluated matrix satisfies the complete
     variance identity by construction.
     """
@@ -683,4 +685,96 @@ def run_time_varying_audit(
                     "epsilon_squared": None if worst_state is None else worst_state[3],
                 }
             )
+    return pd.DataFrame(rows)
+
+
+# Tolerances for the algebraic-domain diagnostic, stated once so that the table
+# caption and the code cannot drift apart.
+POSITIVE_ROOT_TOLERANCE = 1e-12
+REPEATED_ROOT_TOLERANCE = 1e-9
+NEGATIVE_EIGENVALUE_TOLERANCE = -1e-10
+
+# Each design is (label, rate multiples, fx points, max rate multiple, fx range,
+# epsilon^2 levels, logarithmic rate spacing).
+GRID_DESIGNS: tuple[tuple[str, int, int, float, float, tuple[float, ...], bool], ...] = (
+    ("baseline", 26, 21, 5.0, 2.0, (0.0, 0.002, 0.01, 0.05), False),
+    ("denser", 41, 33, 5.0, 2.0, (0.0, 0.002, 0.01, 0.05), False),
+    ("wider fx", 26, 21, 5.0, 4.0, (0.0, 0.002, 0.01, 0.05), False),
+    ("narrower fx", 26, 21, 5.0, 0.5, (0.0, 0.002, 0.01, 0.05), False),
+    ("log rates", 26, 21, 5.0, 2.0, (0.0, 0.002, 0.01, 0.05), True),
+    ("more eps", 26, 21, 5.0, 2.0, (0.0, 0.001, 0.005, 0.01, 0.02, 0.05), False),
+)
+
+
+def run_grid_sensitivity(
+    parameters: Parameters = US_UK,
+    model: str = "C",
+    designs: tuple[tuple[str, int, int, float, float, tuple[float, ...], bool], ...] = GRID_DESIGNS,
+) -> pd.DataFrame:
+    """Repeat the algebraic-domain diagnostic under several candidate grids.
+
+    A single grid could produce an artefact of its own spacing, so the diagnostic
+    is repeated under denser, wider, narrower, logarithmically spaced and
+    finer-incompleteness designs.  The counts are properties of each grid; only
+    the qualitative findings, that no candidate point admits exactly one positive
+    root and that no matrix is indefinite, are properties of the specification.
+    """
+    rows = []
+    for label, n_rates, n_fx, max_rate, fx_range, epsilons, logarithmic in designs:
+        if logarithmic:
+            multiples = np.logspace(math.log10(0.05), math.log10(max_rate), n_rates)
+        else:
+            multiples = np.linspace(0.05, max_rate, n_rates)
+        fx_grid = np.linspace(-fx_range, fx_range, n_fx)
+        points = evaluated = no_root = one_root = two_roots = repeated = 0
+        worst = math.inf
+        for domestic in multiples:
+            for foreign in multiples:
+                rate = domestic * parameters.theta
+                rate_star = foreign * parameters.theta_star
+                for log_fx in fx_grid:
+                    for epsilon_squared in epsilons:
+                        points += 1
+                        branches = volatility_branches(
+                            parameters, model, rate, rate_star, log_fx, epsilon_squared
+                        )
+                        positive = [v for v in branches if v > POSITIVE_ROOT_TOLERANCE]
+                        if len(positive) == 2 and abs(positive[0] - positive[1]) < (
+                            REPEATED_ROOT_TOLERANCE
+                        ):
+                            repeated += 1
+                        if not positive:
+                            no_root += 1
+                        elif len(positive) == 1:
+                            one_root += 1
+                        else:
+                            two_roots += 1
+                        for volatility in positive:
+                            evaluated += 1
+                            eigenvalue = float(
+                                np.linalg.eigvalsh(
+                                    build_matrix(parameters, rate, rate_star, volatility)
+                                ).min()
+                            )
+                            worst = min(worst, eigenvalue)
+        rows.append(
+            {
+                "design": label,
+                "rate_values": n_rates,
+                "fx_values": n_fx,
+                "fx_range": fx_range,
+                "epsilon_levels": len(epsilons),
+                "rate_spacing": "log" if logarithmic else "linear",
+                "candidate_points": points,
+                "no_positive_root": no_root,
+                "one_positive_root": one_root,
+                "two_positive_roots": two_roots,
+                "repeated_roots": repeated,
+                "branch_matrices": evaluated,
+                "worst_min_eigenvalue": worst if evaluated else float("nan"),
+                "indefinite_found": bool(
+                    evaluated and worst < NEGATIVE_EIGENVALUE_TOLERANCE
+                ),
+            }
+        )
     return pd.DataFrame(rows)
