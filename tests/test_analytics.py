@@ -969,3 +969,32 @@ def test_worst_case_derivative_is_positive() -> None:
             ) / (2.0 * step)
             assert analytic > 0.0
             assert analytic == pytest.approx(numeric, rel=1e-4)
+
+
+def test_underflow_threshold_lies_in_the_subnormal_range() -> None:
+    """The caption's account of the binary64 underflow point must be accurate.
+
+    Binary64 represents down to about 5e-324 through subnormals, below the
+    smallest normal value of about 2.2e-308.  A CDF routine may return zero
+    earlier; the one used here does so inside the subnormal range, near 6e-311.
+    An earlier caption put the threshold at "roughly 1e-308", which is neither
+    the representation limit nor this implementation's behaviour.
+    """
+    smallest_normal = float(np.finfo(np.float64).tiny)
+    smallest_subnormal = float(np.nextafter(0.0, 1.0))
+    assert smallest_normal == pytest.approx(2.2250738585072014e-308)
+    assert smallest_subnormal == pytest.approx(5e-324)
+
+    low, high = 1.0, 100.0
+    for _ in range(200):
+        middle = 0.5 * (low + high)
+        if float(norm.cdf(-middle)) > 0.0:
+            low = middle
+        else:
+            high = middle
+    threshold = float(norm.cdf(-low))
+
+    # Strictly inside the subnormal range: below the smallest normal value,
+    # and above the smallest representable subnormal.
+    assert smallest_subnormal < threshold < smallest_normal
+    assert threshold == pytest.approx(6e-311, rel=0.2)

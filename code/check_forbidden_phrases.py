@@ -201,6 +201,34 @@ FORBIDDEN = (
         r"specifications are unproblematic",
         "a finite grid does not establish global validity",
     ),
+    Forbidden(
+        r"degenerates to \$?0\\le0\$? and carries no information",
+        "at |rho_ww*|=1 the condition forces compatibility; it is not vacuous",
+    ),
+    Forbidden(
+        r"applies directly under the substitution \$?S\\mapsto P",
+        "the lemma preserves the scale only; it does not carry the CLT across",
+    ),
+    Forbidden(
+        r"half the effective size of the first",
+        "only the independent-pair diagnostic halves; R_var may not",
+    ),
+    Forbidden(
+        r"optimum is a vertex of whichever feasible set",
+        "boundary point in general; vertex only for the polyhedral C_pub",
+    ),
+    Forbidden(
+        r"object being maximised is a nearest-neighbour functional",
+        "the simulated criterion is a smooth log-sum-exp, only approximated by one",
+    ),
+    Forbidden(
+        r"not a phenomenon any simulation will encounter",
+        "negligible at the displayed states, not impossible",
+    ),
+    Forbidden(
+        r"returns exactly zero, which happens below roughly \$?10\^\{-308\}",
+        "binary64 reaches 5e-324 via subnormals; this routine underflows near 6e-311",
+    ),
 )
 
 

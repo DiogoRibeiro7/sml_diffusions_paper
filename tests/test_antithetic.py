@@ -350,3 +350,55 @@ def test_lemma_bounds_the_constant_but_not_the_clt() -> None:
     # Same order in h, different constants: the lemma cannot supply the latter.
     assert identical_constant > 0.0 and other_constant > 0.0
     assert identical_constant != pytest.approx(other_constant, rel=0.5)
+
+
+# ---------------------------------------------------------------------------
+# Proposition 8.4: nonnegativity bounds rho_A from below
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("dimension", [1, 2, 4])
+def test_pair_correlation_is_bounded_below_and_tends_to_zero(dimension: int) -> None:
+    """rho_A >= -E[G]^2 / Var(G) = O(h^{K/2}), so liminf rho_A >= 0.
+
+    Both partners are nonnegative, so E[G+ G-] >= 0 and the covariance cannot
+    fall below -E[G]^2.  The variance diverges at rate h^{-K/2}, so any negative
+    correlation is squeezed towards zero as the mesh is refined.
+    """
+    rng = np.random.default_rng(9100 + dimension)
+    start = np.zeros(dimension)
+    endpoint = np.full(dimension, 0.5)  # an endpoint where pairing can help
+    draws = 200_000
+
+    observed = []
+    for h in (1 / 10, 1 / 40, 1 / 160):
+        noise = rng.normal(size=(draws, dimension))
+        plus = endpoint_summand(start + math.sqrt(1.0 - h) * noise, endpoint, h)
+        minus = endpoint_summand(start - math.sqrt(1.0 - h) * noise, endpoint, h)
+        correlation = float(np.corrcoef(plus, minus)[0, 1])
+        bound = -float(plus.mean()) ** 2 / float(plus.var(ddof=1))
+        assert correlation >= bound - 0.05, f"h={h}: below the nonnegativity bound"
+        observed.append(correlation)
+
+    # The admissible negative range shrinks, so the correlation is pushed up.
+    assert observed[-1] > observed[0] - 0.05
+    assert observed[-1] > -0.35, "should be well above -1 at the finest mesh"
+
+
+def test_covariance_of_nonnegative_partners_exceeds_minus_mean_squared() -> None:
+    """Cov(G+, G-) >= -E[G]^2 exactly, since E[G+ G-] >= 0."""
+    rng = np.random.default_rng(555)
+    for dimension in (1, 2, 4):
+        for offset in (0.0, 0.5, 1.5):
+            h = 1 / 20
+            noise = rng.normal(size=(60_000, dimension))
+            start = np.zeros(dimension)
+            endpoint = np.full(dimension, offset)
+            plus = endpoint_summand(start + math.sqrt(1.0 - h) * noise, endpoint, h)
+            minus = endpoint_summand(start - math.sqrt(1.0 - h) * noise, endpoint, h)
+            assert float((plus * minus).mean()) >= 0.0
+            # The identity Cov = E[XY] - E[X]E[Y] is exact only for the
+            # population form; the ddof=1 estimator rescales by n/(n-1), which
+            # pushes a negative covariance slightly past the bound.
+            covariance = float(np.cov(plus, minus, ddof=0)[0, 1])
+            assert covariance >= -float(plus.mean()) * float(minus.mean()) - 1e-12

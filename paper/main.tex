@@ -713,6 +713,39 @@ Let $q_M(y\mid x)=\E[G_h]$ and suppose $q_M(y\mid x)\to p(y\mid x)$. Then
 \end{equation}
 \end{corollary}
 
+The central limit theorem below centres at the Euler density $q_M(y\mid x)=\E[G_h]$, and its proof needs that quantity to be bounded uniformly in $h$. That is not automatic: the summand $G_h$ itself is unbounded, since a Gaussian of covariance $hV$ has height of order $h^{-K/2}$ at its centre. What makes the \emph{expectation} bounded is that the preterminal state has a uniformly bounded density, so the mass the kernel can concentrate on is limited. We record this separately rather than assume it.
+
+\begin{lemma}[The Euler density is bounded uniformly in the step]\label{lem:qM_bounded}
+Under \Cref{ass:local},
+\begin{equation}\label{eq:qM_bound}
+\sup_{0<h\le1/2}q_M(y\mid x)\ \le\ \bar r\left(\frac{4\overline v}{\underline v}\right)^{K/2}+C_K\,\bar r\,\underline v^{-K/2}\bar\mu^K
+\ <\ \infty,
+\end{equation}
+where $C_K$ depends only on $K$. In particular $q_M(y\mid x)=O(1)$.
+\end{lemma}
+
+\begin{proof}
+Writing $Z_h$ for the preterminal state and substituting $u=y-z$, which has unit Jacobian,
+\[
+q_M(y\mid x)=\int\varphi_{hV(y-u)}\bigl(u-\mu(y-u)h\bigr)\,r_h(y-u\mid x)\,du .
+\]
+By \ref{ass:bound} the density factor is at most $\bar r$, and by \ref{ass:V},
+\[
+\varphi_{hV(z)}(w)\le(2\pi h)^{-K/2}\underline v^{-K/2}\exp\Bigl(-\frac{\lVert w\rVert^2}{2h\overline v}\Bigr).
+\]
+Split the integral at $\lVert u\rVert=2\bar\mu h$. On $\lVert u\rVert\ge2\bar\mu h$, \ref{ass:mu} gives $\lVert u-\mu(y-u)h\rVert\ge\lVert u\rVert-\bar\mu h\ge\lVert u\rVert/2$, so that part is at most
+\[
+\bar r\,(2\pi h)^{-K/2}\underline v^{-K/2}\int_{\R^K}\exp\Bigl(-\frac{\lVert u\rVert^2}{8h\overline v}\Bigr)du
+=\bar r\,(2\pi h)^{-K/2}\underline v^{-K/2}\bigl(8\pi h\overline v\bigr)^{K/2}
+=\bar r\left(\frac{4\overline v}{\underline v}\right)^{K/2},
+\]
+which is free of $h$. On $\lVert u\rVert<2\bar\mu h$ the integrand is at most $\bar r(2\pi h)^{-K/2}\underline v^{-K/2}$ and the region has volume $\omega_K(2\bar\mu h)^K$, so that part is at most $C_K\bar r\underline v^{-K/2}\bar\mu^Kh^{K/2}$ with $C_K=\omega_K2^K(2\pi)^{-K/2}$, and $h\le1/2$ bounds it. Adding the two gives \eqref{eq:qM_bound}.
+\end{proof}
+
+\begin{remark}[Boundedness, not convergence, is what is used]\label{rem:qM_scope}
+\Cref{lem:qM_bounded} gives only $q_M=O(1)$, and that is all \Cref{thm:generic_clt} requires: the theorem centres at $q_M$ rather than at $p$, so no rate of approach is needed. The stronger statement $q_M(y\mid x)\to p(y\mid x)$ also holds under \Cref{ass:local}, by the approximate-identity argument of \Cref{thm:local_moments} applied at $r=1$ together with \ref{ass:conv}, but we do not use it here. Where the distinction matters is \Cref{cor:diffusion_clt}, which recentres at $p$ and there assumes a first-order Euler density expansion separately.
+\end{remark}
+
 \begin{theorem}[Generic endpoint CLT]\label{thm:generic_clt}
 Let $(M_n,S_n)$ satisfy $M_n\to\infty$ and $S_n\to\infty$, write $h_n=1/M_n$, and suppose the effective endpoint size diverges:
 \begin{equation}\label{eq:effective_diverge_general}
@@ -743,7 +776,7 @@ where $Z_{h_n,1},\ldots,Z_{h_n,S_n}$ are the independent preterminal draws in \e
 \widehat q_{M_n,S_n}-q_{M_n}=\frac1{S_n}\sum_{s=1}^{S_n}\left(G_{n,s}-\E G_{n,s}\right).
 \]
 
-\emph{Variance.} \Cref{thm:local_moments} with $r=2$ gives $h_n^{K/2}\E[G_{n,1}^2]\to\tau^2$. Since $\E G_{n,1}=q_{M_n}\to p(y\mid x)$ is bounded, $h_n^{K/2}(\E G_{n,1})^2\to0$, so
+\emph{Variance.} \Cref{thm:local_moments} with $r=2$ gives $h_n^{K/2}\E[G_{n,1}^2]\to\tau^2$. Since $\E G_{n,1}=q_{M_n}$ is bounded uniformly in $n$ by \Cref{lem:qM_bounded}, $h_n^{K/2}(\E G_{n,1})^2\to0$, so
 \begin{equation}\label{eq:var_asymptotic}
 h_n^{K/2}\Var(G_{n,1})\longrightarrow\tau^2,
 \qquad
@@ -756,7 +789,7 @@ h_n^{K/2}\Var(G_{n,1})\longrightarrow\tau^2,
 \le4\left\{\E[G_{n,1}^3]+(\E G_{n,1})^3\right\}
 =O(h_n^{-K})+O(1)=O(h_n^{-K}),
 \end{equation}
-using once more that $q_{M_n}$ is bounded. Nonnegativity of the summand is what makes this step elementary; without it the centred third moment would require a separate argument.
+using \Cref{lem:qM_bounded} once more. Nonnegativity of the summand is what makes this step elementary; without it the centred third moment would require a separate argument.
 
 \emph{Lyapunov condition.} Write $\sigma_n^2=\Var(G_{n,1})$, so $\sigma_n^2\sim\tau^2h_n^{-K/2}$ by \eqref{eq:var_asymptotic}. The Lyapunov ratio at order $2+\delta$ with $\delta=1$ is
 \[
@@ -1208,7 +1241,7 @@ R_{\mathrm{pair}}=\frac{P}{M^{K/2}},
 \qquad
 R_{\mathrm{var}}=\frac{N_{\mathrm{eff}}}{M^{K/2}}=\frac{2P}{(1+\rho_A)M^{K/2}} .
 \end{equation}
-$R_{\mathrm{pair}}$ counts independent units and requires no knowledge of $\rho_A$; it is the quantity to which the theory of \Cref{sec:general} applies directly under the substitution $S\mapsto P$, and it is the conservative diagnostic in the sense that $R_{\mathrm{var}}\ge R_{\mathrm{pair}}$ always. $R_{\mathrm{var}}$ is the variance-equivalent diagnostic and is known only once $\rho_A$ is. Neither quantity is an exact variance equivalence for the antithetic design taken as a whole: \Cref{def:effective_size} is stated for independent contributions, so $R_{\mathrm{pair}}$ is its literal instance under the substitution $S\mapsto P$, and $R_{\mathrm{var}}$ is a per-transition quantity that varies with $\rho_A$.
+$R_{\mathrm{pair}}$ counts independent units and requires no knowledge of $\rho_A$, and it is the conservative diagnostic in the sense that $R_{\mathrm{var}}\ge R_{\mathrm{pair}}$ always. \Cref{lem:antithetic_exponent} shows that independent pair averages preserve the dimensional consistency scale $P/M^{K/2}$; it does not carry the theory of \Cref{sec:general} across wholesale. A complete antithetic central limit theorem would additionally require the limiting joint second and third moments of each pair, none of which the lemma supplies, as \Cref{rem:antithetic_scope} records. $R_{\mathrm{var}}$ is the variance-equivalent diagnostic and is known only once $\rho_A$ is. Neither quantity is an exact variance equivalence for the antithetic design taken as a whole: \Cref{def:effective_size} is stated for independent contributions, so $R_{\mathrm{pair}}$ is its literal instance under the substitution $S\mapsto P$, and $R_{\mathrm{var}}$ is a per-transition quantity that varies with $\rho_A$.
 
 For the reported design, $P=5{,}000$ independent pairs and $E=10{,}000$ endpoint-density evaluations. \Cref{tab:design} reports both, with $R_{\mathrm{pair}}$ and with $R_{\mathrm{var}}$ evaluated at two reference values of $\rho_A$ rather than at a single assumed one.
 
@@ -1232,7 +1265,31 @@ where nonnegativity is used only for the lower bound. Taking expectations and us
 For the variance statement, $\Var(A_h)=\E[A_h^2]-\E[A_h]^2$. The subtracted term is $O(1)$ by hypothesis while $\E[A_h^2]$ diverges at rate $h^{-K/2}$, so it is negligible and $\Var(A_h)\asymp h^{-K/2}$. The hypothesis $\E[A_h]=O(1)$ holds in the present setting because $\E[A_h]=\E[G_h]$, which converges to the transition density.
 \end{proof}
 
-So the dimensional law of \Cref{thm:local_moments} is untouched by the coupling: only the constant in front of $h^{-K/2}$ responds to $\rho_A$, and \Cref{lem:antithetic_exponent} bounds that response within a factor of two of the independent case. In the theoretical sections $S$ continues to mean the number of independent contributions.
+So the dimensional law of \Cref{thm:local_moments} is untouched by the coupling: only the constant in front of $h^{-K/2}$ responds to $\rho_A$, and \Cref{lem:antithetic_exponent} bounds that response within a factor of two of the independent case.
+
+Nonnegativity says something sharper about $\rho_A$ itself, and it is not encouraging for the design.
+
+\begin{proposition}[Antithetic pairing cannot help at leading order]\label{prop:antithetic_asymptotic}
+Suppose $G_h^{+},G_h^{-}\ge0$ have the common marginal law of $G_h$, with $\E[G_h]=O(1)$ and $\Var(G_h)\asymp h^{-K/2}$. Then
+\begin{equation}\label{eq:rho_a_lower_bound}
+\rho_A\ \ge\ -\frac{\E[G_h]^2}{\Var(G_h)}\ =\ O\bigl(h^{K/2}\bigr),
+\end{equation}
+so $\liminf_{h\downarrow0}\rho_A\ge0$. Consequently $N_{\mathrm{eff}}\le E\,(1+o(1))$: relative to $E$ independent evaluations, antithetic pairing cannot improve the leading rare-event variance constant as the mesh is refined.
+\end{proposition}
+
+\begin{proof}
+Since both variables are nonnegative, $\E[G_h^{+}G_h^{-}]\ge0$, so
+\[
+\Cov\bigl(G_h^{+},G_h^{-}\bigr)=\E\bigl[G_h^{+}G_h^{-}\bigr]-\E[G_h]^2\ \ge\ -\E[G_h]^2 .
+\]
+Dividing by $\Var(G_h)$ gives \eqref{eq:rho_a_lower_bound}. The numerator is $O(1)$ by hypothesis and the denominator diverges at rate $h^{-K/2}$, so the bound tends to zero and $\liminf\rho_A\ge0$. The statement about $N_{\mathrm{eff}}=E/(1+\rho_A)$ follows immediately.
+\end{proof}
+
+The mechanism is worth naming. A negative $\rho_A$ requires the pair to be jointly small when one member is large, but both members are nonnegative densities whose variance is driven by a rare event in which one of them is enormous; on that event the product is nonnegative, and the covariance cannot be more negative than $-\E[G_h]^2$, which does not grow. Antithetic sampling can still reduce variance at a \emph{fixed} $h$ and a favourable endpoint, as the value $\rho_A=-0.479$ above shows, and that is a real finite-sample gain. What it cannot do is change the constant multiplying $h^{-K/2}$ in the limit. In the theoretical sections $S$ continues to mean the number of independent contributions.
+
+\begin{remark}[What \Cref{lem:antithetic_exponent} does not give]\label{rem:antithetic_scope}
+The lemma fixes the order of the second moment and, with $\E[A_h]=O(1)$, of the variance. It does not give the exact local variance constant, the third centred-moment constant, the Lyapunov ratio for a pair-level triangular array, or a central limit theorem at either the pair level or the likelihood level. Establishing an antithetic analogue of \Cref{thm:generic_clt} would require the limiting joint second and third moments of $(G_h^{+},G_h^{-})$, which depend on the coupling and are not supplied by a sandwich bound.
+\end{remark}
 
 \begin{table}[htbp]
 \centering
@@ -1268,7 +1325,7 @@ R_{2M,S}=\frac{R_{M,S}}{4},
 \qquad
 R_{2M,4S}=R_{M,S}.
 \end{equation}
-The paper reports a final round of optimisation in which both the simulation count and $M$ are doubled. In four dimensions that halves the independent-pair scaling diagnostic $R_{\mathrm{pair}}=P/M^2$ rather than increasing it. The corresponding change in the variance-equivalent diagnostic $R_{\mathrm{var}}$ cannot be determined without the antithetic pair correlation at each transition, since $\rho_A$ may itself vary with $M$; what can be said is that $R_{\mathrm{var}}\ge R_{\mathrm{pair}}$ throughout. The reported stability of the estimates under this refinement is therefore not evidence that the simulation is converging in the endpoint dimension; it is a comparison between two designs, the second of which has half the effective size of the first. Holding $R_{M,S}$ fixed while doubling $M$ requires quadrupling $S$, which is the last row of the table.
+The paper reports a final round of optimisation in which both the simulation count and $M$ are doubled. In four dimensions that halves the independent-pair scaling diagnostic $R_{\mathrm{pair}}=P/M^2$ rather than increasing it. The corresponding change in the variance-equivalent diagnostic $R_{\mathrm{var}}$ cannot be determined without the antithetic pair correlation at each transition, since $\rho_A$ may itself vary with $M$; what can be said is that $R_{\mathrm{var}}\ge R_{\mathrm{pair}}$ throughout. The reported stability of the estimates under this refinement is therefore not evidence that the simulation is converging in the endpoint dimension; it is a comparison between two designs, the second of which has half the independent-pair scaling diagnostic of the first. Its variance-equivalent size may change by a different factor, because the pair correlation may change with $M$. Holding $R_{\mathrm{pair}}$ fixed while doubling $M$ requires quadrupling the number of pairs, which is the last row of the table.
 
 \FloatBarrier
 \section{Numerical evidence}\label{sec:numerics}
@@ -1439,11 +1496,11 @@ The corresponding Euler negativity probabilities are strictly positive, because 
 
 The observed rate path is not reconstructed here, so none of this is a sample-wide bound. What the calculation supports is that at the states displayed the one-step positivity problem is numerically negligible, not that no simulated or observed state could behave otherwise.
 
-The assumptions of the generic theorem are genuinely violated by \eqref{eq:cir_rates}, and the estimator applied is therefore not the estimator analysed. But for $r$ and $r^*$ that gap is a matter of proof coverage, not of numerical damage: a violation probability of $10^{-2667}$ per step is not a phenomenon any simulation will encounter.
+The assumptions of the generic theorem are genuinely violated by \eqref{eq:cir_rates}, and the estimator applied is therefore not the estimator analysed. But for $r$ and $r^*$ that gap is a matter of proof coverage rather than of demonstrated numerical damage: at the displayed benchmark states, where the one-step violation probability is of order $10^{-2667}$, such a violation is numerically negligible for any realistically sized simulation.
 
 \begin{table}[htbp]
 \centering
-\caption{One-step Euler negativity diagnostics for the square-root interest-rate processes at $h=1/520$, using the estimates of Table 3 of \citet{BrandtSantaClara2002}. Definitions: from a current state $r>0$ the Euler update has mean $r+\lambda(\vartheta-r)h$ and standard deviation $\sigma\sqrt{rh}$, so the negativity probability is $\Phi(-z)$ with $z=[r+\lambda(\vartheta-r)h]/(\sigma\sqrt{rh})$; the table reports $z$ and $\log_{10}\Phi(-z)$, computed through a numerically stable log-CDF rather than by taking the logarithm of an evaluated tail. ``Underflow'' records whether direct IEEE-754 binary64 evaluation of $\Phi(-z)$ returns exactly zero, which happens below roughly $10^{-308}$; it is a statement about double precision, not about the mathematics, and the probability is strictly positive at every state. These are the displayed benchmark states only, not a sample-wide bound.}
+\caption{One-step Euler negativity diagnostics for the square-root interest-rate processes at $h=1/520$, using the estimates of Table 3 of \citet{BrandtSantaClara2002}. Definitions: from a current state $r>0$ the Euler update has mean $r+\lambda(\vartheta-r)h$ and standard deviation $\sigma\sqrt{rh}$, so the negativity probability is $\Phi(-z)$ with $z=[r+\lambda(\vartheta-r)h]/(\sigma\sqrt{rh})$; the table reports $z$ and $\log_{10}\Phi(-z)$, computed through a numerically stable log-CDF rather than by taking the logarithm of an evaluated tail. ``Underflow'' records whether direct IEEE-754 binary64 evaluation of $\Phi(-z)$ returns exactly zero. Binary64 represents positive values down to about $5\times10^{-324}$, using subnormal numbers below the smallest normal value of about $2.2\times10^{-308}$, but a particular cumulative-distribution routine may return zero earlier: the implementation used here does so at about $6\times10^{-311}$, inside the subnormal range. The flag therefore reports what that routine returns, not a property of the mathematics, and the probability is strictly positive at every state. These are the displayed benchmark states only, not a sample-wide bound.}
 \label{tab:cir_negativity}
 \small
 \begin{tabular}{llrrrrc}
@@ -1977,7 +2034,17 @@ which is \eqref{eq:three_dim_psd}.
 \end{proof}
 
 \begin{remark}[The perfectly correlated case]\label{rem:perfect_ww}
-If $|\rho_{ww^*}|=1$ the kernel of $A_t$ is two dimensional and $B$ is singular, so \eqref{eq:three_dim_psd} degenerates to $0\le0$ and carries no information. \Cref{lem:singular_schur} still applies, now to $B$ itself: writing $\rho_{ww^*}=\sigma\in\{-1,+1\}$, the range condition becomes $\rho_{w^*y}=\sigma\rho_{wy}$, and since $B^{+}=\tfrac14\left(\begin{smallmatrix}1&\sigma\\\sigma&1\end{smallmatrix}\right)$ the magnitude condition becomes $d^{\mathsf T}B^{+}d=\rho_{wy}^2\le1$. This is the only configuration in which the entrywise bound is the operative constraint, and it arises because $W_t^*=\sigma W_t$ almost surely, so the model has one interest-rate Brownian motion rather than two.
+If $|\rho_{ww^*}|=1$ the kernel of $A_t$ is two dimensional and $B$ is singular, so \Cref{prop:floor_overdetermined} does not apply as stated. Writing $\rho_{ww^*}=\sigma\in\{-1,+1\}$, condition \eqref{eq:three_dim_psd} does not become vacuous. Its right-hand side is $1-\sigma^2=0$ and its left-hand side is a perfect square, since $\sigma^2=1$ gives
+\[
+\rho_{wy}^2-2\sigma\rho_{wy}\rho_{w^*y}+\rho_{w^*y}^2=\bigl(\rho_{wy}-\sigma\rho_{w^*y}\bigr)^2,
+\]
+so \eqref{eq:three_dim_psd} reads $(\rho_{wy}-\sigma\rho_{w^*y})^2\le0$ and therefore \emph{forces}
+\[
+\rho_{w^*y}=\sigma\rho_{wy}=\rho_{ww^*}\rho_{wy}.
+\]
+That is exactly the range-compatibility relation of \Cref{lem:singular_schur} applied to $B$, so in this configuration \eqref{eq:three_dim_psd} collapses onto the compatibility condition rather than carrying no information.
+
+What it does \emph{not} retain is the separate magnitude restriction. Once compatibility holds the inequality is satisfied with equality, $0\le0$, and the magnitude condition must be obtained from the Moore--Penrose criterion instead: since $B^{+}=\tfrac14\left(\begin{smallmatrix}1&\sigma\\\sigma&1\end{smallmatrix}\right)$, a compatible $d$ gives $d^{\mathsf T}B^{+}d=\tfrac14(\rho_{wy}+\sigma\rho_{w^*y})^2=\rho_{wy}^2$, so the requirement is $|\rho_{wy}|\le1$. This is the only configuration in which the entrywise bound is the operative magnitude constraint, and it arises because $W_t^*=\sigma W_t$ almost surely, so the model has one interest-rate Brownian motion rather than two.
 \end{remark}
 
 That the second condition is not implied by the first is worth seeing concretely, because an earlier version of this analysis asserted that it was. Take $\phi_t=0.03$, $\phi_t^*=0.02$ and $\rho_{ww^*}=0.3$, so that $v_t=\sqrt{Q_t}=0.03066$, and set $\rho_{wy}=\rho_{w^*y}=0.9$. The implied correlations are $\rho_{wx,t}=0.7828$ and $\rho_{w^*x,t}=-0.3588$, and \eqref{eq:induced_rho_xy} gives $\rho_{xy}=0.2935$, so \emph{every} entry of $R_t$ lies well inside $[-1,1]$ and the compatibility relation holds exactly. But the left side of \eqref{eq:three_dim_psd} is $1.134$ against a right side of $0.91$, and the spectrum of $R_t$ is $\{-0.133,\,0,\,1.558,\,2.575\}$. The matrix is indefinite. Compatibility bought the zero eigenvalue that singularity requires; it did nothing about the negative one.
@@ -2102,7 +2169,7 @@ The proposition is conditional in a way the earlier version was not. It does not
 \end{itemize}
 The third item is the weak link. Slackness of a constraint at the reported optimum and at a collection of candidate points is not slackness along the whole feasible set, and the active constraint is a property of the set, not of a sample of its points. Accordingly: for the published optimisation problem, the authors report that the nonnegativity constraint binds in the time-varying specifications, and our affine-objective analysis explains why a boundary solution is expected there. We cannot independently determine the active constraint in $\mathcal C_{\text{obs}}$ without the observed state sequence, nor in $\mathcal C_{\text{glob}}$ without both that and an argument covering an infinite constraint family.
 
-Table 4 of \citet{BrandtSantaClara2002} reports the minimum of the inferred excess volatility as $0.0000$ in all six specifications, that is for models A, B and C in both the U.S.--U.K. and the U.S.--Germany systems. This is consistent with case (i), but it should be read carefully, and the three sources of support must be kept apart. A reported $0.0000$ is a rounded value at four decimal places and is not by itself proof of exact binding. \Cref{prop:min_incomplete} proves that the optimum is a vertex of whichever feasible set the optimiser used, and in the constant-risk-price case with the stated conditions it gives the exact corner formula \eqref{eq:min_incomplete_solution}. That the vertex sits on a nonnegativity face rather than on a range or semidefiniteness face is, for the time-varying specifications, what the original authors report rather than something we verify. \Cref{tab:binding_status} sets out the status of the claim $\min_t\epsilon_t^2=0$ in each case, and every statement elsewhere in this paper conforms to it.
+Table 4 of \citet{BrandtSantaClara2002} reports the minimum of the inferred excess volatility as $0.0000$ in all six specifications, that is for models A, B and C in both the U.S.--U.K. and the U.S.--Germany systems. This is consistent with case (i), but it should be read carefully, and the three sources of support must be kept apart. A reported $0.0000$ is a rounded value at four decimal places and is not by itself proof of exact binding. \Cref{prop:min_incomplete} proves that the optimum is a boundary point of whichever compact feasible set the optimiser used; for the published affine feasible set $\mathcal C_{\text{pub}}$ that boundary point is a vertex, and in the constant-risk-price case with the stated conditions it gives the exact corner formula \eqref{eq:min_incomplete_solution}. That the optimum sits on a nonnegativity boundary rather than on a range or semidefiniteness boundary is, for the time-varying specifications, what the original authors report rather than something we verify. \Cref{tab:binding_status} sets out the status of the claim $\min_t\epsilon_t^2=0$ in each case, and every statement elsewhere in this paper conforms to it.
 
 \begin{table}[htbp]
 \centering
@@ -2197,7 +2264,7 @@ Every exponent in the second factor is nonpositive and at least one is zero, so 
 
 The bound is uniform in $\theta$ with slack $2Nh\log S$. After division by $N$ that slack is $2h\log S$, which along $M=S=n$ equals $2(\log n)/n$ and therefore vanishes. What this does \emph{not} settle is whether the comparison is sharp enough to control the maximiser, because that is a question about the slack relative to the variation of $D_N$ near its optimum, and the order and local geometry of $D_N$ are exactly what remain unresolved. An earlier version of this discussion asserted the slack was negligible relative to $D_N$; that was not proved and is withdrawn.
 
-So the statement is the one in the title: the scaled simulated log likelihood lies uniformly within $2Nh\log S$ of a transformed nearest-atom criterion. The exact log likelihood in this model is by contrast the smooth quadratic $-\tfrac12\sum_n\lVert\theta-\Delta Y_n\rVert^2$ with minimiser $\widehat\theta_N$, so the object being maximised is a nearest-neighbour functional of $NS$ atoms rather than a smooth quadratic, and any argument that the two maximisers agree must be made rather than assumed.
+So the statement is the one in the title: the scaled simulated log likelihood lies uniformly within $2Nh\log S$ of a transformed nearest-atom criterion. The simulated criterion is not itself a nearest-neighbour functional; it is a smooth log-sum-exp of $NS$ terms, and \Cref{prop:nearest_atom} says only that after scaling and the addition of a constant it is uniformly approximated by one. The exact log likelihood in this model is by contrast the quadratic $-\tfrac12\sum_n\lVert\theta-\Delta Y_n\rVert^2$ with minimiser $\widehat\theta_N$. Whether the approximation controls the maximiser depends on the unresolved local scale of $D_N$, so any argument that the two maximisers agree must be made rather than assumed.
 
 Five things the uniform bound alone does not establish, and which are not claimed anywhere in this paper: convergence of the two maximisers; equality of their finite-sample values; equivalence of local curvature at the optimum; the order of $D_N$; or a contradiction to Lemma 5 of \citet{BrandtSantaClara2002}.
 

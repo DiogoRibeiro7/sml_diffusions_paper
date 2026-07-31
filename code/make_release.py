@@ -265,6 +265,7 @@ def main() -> int:
         "final_adversarial_review.md",
         "targeted_final_review.md",
         "final_local_revision_review.md",
+        "external_review_round_one.md",
     )
     missing = [name for name in hand_written if not (DIST / name).exists()]
     for name in hand_written:

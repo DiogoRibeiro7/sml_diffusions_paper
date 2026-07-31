@@ -382,3 +382,47 @@ def test_the_degenerate_case_satisfies_the_hypothesis() -> None:
         )
         floor = math.sqrt(quadratic + parameters.currency_quadratic)
         assert floor > 0.0
+
+
+# ---------------------------------------------------------------------------
+# Remark E.6: the perfectly correlated case is not vacuous
+# ---------------------------------------------------------------------------
+
+
+def test_condition_forces_compatibility_when_ww_is_perfectly_correlated() -> None:
+    """At |rho_ww*| = 1 the magnitude condition becomes a perfect square.
+
+    An earlier version of the remark said the condition "degenerates to 0 <= 0
+    and carries no information".  It does not: with rho_ww* = sigma, the left
+    side is (rho_wy - sigma rho_w*y)^2 and the right side is zero, so the
+    condition forces rho_w*y = sigma rho_wy.
+    """
+    for sigma in (1.0, -1.0):
+        for rho_wy in (-0.9, -0.3, 0.0, 0.45, 0.9):
+            for rho_wsy in (-0.9, -0.3, 0.0, 0.45, 0.9):
+                left = rho_wy**2 - 2.0 * sigma * rho_wy * rho_wsy + rho_wsy**2
+                right = 1.0 - sigma**2
+                assert right == pytest.approx(0.0)
+                # The left side is exactly a perfect square.
+                assert left == pytest.approx((rho_wy - sigma * rho_wsy) ** 2)
+                satisfied = left <= right + 1e-12
+                compatible = abs(rho_wsy - sigma * rho_wy) < 1e-12
+                assert satisfied == compatible
+
+
+def test_pseudoinverse_supplies_the_magnitude_condition_in_that_case() -> None:
+    """Once compatibility holds, the magnitude bound is |rho_wy| <= 1."""
+    for sigma in (1.0, -1.0):
+        block_matrix = np.array([[1.0, sigma], [sigma, 1.0]])
+        pseudo = np.linalg.pinv(block_matrix)
+        for rho_wy in (-1.5, -1.0, -0.4, 0.0, 0.7, 1.0, 1.4):
+            compatible = np.array([rho_wy, sigma * rho_wy])
+            assert in_range(block_matrix, compatible)
+            # d' B^+ d = (rho_wy + sigma rho_w*y)^2 / 4 = rho_wy^2.
+            quadratic = float(compatible @ pseudo @ compatible)
+            assert quadratic == pytest.approx(rho_wy**2)
+            assert (quadratic <= 1.0 + 1e-12) == (abs(rho_wy) <= 1.0 + 1e-12)
+
+            bordered = block(block_matrix, compatible, 1.0)
+            assert bordered.shape == (3, 3)
+            assert is_psd(bordered) == (abs(rho_wy) <= 1.0 + 1e-9)
