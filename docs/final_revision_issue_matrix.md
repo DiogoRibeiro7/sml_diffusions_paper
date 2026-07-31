@@ -25,7 +25,7 @@ presentation only.
 | 14 | Figure 5 floating into the conclusion | editorial | `main.tex` | layout | `placeins` loaded, `\FloatBarrier` before every section and before the conclusion | float audit |
 | 15 | End-loaded tables | editorial | `main.tex` | layout | Worse than reported: Table 1 was cited on page 3 and placed on page 31. All floats changed from `[t]` to `[htbp]` and the float parameters relaxed; Table 1 now lands on page 7 | float audit |
 | 16 | Table 9 matrix count ambiguity | minor | `main.tex` §E.1 | `38,496` matrices | Caption states `38,496 = 2 × 19,248`; column renamed "Branch-specific matrices" | — |
-| 17 | Affiliation formatting | editorial | `main.tex`, `CITATION.cff`, `.zenodo.json` | front matter | Expanded to `Escola Superior de Media Arte e Design (ESMAD), IPP` on the author's instruction | metadata gate, consistency test |
+| 17 | Affiliation formatting | editorial | `main.tex`, `CITATION.cff`, `.zenodo.json` | front matter | Expanded to `Escola Superior de Media Artes e Design (ESMAD), IPP` on the author's instruction | metadata gate, consistency test |
 
 ## The affiliation
 
@@ -34,18 +34,14 @@ Prompt 10 Part B asks for the official institutional name, verified from an auth
 existed here: `ESMAD -IPP` had been supplied as an acronym and nothing corroborated an expansion, so
 the field was left unchanged rather than guessed at.
 
-The author subsequently supplied the expansion, *Escola Superior de Media Arte e Design*, and it is
-now used in all three places that carry an affiliation. The parent institute is left as the acronym
-`IPP`, which the author has not expanded and which is therefore not invented here.
+The author subsequently supplied the expansion and, on being asked, confirmed the plural: *Escola
+Superior de Media Artes e Design*, matching the school's own published name. It is now used in all
+three places that carry an affiliation. The parent institute is left as the acronym `IPP`, which the
+author has not expanded and which is therefore not invented here.
 
-Because the string now appears in the manuscript, in `CITATION.cff` and in `.zenodo.json`, a test in
+Because the string appears in the manuscript, in `CITATION.cff` and in `.zenodo.json`, a test in
 `tests/test_analytics.py` asserts that the three agree, alongside the existing checks on title,
-ORCID and licence.
-
-One point for the author to confirm before deposit: the school's own published name uses the plural
-*Artes*. The singular form supplied here is used verbatim, on the principle that the author is the
-authority on their own affiliation, but a single character is easy to change and hard to notice
-after publication.
+ORCID and licence. Nothing outside those three files and the test may hold a second copy.
 
 ## Rules observed
 
