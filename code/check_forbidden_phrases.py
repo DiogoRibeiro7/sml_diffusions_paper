@@ -245,6 +245,18 @@ FORBIDDEN = (
         r"its third column is strictly decreasing",
         "the worst-case probability is the final column of that table",
     ),
+    Forbidden(
+        r"either no positive root or exactly two positive roots",
+        "inconsistent unless multiplicity is counted; state the three cases",
+    ),
+    Forbidden(
+        r"inverse map is globally single valued",
+        "single valued on states with zeta_t > 0, the proposition's hypothesis",
+    ),
+    Forbidden(
+        r"in any of the three specifications",
+        "the sweep covers models A, B and C across two currency systems",
+    ),
 )
 
 

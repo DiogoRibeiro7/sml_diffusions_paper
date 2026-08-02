@@ -44,7 +44,7 @@ make            # regenerate figures and tables, then build the PDF
 make check      # tests, reproducibility, forbidden-phrase gate
 ```
 
-The manuscript builds to `paper/main.pdf` (62 pages). Python 3.11+, NumPy, SciPy, pandas and
+The manuscript builds to `paper/main.pdf` (63 pages). Python 3.11+, NumPy, SciPy, pandas and
 Matplotlib; LaTeX with `latexmk` and `biber`.
 
 ## Layout
@@ -85,9 +85,9 @@ gates keep the manuscript and the code from drifting apart.
 
 | Gate | Command | What it enforces |
 | --- | --- | --- |
-| Tests | `make test` | 230 tests. Every closed form is checked against an independent computation: numerical integration, direct Monte Carlo, or brute force. Tolerances are stated at each assertion. |
+| Tests | `make test` | 234 tests. Every closed form is checked against an independent computation: numerical integration, direct Monte Carlo, or brute force. Tolerances are stated at each assertion. |
 | Reproducibility | `make verify` | 33 artefacts regenerated into a scratch directory and compared with the committed copies. CSV field-wise at `1e-9`; PDF and PNG by SHA-256. Figure output carries no embedded timestamp, so the comparison is exact. |
-| Wording | `make phrases` | 51 patterns for claims retracted in an earlier review round. Guards against an overstatement removed from one section reappearing in another later. |
+| Wording | `make phrases` | 54 patterns for claims retracted in an earlier review round. Guards against an overstatement removed from one section reappearing in another later. |
 | Release | `python code/make_release.py` | All of the above, plus a clean LaTeX log, resolved front-matter metadata, no draft label, deposit metadata that parses, and every release document present. |
 
 `make check` runs the first three. The release gate refuses to build if any fails; `--allow-draft`
@@ -100,7 +100,7 @@ kept because a paper arguing that published claims need checking should show its
 
 | Document | Contents |
 | --- | --- |
-| `docs/external_review_round_one.md` | external review: one blocking finding, plus ten corrections over two passes |
+| `docs/external_review_round_one.md` | external review, three passes: one blocking finding and fourteen corrections |
 | `docs/final_local_revision_review.md` | the fifth round, twelve local corrections |
 | `docs/targeted_final_review.md` | the fourth round, nine targeted issues |
 | `docs/final_revision_issue_matrix.md` | the seventeen third-round issues, with resolutions |

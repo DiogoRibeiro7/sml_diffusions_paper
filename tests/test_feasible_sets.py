@@ -231,3 +231,97 @@ def test_reduced_matrix_has_six_off_diagonal_entries() -> None:
     primitive = free_entries | {"rho_zz*"}
     assert len(primitive) == 5
     assert "rho_zz*" not in (free_entries | implied_entries)
+
+
+# ---------------------------------------------------------------------------
+# Proposition D.1(ii): the three-way root classification
+# ---------------------------------------------------------------------------
+
+
+def classify(kappa_b: float, eta: float, zeta: float) -> str:
+    """Return the case of Proposition D.1(ii) predicted for these coefficients."""
+    assert kappa_b > 1.0 and zeta > 0.0
+    discriminant = eta * eta - (kappa_b - 1.0) * zeta
+    if eta < 0.0 and discriminant > 0.0:
+        return "two distinct"
+    if eta < 0.0 and discriminant == 0.0:
+        return "one double"
+    return "none"
+
+
+def positive_roots(kappa_b: float, eta: float, zeta: float) -> list[float]:
+    """Return the strictly positive real roots of (k-1)v^2 + 2 eta v + zeta."""
+    roots = np.roots([kappa_b - 1.0, 2.0 * eta, zeta])
+    return sorted(
+        float(r.real) for r in roots if abs(r.imag) < 1e-12 and r.real > 1e-12
+    )
+
+
+def test_root_classification_matches_the_quadratic() -> None:
+    """The three cases must agree with numerically computed roots.
+
+    The statement "no positive root or exactly two" is consistent only if
+    roots are counted with multiplicity; the proposition now separates the
+    repeated-root case explicitly.
+    """
+    rng = np.random.default_rng(4021)
+    seen = {"two distinct": 0, "none": 0}
+    for _ in range(20_000):
+        kappa_b = 1.0 + float(rng.uniform(0.01, 3.0))
+        eta = float(rng.uniform(-2.0, 2.0))
+        zeta = float(rng.uniform(0.001, 3.0))
+        predicted = classify(kappa_b, eta, zeta)
+        roots = positive_roots(kappa_b, eta, zeta)
+        if predicted == "two distinct":
+            assert len(roots) == 2 and roots[1] - roots[0] > 1e-9
+        elif predicted == "none":
+            assert roots == []
+        seen[predicted] = seen.get(predicted, 0) + 1
+    assert seen["two distinct"] > 0 and seen["none"] > 0
+
+
+def test_repeated_root_case_is_reachable_by_construction() -> None:
+    """Case (b) exists: on the boundary there is one positive double root."""
+    for kappa_b, eta in ((2.0, -1.0), (1.5, -0.8), (3.0, -2.5)):
+        # Choose zeta to put the state exactly on Delta = 0.
+        zeta = eta * eta / (kappa_b - 1.0)
+        assert zeta > 0.0
+        assert classify(kappa_b, eta, zeta) == "one double"
+
+        # A double root is ill-conditioned for a numerical root finder, which
+        # splits it by about sqrt(eps).  Verify it by its defining property
+        # instead: the quadratic and its derivative both vanish there.
+        candidate = -eta / (kappa_b - 1.0)
+        assert candidate > 0.0
+        value = (kappa_b - 1.0) * candidate**2 + 2.0 * eta * candidate + zeta
+        slope = 2.0 * (kappa_b - 1.0) * candidate + 2.0 * eta
+        assert value == pytest.approx(0.0, abs=1e-12)
+        assert slope == pytest.approx(0.0, abs=1e-12)
+
+
+def test_positive_eta_never_gives_a_positive_root() -> None:
+    """With eta >= 0 the root sum is nonpositive while the product is positive."""
+    rng = np.random.default_rng(77)
+    for _ in range(5_000):
+        kappa_b = 1.0 + float(rng.uniform(0.01, 3.0))
+        eta = float(rng.uniform(0.0, 2.0))
+        zeta = float(rng.uniform(0.001, 3.0))
+        assert classify(kappa_b, eta, zeta) == "none"
+        assert positive_roots(kappa_b, eta, zeta) == []
+
+
+def test_repeated_root_boundary_has_measure_zero_on_a_grid() -> None:
+    """A candidate grid does not meet case (b) unless built to.
+
+    This is why the sweep reports no point with exactly one positive root:
+    Delta = 0 is a codimension-one condition on the state.
+    """
+    rng = np.random.default_rng(1234)
+    hits = 0
+    for _ in range(50_000):
+        kappa_b = 1.0 + float(rng.uniform(0.01, 3.0))
+        eta = float(rng.uniform(-2.0, 0.0))
+        zeta = float(rng.uniform(0.001, 3.0))
+        if classify(kappa_b, eta, zeta) == "one double":
+            hits += 1
+    assert hits == 0
