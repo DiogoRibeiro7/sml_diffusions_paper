@@ -38,7 +38,7 @@ keywords:
 license: CC-BY-4.0
 repository-code: "https://github.com/DiogoRibeiro7/sml_diffusions_paper"
 date-released: 2026-07-31
-version: v1.0.2
+version: v1.0.3
 doi: 10.5281/zenodo.21719868
 identifiers:
   - type: doi
@@ -47,21 +47,26 @@ identifiers:
       Concept DOI. Represents every version of this work and always resolves to
       the most recent one. Cite this unless you need to pin a specific version.
   - type: doi
+    value: 10.5281/zenodo.21760062
+    description: >-
+      Version DOI for v1.0.3, the current release. It adds the missing
+      correlation hypothesis to Proposition E.2 and applies three further
+      corrections from the second pass of external review.
+  - type: doi
     value: 10.5281/zenodo.21729471
     description: >-
-      Version DOI for v1.0.2, the current release. It corrects Remark E.6, which
-      called a magnitude condition vacuous when it forces the compatibility
-      relation, and six further findings from external review.
+      Version DOI for v1.0.2, superseded. Its Proposition E.2 omits the
+      hypothesis |rho_ww*| <= 1 and is false as a standalone statement.
   - type: doi
     value: 10.5281/zenodo.21728285
     description: >-
-      Version DOI for v1.0.1, superseded. Its Remark E.6 is incorrect; cite
-      v1.0.2 or the concept DOI instead.
+      Version DOI for v1.0.1, superseded. Its Remark E.6 wrongly calls a
+      magnitude condition vacuous.
   - type: doi
     value: 10.5281/zenodo.21719869
     description: >-
       Version DOI for v1.0.0, superseded. It states the limit in Proposition C.1
-      in the wrong direction; cite v1.0.2 or the concept DOI instead.
+      in the wrong direction.
 references:
   - type: article
     scope: "The article analysed and corrected by this work."

@@ -202,19 +202,23 @@ Cite the **concept DOI**, which represents every version and always resolves to 
 }
 ```
 
-| DOI | Refers to |
-| --- | --- |
-| [`10.5281/zenodo.21719868`](https://doi.org/10.5281/zenodo.21719868) | all versions; resolves to the latest |
-| [`10.5281/zenodo.21729471`](https://doi.org/10.5281/zenodo.21729471) | v1.0.2, the current release |
-| [`10.5281/zenodo.21728285`](https://doi.org/10.5281/zenodo.21728285) | v1.0.1, superseded |
-| [`10.5281/zenodo.21719869`](https://doi.org/10.5281/zenodo.21719869) | v1.0.0, superseded |
+| DOI | Refers to | Status |
+| --- | --- | --- |
+| [`10.5281/zenodo.21719868`](https://doi.org/10.5281/zenodo.21719868) | all versions; resolves to the latest | **cite this** |
+| [`10.5281/zenodo.21760062`](https://doi.org/10.5281/zenodo.21760062) | v1.0.3 | current |
+| [`10.5281/zenodo.21729471`](https://doi.org/10.5281/zenodo.21729471) | v1.0.2 | superseded: Proposition E.2 omits `\|ρ_ww*\| ≤ 1` |
+| [`10.5281/zenodo.21728285`](https://doi.org/10.5281/zenodo.21728285) | v1.0.1 | superseded: Remark E.6 wrongly calls a condition vacuous |
+| [`10.5281/zenodo.21719869`](https://doi.org/10.5281/zenodo.21719869) | v1.0.0 | superseded: Proposition C.1 limit stated in the wrong direction |
 
 Pin a version DOI only when you need that exact archived snapshot, for instance when quoting a page
-or theorem number that a later revision could move. **Do not cite v1.0.0 or v1.0.1.** Each contains a
-mathematical error the next version corrects: v1.0.0 states the limit in Proposition C.1 in the wrong
-direction, and v1.0.1 calls a magnitude condition vacuous when it in fact forces the compatibility
-relation. Zenodo records are immutable, so superseded versions stay resolvable; they are listed here
-so that a reader who meets one knows its status.
+or theorem number that a later revision could move. Otherwise cite the concept DOI, which always
+resolves to the current version.
+
+**Every superseded version carries a mathematical error the next one corrects**, and the table names
+each. Zenodo records are immutable, so they stay resolvable; listing them with their defects is
+deliberate, so that a reader who meets one can learn its status here rather than rediscover the
+problem. The corrections came from review — five internal rounds and one external — and the record of
+what each found is in `docs/`.
 
 `CITATION.cff` carries the same metadata in Citation File Format, which GitHub renders as a "Cite
 this repository" control and which `cffconvert` turns into BibTeX, RIS and other formats. It also

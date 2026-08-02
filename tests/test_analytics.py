@@ -803,22 +803,28 @@ def test_zenodo_dois_are_recorded_consistently() -> None:
     yaml = pytest.importorskip("yaml")
 
     concept = "10.5281/zenodo.21719868"
-    current = "10.5281/zenodo.21729471"
-    superseded = ("10.5281/zenodo.21728285", "10.5281/zenodo.21719869")
-    assert len({concept, current, *superseded}) == 4
+    current = "10.5281/zenodo.21760062"
+    superseded = (
+        "10.5281/zenodo.21729471",
+        "10.5281/zenodo.21728285",
+        "10.5281/zenodo.21719869",
+    )
+    assert len({concept, current, *superseded}) == 5
 
     citation = yaml.safe_load((ROOT / "CITATION.cff").read_text(encoding="utf-8"))
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
     # The top-level doi field must be the concept DOI, not a version DOI.
     assert citation["doi"] == concept
-    assert citation["version"] == "v1.0.2"
+    assert citation["version"] == "v1.0.3"
 
     recorded = {entry["value"]: entry for entry in citation["identifiers"]}
     assert set(recorded) == {concept, current, *superseded}
     assert all(entry["type"] == "doi" for entry in recorded.values())
     assert "always resolves" in recorded[concept]["description"]
-    assert "v1.0.2" in recorded[current]["description"]
+    # Derived from the recorded version rather than hardcoded, so that bumping
+    # the release does not silently leave this assertion checking the old one.
+    assert citation["version"] in recorded[current]["description"]
     for value in superseded:
         assert "superseded" in recorded[value]["description"]
 
