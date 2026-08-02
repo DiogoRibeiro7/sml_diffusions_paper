@@ -229,6 +229,22 @@ FORBIDDEN = (
         r"returns exactly zero, which happens below roughly \$?10\^\{-308\}",
         "binary64 reaches 5e-324 via subnormals; this routine underflows near 6e-311",
     ),
+    Forbidden(
+        r"cannot do is change the constant multiplying",
+        "pairing cannot REDUCE the leading constant; it may raise it when rho_A > 0",
+    ),
+    Forbidden(
+        r"conditionally Gaussian and unbounded below",
+        "the radicand holds v^2, so large negative v helps; the issue is support near zero",
+    ),
+    Forbidden(
+        r"no estimate can move this process away from its boundary",
+        "the Feller ratio fixes attainability, not typical distance from zero",
+    ),
+    Forbidden(
+        r"its third column is strictly decreasing",
+        "the worst-case probability is the final column of that table",
+    ),
 )
 
 

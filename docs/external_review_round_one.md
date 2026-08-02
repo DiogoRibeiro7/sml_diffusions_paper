@@ -134,3 +134,65 @@ is not a phrase pattern.
 Seven forbidden-phrase patterns were added for this round's corrections, which guards recurrence but
 not recognition. What would have caught it earlier is what caught it now: an independent reader
 checking the algebra rather than the prose.
+
+---
+
+# External review, second pass
+
+Four local corrections on the corrected text, all accepted. No broad rewrite; the reviewer's verdict
+is that the central results show no structural defect and the manuscript is ready for independent
+mathematical review after these.
+
+## 1. Proposition E.2 needed `|rho_ww*| <= 1` as a hypothesis
+
+The proof rests on `Q_t - (phi - rho_ww* phi*)^2 = phi*^2 (1 - rho_ww*^2) >= 0`, which requires
+`|rho_ww*| <= 1`. Without it the proposition is false as a standalone algebraic statement, even
+though `rho_ww*` is a correlation in the model and Table 11 records that the published
+parameterisation imposes the bound entrywise. Added to the hypotheses, with the remark now explaining
+that both side conditions are load-bearing and that neither follows from the variance identity.
+
+A test supplies the counterexample: at `phi = 0.03`, `phi* = 0.02` and `rho_ww* = 1.05`, the quadratic
+form is still positive so `v_t > 0` and `v_t^2 >= Q_t` both hold, yet an implied correlation reaches
+`1.82`.
+
+## 2. Proposition 8.4's gloss was one-sided in the wrong direction
+
+The proposition proves `liminf rho_A >= 0`, hence that pairing cannot give a negative leading-order
+correlation. The explanatory paragraph then said "what it cannot do is change the constant multiplying
+`h^{-K/2}` in the limit". Too strong: if `rho_A -> c > 0` the constant is multiplied by `1 + c`, and at
+a coincident endpoint `rho_A = 1` doubles it relative to `E` independent evaluations.
+
+Corrected to the one-sided statement the proposition actually supports: pairing cannot *reduce* the
+leading constant below the independent-evaluation constant, and may leave it unchanged or raise it.
+The theorem statement `N_eff <= E(1 + o(1))` was already consistent with the narrower reading.
+
+## 3. The intermediate-radicand mechanism was misidentified
+
+Appendix C argued that the Euler increments of `v_t` are "conditionally Gaussian and unbounded below"
+while positive terms are subtracted. That is not the operative mechanism: the radicand contains
+`v_t^2`, so a large negative `v_t` makes it large and positive.
+
+Replaced with the correct point. The update is not constrained to preserve the algebraic domain
+`v_t^2 >= Q_t + C_t`; a nondegenerate Gaussian update assigns positive probability to neighbourhoods
+in which `|v_t|` is small, while the subtracted terms need not be small there. A sentence now states
+that turning this into a violation probability would need the joint conditional covariance of the
+whole state update, since `Q_t` and `C_t` move with the other components, and that we stop short of
+it. The well-posedness criticism is unaffected.
+
+## 4. Two textual errors
+
+Table 7's worst-case probability is the **final** column, not the third, as the Appendix C discussion
+claimed. And "no estimate can move this process away from its boundary" overstates what the Feller
+ratio gives: it fixes *attainability* of zero, not typical distance from it. Both corrected, the
+second with an explicit sentence separating the two readings.
+
+## Verification
+
+230 tests, 33/33 artefacts bit-exact, 62 pages, zero LaTeX errors or overfull boxes, 51
+forbidden-phrase patterns with zero hits, release gate passing.
+
+## Not acted on
+
+The reviewer notes unused space on page 34 where Figure 4 separates from Section 9.5, and suggests
+Appendices B–G might become supplementary material for a journal with a length limit. Both are
+recorded as editorial decisions for after external review rather than changes to make now.

@@ -426,3 +426,34 @@ def test_pseudoinverse_supplies_the_magnitude_condition_in_that_case() -> None:
             bordered = block(block_matrix, compatible, 1.0)
             assert bordered.shape == (3, 3)
             assert is_psd(bordered) == (abs(rho_wy) <= 1.0 + 1e-9)
+
+
+def test_implied_bound_needs_the_correlation_hypothesis() -> None:
+    """Proposition E.2 also requires |rho_ww*| <= 1.
+
+    The proof rests on Q_t - (phi - rho_ww* phi*)^2 = phi*^2 (1 - rho_ww*^2),
+    which is nonnegative only when |rho_ww*| <= 1.  Feed the algebra a value
+    outside [-1, 1] and the conclusion fails even though v_t > 0 and
+    v_t^2 >= Q_t both hold, so the hypothesis is not redundant.
+    """
+    phi, phi_star = 0.03, 0.02
+    # Q = (phi - phi*)^2 + 2 phi phi* (1 - rho_ww*) stays positive for
+    # rho_ww* below 1 + (phi - phi*)^2 / (2 phi phi*), and for every
+    # rho_ww* < -1, so these four values all admit a real volatility.
+    for rho_ww in (1.05, 1.08, -1.4, -2.0):
+        quadratic = phi**2 + phi_star**2 - 2.0 * rho_ww * phi * phi_star
+        assert quadratic > 0.0, "the test needs a positive quadratic form"
+        volatility = math.sqrt(quadratic)  # v^2 = Q exactly, and v > 0
+        assert volatility > 0.0
+        first, second = implied_correlations(phi, phi_star, rho_ww, volatility)
+        # With |rho_ww*| > 1 at least one implied correlation leaves [-1, 1],
+        # even though v_t > 0 and v_t^2 >= Q_t both hold.
+        assert max(abs(first), abs(second)) > 1.0
+
+    # Inside the admissible range the conclusion holds at the same states.
+    for rho_ww in (-0.99, -0.3, 0.0, 0.5, 0.99):
+        quadratic = phi**2 + phi_star**2 - 2.0 * rho_ww * phi * phi_star
+        volatility = math.sqrt(quadratic)
+        first, second = implied_correlations(phi, phi_star, rho_ww, volatility)
+        assert abs(first) <= 1.0 + 1e-12
+        assert abs(second) <= 1.0 + 1e-12
