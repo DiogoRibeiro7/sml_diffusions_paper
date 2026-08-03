@@ -2326,7 +2326,37 @@ So the statement is the one in the title: the scaled simulated log likelihood li
 
 Five things the uniform bound alone does not establish, and which are not claimed anywhere in this paper: convergence of the two maximisers; equality of their finite-sample values; equivalence of local curvature at the optimum; the order of $D_N$; or a contradiction to Lemma 5 of \citet{BrandtSantaClara2002}.
 
-What is missing is the limit of $D_N$. A nearest-neighbour heuristic, given in the accompanying notes, suggests that $N^{-1}S^{2/K}D_N(\theta)$ converges to a multiple of $\exp\{\lVert\theta-\thetao\rVert^2/(K-2)\}$, finite exactly when $K>2$, which is the same threshold as \Cref{thm:collapse}. If that were established, the simulated argmax would be \emph{consistent} for $\thetao$ but would converge at a rate governed by $S^{2/K}$ rather than the parametric rate, so that $\sqrt N(\widehat\theta_{N,M,S}-\widehat\theta_N)$ would not vanish, contradicting the conclusion of Lemma 5. Proving it requires a uniform-in-$\theta$ nearest-neighbour law for a triangular array of exchangeable, not independent, atoms with $S$ growing; standard nearest-neighbour asymptotics are pointwise and assume independent sampling from a fixed density. We did not close that gap.
+What is missing is the limit of $D_N$, and it is worth being precise about how much is missing, because an earlier version of this appendix misidentified the obstacle.
+
+The candidate limit is computable in closed form. By \Cref{prop:crn_kde} the atoms $b_{n,s}=\Delta Y_n-\sqrt{1-h}\,\xi_{n,s}$ do not depend on $\theta$ at all; given $\Delta Y_n$ they are independent across $s$ with the Gaussian density $f_n$, and they are independent across $n$. Classical nearest-neighbour asymptotics for an independent sample from a fixed density then give
+\begin{equation}\label{eq:nn_pointwise}
+\E\Bigl[\min_{s\le S}\lVert\theta-b_{n,s}\rVert^2\;\Big|\;\Delta Y_n\Bigr]
+\ \sim\ \Gamma\bigl(1+\tfrac2K\bigr)\,(\omega_KS)^{-2/K}f_n(\theta)^{-2/K},
+\end{equation}
+with $\omega_K$ the volume of the unit ball. Since $f_n(\theta)^{-2/K}=2\pi(1-h)\exp\{\lVert\theta-\Delta Y_n\rVert^2/(K(1-h))\}$ and $\Delta Y_n\sim\Normal(\thetao,I)$ in this model, averaging over $\Delta Y_n$ with the Gaussian identity $\E e^{a\lVert W\rVert^2}=(1-2a)^{-K/2}e^{a\lVert m\rVert^2/(1-2a)}$ at $a=1/K$ gives the candidate
+\begin{equation}\label{eq:nn_limit}
+N^{-1}S^{2/K}D_N(\theta)
+\ \longrightarrow\
+2\pi\,\Gamma\bigl(1+\tfrac2K\bigr)\,\omega_K^{-2/K}\Bigl(\frac{K}{K-2}\Bigr)^{K/2}
+\exp\Bigl(\frac{\lVert\theta-\thetao\rVert^2}{K-2}\Bigr),
+\end{equation}
+finite exactly when $a<1/2$, that is when $K>2$. The threshold is not a coincidence of two calculations: it is the integrability boundary of the same Gaussian moment that drives \Cref{thm:collapse}, appearing here as the condition for the averaged nearest-neighbour distance to be finite.
+
+Two of the three ingredients check out numerically. The conditional statement \eqref{eq:nn_pointwise} is accurate: at $K=4$ and $K=6$, for centres at distance $0$ and $1.5$ from $\theta$, simulated values agree with the formula to within $0.5$ per cent at $S=50{,}000$, improving monotonically in $S$. The Gaussian moment identity is exact by computation.
+
+What is \emph{not} established is the interchange: passing from \eqref{eq:nn_pointwise} to \eqref{eq:nn_limit} requires uniform integrability of $S^{2/K}\min_s\lVert\theta-b_{n,s}\rVert^2$ over the distribution of $\Delta Y_n$, and that is a genuine obstacle rather than a formality. The limit is dominated by centres far from $\theta$: at $K=4$ the nearest $90$ per cent of centres contribute only $58$ per cent of \eqref{eq:nn_limit}, and the outermost $1$ per cent contributes $15$ per cent. Those are exactly the centres for which \eqref{eq:nn_pointwise} needs the largest $S$, since its accuracy is governed by $Sf_n(\theta)$, the expected number of atoms near $\theta$, and $f_n(\theta)$ is exponentially small there. Direct simulation of the unconditional quantity is correspondingly slow: at $K=4$ and $S=5{,}000$ it reaches only about $89$ per cent of \eqref{eq:nn_limit}, approaching it from below as $S$ grows.
+
+An earlier version of this appendix gave a different and incorrect reason for stopping, namely that the atoms are ``exchangeable, not independent''. That is wrong. By \Cref{prop:crn_kde} the atoms are free of $\theta$ and independent across $s$ given the data, which is precisely the setting classical nearest-neighbour asymptotics assume. The real requirements are the uniform integrability just described and a uniform-in-$\theta$ upgrade of the pointwise law, both of which are standard in kind if delicate in execution. We have not carried them out, and \eqref{eq:nn_limit} remains a conjecture; but it is a better-specified conjecture than before, with the constant explicit and the single missing step named.
+
+If it were established, the consequence would be substantial. The limit criterion is minimised at $\thetao$, so the simulated argmax would be \emph{consistent}; but its curvature at $\thetao$ is $2/(K-2)$ against the exact maximum-likelihood curvature $2$, and the fluctuation of $N^{-1}S^{2/K}D_N$ about its limit is $\Op(N^{-1/2})$ with a covariance not depending on $S$. Then $\sqrt N(\widetilde\theta_{N,M,S}-\widehat\theta_N)$ would converge to a nondegenerate limit rather than to zero, for every admissible $(M_n,S_n)$ including the regime in which Theorem 2 of \citet{BrandtSantaClara2002} operates. That would refute the \emph{conclusion} of Lemma 5, not merely its proof, and would change the standing of this paper's main claim.
+
+\begin{remark}[Why \Cref{prop:nearest_atom} cannot deliver this]\label{rem:h2_cannot}
+The uniform sandwich has slack $2h\log S$ after division by $N$. Against the \emph{level} $D_N/N\asymp S^{-2/K}$ that slack is negligible whenever $M\gg S^{2/K}\log S$, which along $M=S$ with $K>2$ holds comfortably. So \Cref{prop:nearest_atom} is strong enough to transfer consistency, if the limit above were known. It is not strong enough for the $\sqrt N$ statement, because there the comparison is with the \emph{variation} of $D_N/N$ over a ball of radius $N^{-1/2}$ around the minimiser, where the limit criterion is flat and the slack is not negligible. Any route to the $\sqrt N$ conclusion must therefore go through the limit \eqref{eq:nn_limit} rather than through the sandwich.
+\end{remark}
+
+\begin{remark}[A likely shorter route]\label{rem:score_route}
+\Cref{prop:crn_kde} makes the simulated transition density an exact kernel density estimate, so the simulated score is $\nabla_\theta\log\widehat f_n(\theta)$ and the estimating equation is $\sum_n\nabla_\theta\log\widehat f_n(\theta)=0$. The asymptotics of log-density-gradient estimators at bandwidth $\sqrt h$ from $S$ draws are standard, and would deliver directly the order of the discrepancy between the simulated and exact scores. That is exactly what hypothesis \ref{it:me_score} of \Cref{prop:m_estimator} requires, and it is what Lemma 4 of \citet{BrandtSantaClara2002} asserts without proof. This route stays inside \Cref{sec:loglik} rather than relying on nearest-neighbour theory, and we expect it to be both easier and more general. We record it as the first thing to try.
+\end{remark}
 
 The status of the ingredients above should be kept distinct.
 

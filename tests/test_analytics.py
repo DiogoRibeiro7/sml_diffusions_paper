@@ -1006,3 +1006,112 @@ def test_underflow_threshold_lies_in_the_subnormal_range() -> None:
     # and above the smallest representable subnormal.
     assert smallest_subnormal < threshold < smallest_normal
     assert threshold == pytest.approx(6e-311, rel=0.2)
+
+
+# ---------------------------------------------------------------------------
+# The nearest-neighbour candidate limit of Appendix H
+# ---------------------------------------------------------------------------
+
+
+def unit_ball_volume(dimension: int) -> float:
+    """Lebesgue volume of the unit ball in R^d."""
+    from scipy.special import gamma as gamma_function
+
+    return math.pi ** (dimension / 2.0) / float(
+        gamma_function(dimension / 2.0 + 1.0)
+    )
+
+
+def nearest_neighbour_constant(dimension: int) -> float:
+    """The constant in the candidate limit for N^{-1} S^{2/K} D_N."""
+    from scipy.special import gamma as gamma_function
+
+    return (
+        2.0
+        * math.pi
+        * float(gamma_function(1.0 + 2.0 / dimension))
+        * unit_ball_volume(dimension) ** (-2.0 / dimension)
+        * (dimension / (dimension - 2.0)) ** (dimension / 2.0)
+    )
+
+
+@pytest.mark.parametrize("dimension", [4, 6])
+def test_conditional_nearest_neighbour_formula_is_accurate(dimension: int) -> None:
+    """Given the centre, the pointwise nearest-neighbour formula holds.
+
+    This is the ingredient of the Appendix H candidate limit that is verified.
+    Accuracy improves in S, which is what distinguishes it from the
+    unconditional statement, where uniform integrability is unresolved.
+    """
+    rng = np.random.default_rng(400 + dimension)
+    theta = np.zeros(dimension)
+    for offset in (0.0, 1.5):
+        centre = np.zeros(dimension)
+        centre[0] = offset
+        density = (2.0 * math.pi) ** (-dimension / 2.0) * math.exp(-(offset**2) / 2.0)
+        ratios = []
+        for simulations in (2_000, 20_000):
+            atoms = centre + rng.normal(size=(1_500, simulations, dimension))
+            squared = ((theta - atoms) ** 2).sum(axis=2).min(axis=1)
+            formula = (
+                float(np.exp(math.lgamma(1.0 + 2.0 / dimension)))
+                * (unit_ball_volume(dimension) * simulations) ** (-2.0 / dimension)
+                * density ** (-2.0 / dimension)
+            )
+            ratios.append(float(squared.mean()) / formula)
+        # Within a few per cent, and not drifting away as S grows.
+        assert all(abs(r - 1.0) < 0.08 for r in ratios), ratios
+        assert abs(ratios[-1] - 1.0) <= abs(ratios[0] - 1.0) + 0.02
+
+
+def test_gaussian_moment_identity_and_the_k_greater_than_two_threshold() -> None:
+    """E[exp(a||W||^2)] = (1-2a)^{-K/2} e^{a|m|^2/(1-2a)}, finite iff K > 2 at a=1/K."""
+    rng = np.random.default_rng(88)
+    for dimension in (3, 4, 6):
+        a = 1.0 / dimension
+        assert 1.0 - 2.0 * a > 0.0, "K > 2 is exactly the integrability condition"
+        exact = (1.0 - 2.0 * a) ** (-dimension / 2.0)
+        draws = rng.normal(size=(2_000_000, dimension))
+        simulated = float(np.exp(a * (draws**2).sum(axis=1)).mean())
+        assert simulated == pytest.approx(exact, rel=0.03)
+
+    # At K = 2 the moment diverges, which is the same boundary as Theorem 3.3.
+    assert 1.0 - 2.0 * (1.0 / 2.0) == 0.0
+
+
+def test_unconditional_limit_is_approached_from_below() -> None:
+    """The unconditional average converges slowly, and from below.
+
+    This is the uniform-integrability gap Appendix H records as open: the limit
+    is carried by centres far from theta, exactly where the conditional formula
+    needs the largest S.
+    """
+    rng = np.random.default_rng(2718)
+    dimension = 4
+    target = nearest_neighbour_constant(dimension)
+    theta = np.zeros(dimension)
+    values = []
+    for simulations in (500, 4_000):
+        centres = rng.normal(size=(3_000, 1, dimension))
+        atoms = centres + rng.normal(size=(3_000, simulations, dimension))
+        squared = ((theta[None, None, :] - atoms) ** 2).sum(axis=2).min(axis=1)
+        values.append(simulations ** (2.0 / dimension) * float(squared.mean()))
+    # Below the candidate limit, and rising towards it.
+    assert all(v < target for v in values)
+    assert values[-1] > values[0]
+
+
+def test_limit_mass_sits_in_the_tail_of_the_centre_distribution() -> None:
+    """Most of the candidate limit comes from centres far from theta."""
+    rng = np.random.default_rng(31_415)
+    for dimension, expected_share in ((4, 0.60), (6, 0.70)):
+        a = 1.0 / dimension
+        draws = rng.normal(size=(1_500_000, dimension))
+        radius = (draws**2).sum(axis=1)
+        weight = np.exp(a * radius)
+        order = np.argsort(radius)
+        sorted_weight = weight[order]
+        cut = int(0.9 * len(sorted_weight))
+        share = float(sorted_weight[:cut].sum() / sorted_weight.sum())
+        # The nearest 90 per cent of centres carry well under 90 per cent.
+        assert share < expected_share
