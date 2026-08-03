@@ -1060,15 +1060,55 @@ Combining, $\Delta_N=-\bar H_N^{-1}\nabla\widehat Q_{N,M,S}(\widehat\theta_N)$, 
 Assumption \ref{it:me_consist} assumes consistency of the simulated maximiser rather than deriving it, and it is the hypothesis that does the most work: without it the segment need not shrink to $\thetao$, $\bar H_N$ need not approach a nonsingular limit, and the argument fails. It could be replaced by the weaker requirement $\Pp(\widetilde\theta_{N,M,S}\in U)\to1$ if $H$ were additionally assumed nonsingular throughout $U$, with smallest singular value bounded away from zero there. Either way the localisation must be supplied, and the usual routes are global uniform convergence of the simulated criterion to a limit criterion uniquely maximised at $\thetao$, or an argmax theorem. We prove neither here, and \Cref{sec:argmax_gap} explains why the transition-density counterexample does not by itself settle that question. \Cref{prop:m_estimator} should therefore be read as a conditional abstract result, not as an asymptotic theorem for the endpoint simulated-likelihood estimator.
 \end{remark}
 
-Under uniform analogues of the pointwise density expansion, plausible minimum requirements for first-order equivalence include
+One of those requirements can be made exact rather than plausible, and it is the one that matters most. Hypothesis \ref{it:me_score} of \Cref{prop:m_estimator} is about the \emph{score}, not the density, and by \Cref{prop:crn_kde} the simulated density is a kernel estimate of bandwidth $\sqrt h$; differentiating a kernel estimate costs one further power of the bandwidth. For the Brownian benchmark the cost can be computed in closed form, and the answer is clean.
+
+\begin{proposition}[Exact score second moment]\label{prop:score_moment}
+For $K$-dimensional Brownian motion at $x=y=0$, let $G_h$ be the endpoint summand \eqref{eq:brownian_summand} and let $\partial_j$ denote differentiation in the $j$-th coordinate of the evaluation point. Then for every $h\in(0,1)$ and every $j$,
+\begin{equation}\label{eq:score_second_moment}
+\E\bigl[(\partial_jG_h)^2\bigr]
+=(1-h)(2\pi)^{-K}h^{-K/2-1}(2-h)^{-K/2-1}
+=\frac{1-h}{h(2-h)}\;\E\bigl[G_h^2\bigr].
+\end{equation}
+The ratio to the density second moment is therefore free of $K$, and as $h\downarrow0$,
+\begin{equation}\label{eq:score_scale}
+\E\bigl[(\partial_jG_h)^2\bigr]\ \sim\ (2\pi)^{-K}2^{-(K+2)/2}\,h^{-(K+2)/2}.
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+At $y=x=0$ the preterminal draw is $Z=\sqrt{1-h}\,\xi$ with $\xi\sim\Normal(0,I_K)$, and $\partial_jG_h=(Z_j/h)G_h$. Hence
+\[
+\E\bigl[(\partial_jG_h)^2\bigr]=h^{-2}\,\E\bigl[Z_j^2G_h^2\bigr]
+=h^{-2}(1-h)(2\pi h)^{-K}\,\E\bigl[\xi_j^2e^{-a\lVert\xi\rVert^2}\bigr],
+\qquad a=\frac{1-h}{h}.
+\]
+Writing $c=a+\tfrac12=(2-h)/(2h)$ and integrating,
+$\E[\xi_j^2e^{-a\lVert\xi\rVert^2}]=(2c)^{-K/2-1}=(h/(2-h))^{K/2+1}$.
+Substituting gives \eqref{eq:score_second_moment}; the second equality follows from $\E[G_h^2]=(2\pi)^{-K}h^{-K/2}(2-h)^{-K/2}$, which is \Cref{prop:brownian_moments} at $r=2$ and $y=x$. Letting $h\downarrow0$ gives \eqref{eq:score_scale}.
+\end{proof}
+
+The consequence is a \emph{score-level} effective simulation size, one power of $M$ more demanding than the density-level one:
+\begin{equation}\label{eq:score_effective_size}
+R^{\mathrm{score}}_{M,S}=S\,h^{(K+2)/2}=\frac{S}{M^{(K+2)/2}},
+\qquad\text{against}\qquad
+R_{M,S}=\frac{S}{M^{K/2}}.
+\end{equation}
+
+\begin{corollary}[The published condition fails more decisively at score level]\label{cor:score_contradiction}
+In $K=4$, hypothesis \ref{it:me_score} of \Cref{prop:m_estimator} requires $S/M^3\to\infty$, whereas the rate condition of \citet{BrandtSantaClara2002}, equivalent to $S/M^2\to0$, requires $S\ll M^2$. Since $M^3\gg M^2$, no sequence satisfies both, and the gap is wider by a factor $M$ than the density-level incompatibility of \Cref{cor:contradiction}.
+\end{corollary}
+
+This bears directly on Lemma 4 of \citet{BrandtSantaClara2002}, which asserts $\ln\widehat{\mathcal L}-\ln\mathcal L=o(N/S^{1/2})$ under $S^{1/2}/M\to0$ and derives it from Lemma 3, a statement about the density. The score is not the density, and \Cref{prop:score_moment} quantifies the difference exactly: at $K=4$ the score's Monte Carlo variance is larger by a factor of order $M$. Whether the argmax conclusion survives is still open, for the reasons set out in \Cref{app:argmax}; what is not open is that the rate condition under which the published proof operates is insufficient for the score even to converge.
+
+Under uniform analogues of the pointwise density expansion, the remaining requirements for first-order equivalence include
 \begin{equation}\label{eq:parameter_rate_heuristic}
-S h^{K/2}\to\infty,
+S h^{(K+2)/2}\to\infty,
 \qquad
 \frac{\sqrt N}{S h^{K/2}}\to0,
 \qquad
 \sqrt N\,h\to0,
 \end{equation}
-corresponding respectively to vanishing score simulation noise, vanishing nonlinear simulation bias at the $N^{-1/2}$ scale, and negligible Euler bias. Derivatives of the simulated paths and Gaussian kernels can impose stronger conditions. Therefore \eqref{eq:parameter_rate_heuristic} is a design implication, not a claimed complete theorem for arbitrary diffusions.
+corresponding respectively to vanishing score simulation noise, vanishing nonlinear simulation bias at the $N^{-1/2}$ scale, and negligible Euler bias. The first condition is now the score-level one of \eqref{eq:score_effective_size} rather than the density-level $Sh^{K/2}\to\infty$ that an earlier version of this display carried; \Cref{prop:score_moment} is what fixes the exponent. Therefore \eqref{eq:parameter_rate_heuristic} is a design implication, not a claimed complete theorem for arbitrary diffusions.
 
 The broader Monte Carlo likelihood literature treats joint data and simulation limits through empirical-process, importance-sampling, or exact-simulation arguments rather than by combining two pointwise limits; see, among others, \citet{Lee1995,SungGeyer2007,BeskosEtAl2009,MiasojedowEtAl2016}.
 

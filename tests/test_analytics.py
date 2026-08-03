@@ -1115,3 +1115,63 @@ def test_limit_mass_sits_in_the_tail_of_the_centre_distribution() -> None:
         share = float(sorted_weight[:cut].sum() / sorted_weight.sum())
         # The nearest 90 per cent of centres carry well under 90 per cent.
         assert share < expected_share
+
+
+def brownian_score_second_moment(dimension: int, h: float) -> float:
+    """Proposition 6.3: E[(d_j G_h)^2] at x = y = 0."""
+    return (
+        (1.0 - h)
+        * (2.0 * math.pi) ** (-dimension)
+        * h ** (-dimension / 2.0 - 1.0)
+        * (2.0 - h) ** (-dimension / 2.0 - 1.0)
+    )
+
+
+@pytest.mark.parametrize("dimension", [1, 2, 4])
+def test_score_second_moment_matches_simulation(dimension: int) -> None:
+    """The exact score second moment agrees with direct Monte Carlo."""
+    rng = np.random.default_rng(9000 + dimension)
+    for m_steps in (8, 32, 128):
+        h = 1.0 / m_steps
+        draws = 2_000_000
+        xi = rng.normal(size=(draws, dimension))
+        z = math.sqrt(1.0 - h) * xi
+        summand = (2.0 * math.pi * h) ** (-dimension / 2.0) * np.exp(
+            -(z**2).sum(axis=1) / (2.0 * h)
+        )
+        gradient = (z[:, 0] / h) * summand
+        squared = gradient**2
+        # The summand is heavy-tailed, so the sample mean of its square has a
+        # relative standard error of several per cent at the finer steps.
+        # Compare at three standard errors rather than at a fixed tolerance.
+        estimate = float(squared.mean())
+        standard_error = float(squared.std(ddof=1)) / math.sqrt(draws)
+        exact = brownian_score_second_moment(dimension, h)
+        assert abs(estimate - exact) < MC_SIGMAS * standard_error
+
+
+def test_score_to_density_ratio_is_free_of_dimension() -> None:
+    """E[(d_j G)^2] / E[G^2] = (1-h) / (h(2-h)), the same in every dimension."""
+    for h in (0.5, 0.1, 0.01, 1e-4):
+        expected = (1.0 - h) / (h * (2.0 - h))
+        ratios = []
+        for dimension in (1, 2, 4, 7):
+            density = brownian_moment_closed_form(dimension, 1.0 / h, 2.0, 0.0)
+            ratios.append(brownian_score_second_moment(dimension, h) / density)
+        for ratio in ratios:
+            assert ratio == pytest.approx(expected, rel=1e-12)
+        assert max(ratios) - min(ratios) < 1e-9 * max(ratios)
+
+
+def test_score_effective_size_is_one_power_of_m_more_demanding() -> None:
+    """The score scale is S h^{(K+2)/2}, against S h^{K/2} for the density."""
+    for dimension in (2, 4, 6):
+        for m_steps in (10, 100, 1000):
+            h = 1.0 / m_steps
+            density_scale = h ** (dimension / 2.0)
+            score_scale = h ** ((dimension + 2.0) / 2.0)
+            assert score_scale == pytest.approx(density_scale * h)
+            # In K = 4 the published condition allows S << M^2 while the score
+            # needs S >> M^3, so the two cannot be satisfied together.
+            if dimension == 4:
+                assert m_steps**3 > m_steps**2
