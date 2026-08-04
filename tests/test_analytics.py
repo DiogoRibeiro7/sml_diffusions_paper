@@ -1175,3 +1175,92 @@ def test_score_effective_size_is_one_power_of_m_more_demanding() -> None:
             # needs S >> M^3, so the two cannot be satisfied together.
             if dimension == 4:
                 assert m_steps**3 > m_steps**2
+
+
+# ---------------------------------------------------------------------------
+# Finite-sample accuracy at the implemented design, and the K = 2 boundary
+# ---------------------------------------------------------------------------
+
+
+def test_reported_finite_sample_accuracy_at_the_implemented_design() -> None:
+    """The figures quoted in Section 8.2 follow from Proposition 3.1.
+
+    At K = 4, M = 10, S = 5000 the relative second moment is 27.70 at a
+    coincident endpoint and 44.48 at unit separation, giving relative standard
+    deviations of 7.3 and 9.3 per cent.
+    """
+    dimension, m_steps, simulations, observations = 4, 10, 5_000, 544
+    h = 1.0 / m_steps
+
+    for distance, expected_ratio, expected_rmse in (
+        (0.0, 27.70, 0.073),
+        (1.0, 44.48, 0.093),
+    ):
+        density = (2.0 * math.pi) ** (-dimension / 2.0) * math.exp(-(distance**2) / 2.0)
+        second = brownian_moment_closed_form(dimension, m_steps, 2.0, distance)
+        ratio = second / density**2
+        assert ratio == pytest.approx(expected_ratio, abs=0.01)
+        relative_variance = (ratio - 1.0) / simulations
+        assert math.sqrt(relative_variance) == pytest.approx(expected_rmse, abs=0.001)
+
+    # The coincident case has the closed form (h(2-h))^{-K/2}.
+    coincident = brownian_moment_closed_form(dimension, m_steps, 2.0, 0.0)
+    coincident /= ((2.0 * math.pi) ** (-dimension / 2.0)) ** 2
+    assert coincident == pytest.approx((h * (2.0 - h)) ** (-dimension / 2.0), rel=1e-12)
+
+    # Summed second-order log bias over the 544-term log likelihood.
+    density = (2.0 * math.pi) ** (-dimension / 2.0)
+    ratio = brownian_moment_closed_form(dimension, m_steps, 2.0, 0.0) / density**2
+    per_observation = (ratio - 1.0) / simulations / 2.0
+    assert per_observation * observations == pytest.approx(1.45, abs=0.05)
+
+
+def test_dimension_two_is_the_exact_boundary_along_the_diagonal() -> None:
+    """R = n^{1-K/2} along M = S = n: divergent, unit, then vanishing.
+
+    At K = 2 the relative variance converges to 1/2, so the estimator is
+    bounded away from consistency without collapsing.
+    """
+    for m_steps in (2, 8, 32, 128):
+        assert m_steps ** (1 - 2 / 2.0) == pytest.approx(1.0)  # K = 2 gives R = 1
+        assert m_steps ** (1 - 1 / 2.0) > 1.0                  # K = 1 diverges
+        assert m_steps ** (1 - 4 / 2.0) < 1.0                  # K = 4 vanishes
+
+    density_squared = (2.0 * math.pi) ** (-2)
+    ratios = []
+    for n in (32, 512, 8192):
+        variance = gr.brownian_estimator_variance(2, n, n)
+        ratios.append(variance / density_squared)
+        # Closed form: (1/n)(n/(2 - 1/n) - 1).
+        assert ratios[-1] == pytest.approx(
+            (n / (2.0 - 1.0 / n) - 1.0) / n, rel=1e-9
+        )
+    assert ratios[-1] == pytest.approx(0.5, abs=1e-3)
+    assert all(r < 0.5 for r in ratios)
+
+    # K = 1 is consistent along the same diagonal; K = 4 diverges.
+    assert gr.brownian_estimator_variance(1, 8192, 8192) / (
+        2.0 * math.pi
+    ) ** -1 < 0.01
+    assert gr.brownian_estimator_variance(4, 8192, 8192) / (
+        2.0 * math.pi
+    ) ** -4 > 100.0
+
+
+def test_subcritical_condition_covers_the_diagonal() -> None:
+    """The diagonal satisfies the subcritical condition exactly when K > 2."""
+    for dimension in (1, 2, 3, 4, 6):
+        values = []
+        for n in (100, 10_000, 1_000_000):
+            h = 1.0 / n
+            values.append(n * h ** (dimension / 2.0) * math.log(1.0 / h) ** (dimension / 2.0))
+        if dimension > 2:
+            # Decreasing towards zero.  The approach is slow at K = 3, where the
+            # polynomial factor n^{1-K/2} = n^{-1/2} only just beats the
+            # logarithm, so monotonicity is the right test rather than a fixed
+            # threshold at any particular n.
+            assert values[1] < values[0], f"K={dimension} should be decreasing"
+            assert values[2] < values[1], f"K={dimension} should be decreasing"
+            assert values[-1] < 0.2 * values[0], f"K={dimension} should be falling fast"
+        else:
+            assert values[-1] > values[0], f"K={dimension} should not be subcritical"

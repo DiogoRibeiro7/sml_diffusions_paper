@@ -76,6 +76,7 @@
 % Evaluation count in the antithetic subsection.  Not E, which would sit one
 % glyph away from the expectation symbol.
 \newcommand{\neval}{n_{\mathrm{eval}}}
+\newcommand{\Rem}{\mathcal{R}}
 \newcommand{\Cov}{\operatorname{Cov}}
 \newcommand{\tr}{\operatorname{tr}}
 \newcommand{\diag}{\operatorname{diag}}
@@ -130,7 +131,7 @@
 \maketitle
 
 \begin{abstract}
-A widely used simulation method for likelihood inference in discretely observed diffusions approximates each transition density by simulating an Euler scheme to one step before the observed endpoint and averaging the final Gaussian density. We show that this endpoint estimator is a shrinking-bandwidth kernel estimator whose effective simulation size is $S/M^{K/2}$, not $S$, where $K$ is the state dimension, $M$ the number of Euler substeps and $S$ the number of simulations. We derive exact Brownian moments, the general local moment law, the corrected density-level normalisation $\sqrt{S/M^{K/2}}$, and the pointwise mean squared error, minimised at $M\asymp S^{2/(K+4)}$. We then give a direct counterexample to the joint transition-density statements of \citet{BrandtSantaClara2002}: along $M=S\to\infty$, a sequence satisfying their rate condition and their own regularity assumptions, the simulated density converges in probability to zero for every $K>2$ although the true density is strictly positive. This refutes the consistency asserted in their Lemma 2 and, since $\sqrt S$ times the centred density then diverges, the central-limit statement of their Lemma 3. The proofs of their parameter-estimator theorems consequently fail, and in four dimensions their rate condition is incompatible with mean-square consistency of the simulated density. \textbf{We do not show that the estimator itself is inconsistent}: the results refute two published statements about the transition density and remove inputs on which the published parameter-estimator proofs rely, but the behaviour of the maximiser remains open, and we set out precisely what a proof either way would require. Issues specific to the exchange-rate application are analysed separately in appendices.
+A widely used simulation method for likelihood inference in discretely observed diffusions approximates each transition density by simulating an Euler scheme to one step before the observed endpoint and averaging the final Gaussian density. We show that this endpoint estimator is a shrinking-bandwidth kernel estimator whose effective simulation size is $S/M^{K/2}$, not $S$, where $K$ is the state dimension, $M$ the number of Euler substeps and $S$ the number of simulations. We derive exact Brownian moments, the general local moment law, the corrected density-level normalisation $\sqrt{S/M^{K/2}}$, and the pointwise mean squared error, minimised at $M\asymp S^{2/(K+4)}$. We then show that the simulated density converges in probability to zero, at every pair of points and although the true density is strictly positive, along \emph{every} sequence on the subcritical side of the threshold, that is whenever $S/M^{K/2}\to0$ up to a logarithmic factor. This is not a statement about one badly chosen design: the diagonal $M=S$, which satisfies the rate condition of \citet{BrandtSantaClara2002} and their own regularity assumptions, is merely the corollary that lands inside their hypotheses for every $K>2$. It refutes the consistency asserted in their Lemma 2 and, since $\sqrt S$ times the centred density then diverges, the central-limit statement of their Lemma 3. The proofs of their parameter-estimator theorems consequently fail, and in four dimensions their rate condition is incompatible with mean-square consistency of the simulated density. \textbf{We do not show that the estimator itself is inconsistent}: the results refute two published statements about the transition density and remove inputs on which the published parameter-estimator proofs rely, but the behaviour of the maximiser remains open, and we set out precisely what a proof either way would require. Issues specific to the exchange-rate application are analysed separately in appendices.
 \end{abstract}
 
 \noindent\textbf{Keywords:} simulated maximum likelihood; diffusion processes; Euler scheme; transition density; Monte Carlo variance; curse of dimensionality; diffusion bridges; importance sampling.
@@ -419,54 +420,78 @@ The variance is not uniformly $O(1/S)$. It is $O(M^{K/2}/S)$. The estimator is u
 
 \subsection{A direct joint-limit counterexample}
 
-A variance calculation alone does not prove failure of convergence in probability because a non-uniformly integrable sequence can converge in probability while retaining large or divergent moments. The next theorem gives a direct failure result. It is a statement about the simulated transition density at a single pair of points; \Cref{sec:argmax_gap} explains why it does not transfer automatically to the parameter estimator.
+A variance calculation alone does not prove failure of convergence in probability because a non-uniformly integrable sequence can converge in probability while retaining large or divergent moments. The next theorem gives a direct failure result. It is a statement about the simulated transition density at a pair of points; \Cref{sec:argmax_gap} explains why it does not transfer automatically to the parameter estimator.
 
-\begin{theorem}[Collapse along $M=S$]\label{thm:collapse}
-Let $K>2$, let $x,y\in\R^K$ be arbitrary, and choose $M_n=S_n=n$. Then the Brownian endpoint estimator satisfies
+The result is stated for the whole subcritical region rather than for one sequence, because the region is what it is about. A reader shown only the diagonal $M=S$ may reasonably answer that one should therefore not set $M=S$; the point is that no path on the subcritical side of the threshold escapes, up to a logarithmic factor.
+
+\begin{theorem}[Collapse on the whole subcritical region]\label{thm:subcritical}
+Let $K\ge1$ and let $x,y\in\R^K$ be arbitrary. Let $h_n=1/M_n\downarrow0$ with $h_n\le\tfrac12$, and suppose the simulation counts are subcritical in the sense that
+\begin{equation}\label{eq:subcritical_condition}
+S_n\,h_n^{K/2}\bigl\{\log(1/h_n)\bigr\}^{K/2}\longrightarrow0 .
+\end{equation}
+Then the Brownian endpoint estimator satisfies
 \begin{equation}\label{eq:collapse}
-\widehat q_{n,n}(y\mid x)\longrightarrow0
+\widehat q_{M_n,S_n}(y\mid x)\longrightarrow0
 \qquad\text{in probability},
 \end{equation}
 although the true density is strictly positive at every such pair,
 \[
-p(y\mid x)=(2\pi)^{-K/2}e^{-\lVert y-x\rVert^2/2}>0.
+p(y\mid x)=(2\pi)^{-K/2}e^{-\lVert y-x\rVert^2/2}>0 .
 \]
-In every dimension the sequence satisfies the rate condition
+\end{theorem}
+
+\begin{proof}
+Let $Z_{n,1},\ldots,Z_{n,S_n}$ be the preterminal draws, each distributed as $\Normal(x,(1-h_n)I_K)$. Fix any constant $c>K$ and define
+\[
+r_n=\sqrt{c\,h_n\log(1/h_n)} .
+\]
+Let $A_n$ be the event that at least one draw lies in the ball $B(y,r_n)$. Since $h_n\le\tfrac12$ the covariance satisfies $1-h_n\ge\tfrac12$, so the density of $Z_{n,1}$ is bounded by $\pi^{-K/2}$ everywhere, uniformly in $n$ and in the pair $(x,y)$. Hence, with $\omega_K$ the volume of the unit ball and $C_K=\pi^{-K/2}\omega_K$,
+\[
+\Pp(A_n)
+\le S_n\Pp\bigl(\lVert Z_{n,1}-y\rVert\le r_n\bigr)
+\le C_KS_nr_n^K
+=C_Kc^{K/2}\,S_nh_n^{K/2}\bigl\{\log(1/h_n)\bigr\}^{K/2}
+\longrightarrow0
+\]
+by \eqref{eq:subcritical_condition}. This bound does not involve $x$ or $y$: displacing the evaluation point only moves the ball, and the Gaussian density bound is global.
+
+On $A_n^c$, every summand is bounded by
+\[
+(2\pi h_n)^{-K/2}\exp\Bigl(-\frac{r_n^2}{2h_n}\Bigr)
+=(2\pi h_n)^{-K/2}h_n^{c/2}
+=(2\pi)^{-K/2}h_n^{(c-K)/2},
+\]
+which tends to zero because $c>K$. The sample average obeys the same bound, and no restriction on the growth of $S_n$ beyond \eqref{eq:subcritical_condition} is needed, because that bound does not involve $S_n$. Therefore, for every $\varepsilon>0$,
+\[
+\Pp(\widehat q_{M_n,S_n}>\varepsilon)
+\le \Pp(A_n)+
+\mathbf{1}\!\left\{(2\pi)^{-K/2}h_n^{(c-K)/2}>\varepsilon\right\}
+\longrightarrow0. \qedhere
+\]
+\end{proof}
+
+Condition \eqref{eq:subcritical_condition} is the effective-size condition $R_{M,S}\to0$ of \Cref{def:effective_size}, weakened by a logarithmic factor. The theorem therefore says that collapse occurs throughout the subcritical region and not merely along one sequence, which is what makes it a statement about the estimator rather than about a choice of design. The diagonal is the case of interest for the published rate condition.
+
+\begin{corollary}[Collapse along $M=S$]\label{thm:collapse}
+Let $K>2$, let $x,y\in\R^K$, and choose $M_n=S_n=n$. Then $\widehat q_{n,n}(y\mid x)\to0$ in probability while $p(y\mid x)>0$. In every dimension this sequence satisfies the rate condition
 \[
 \frac{\sqrt{S_n}}{M_n}=n^{-1/2}\longrightarrow0
 \]
 used in Theorems 1 and 2 of \citet{BrandtSantaClara2002}, and it satisfies without any rate restriction the hypotheses of their Lemma 2, which requires only $M\to\infty$ and $S\to\infty$.
-\end{theorem}
+\end{corollary}
 
 \begin{proof}
-Write $h_n=1/n$ and let $Z_{n,1},\ldots,Z_{n,n}$ be the preterminal draws, each distributed as $\Normal(x,(1-1/n)I_K)$. Fix a constant $c>K$ and define
-\[
-r_n=\sqrt{\frac{c\log n}{n}}.
-\]
-Let $A_n$ be the event that at least one draw lies in the ball $B(y,r_n)$. For $n\ge2$ the covariance satisfies $1-1/n\ge\tfrac12$, so the density of $Z_{n,1}$ is bounded by $\pi^{-K/2}$ everywhere, uniformly in $n$ and in the pair $(x,y)$. Hence, with $\omega_K$ the volume of the unit ball and $C_K=\pi^{-K/2}\omega_K$,
-\[
-\Pp(A_n)
-\le n\Pp\bigl(\lVert Z_{n,1}-y\rVert\le r_n\bigr)
-\le C_K n r_n^K
-=C_Kc^{K/2}n^{1-K/2}(\log n)^{K/2}
-\longrightarrow0
-\]
-because $K>2$. Note that this bound does not involve $x$ or $y$: displacing the evaluation point only moves the ball, and the Gaussian density bound is global.
-
-On $A_n^c$, every summand is bounded by
-\[
-\left(\frac{n}{2\pi}\right)^{K/2}
-\exp\!\left(-\frac{nr_n^2}{2}\right)
-=(2\pi)^{-K/2}n^{(K-c)/2},
-\]
-which tends to zero because $c>K$. The sample average obeys the same bound. Therefore, for every $\varepsilon>0$,
-\[
-\Pp(\widehat q_{n,n}>\varepsilon)
-\le \Pp(A_n)+
-\mathbf{1}\!\left\{(2\pi)^{-K/2}n^{(K-c)/2}>\varepsilon\right\}
-\longrightarrow0. \qedhere
-\]
+With $h_n=1/n$ and $S_n=n$ the left side of \eqref{eq:subcritical_condition} is $n^{1-K/2}(\log n)^{K/2}$, which tends to zero precisely because $K>2$. Apply \Cref{thm:subcritical}. The rate condition is immediate.
 \end{proof}
+
+\begin{remark}[The threshold in low dimensions]\label{rem:trichotomy}
+Along $M=S=n$ the effective size is $R_{n,n}=n^{1-K/2}$, and the three cases are worth seeing together. At $K=1$ it is $\sqrt n\to\infty$, so the estimator is consistent and indeed asymptotically normal by \Cref{thm:brownian_clt}. At $K=2$ it is identically one: bounded, so the collapse argument fails, but not divergent, so consistency fails too. \Cref{prop:brownian_moments} makes the second statement exact, since at $x=y$ and $S=M=n$,
+\[
+\frac{\Var\bigl(\widehat q_{n,n}\bigr)}{p(y\mid x)^2}
+=\frac1n\Bigl(\frac{n}{2-1/n}-1\Bigr)\longrightarrow\frac12 ,
+\]
+so the relative variance does not vanish and the estimator cannot converge in probability to $p$. At $K>2$ the effective size tends to zero and \Cref{thm:collapse} applies. Dimension two is thus a genuine boundary and not an artefact of the proof: below it the diagonal is consistent, at it the estimator is stuck with a fixed relative error of $1/\sqrt2$, and above it the estimator collapses.
+\end{remark}
 
 \begin{remark}[The collapse is not an artefact of the evaluation point]\label{rem:general_xy}
 Neither bound in the proof depends on $x$ or $y$: the first is a global Gaussian density bound applied to a ball centred at $y$, and the second uses only that every draw lies outside that ball. The collapse is therefore not a feature of evaluating at the mode, where one might suspect the estimator is stressed unusually, nor of the coincident case $x=y$. It holds at every pair of points, and the limit is zero at all of them while $p(y\mid x)$ is strictly positive at all of them. What varies with $(x,y)$ is only the constant in \Cref{prop:brownian_moments}, not the rate or the conclusion.
@@ -708,7 +733,7 @@ The constant can be checked against closed forms. For standard Brownian motion $
 \begin{remark}[Localisation]\label{rem:localisation}
 Only three features of \Cref{ass:local} are used: ellipticity and boundedness of $\mu$ near $y$, which drive the local term; the uniform bound \ref{ass:bound}, which drives domination; and enough global control to make the tail negligible. Global uniform ellipticity is therefore stronger than necessary. It can be replaced by ellipticity on $B(y,\delta_0)$ together with any condition forcing the contribution of $\{Z_h\notin B(y,\delta)\}$ to vanish after multiplication by $h^{(r-1)K/2}\sup_zg_h(y\mid z)^r$, for instance a Gaussian upper bound of Aronson type on $r_h$. We state the global version because it keeps the proof short and because the content of the theorem is the dimensional constant, not the weakest hypotheses.
 
-We do not claim the assumption set is directly verifiable, and an earlier version did. Conditions \ref{ass:mu} to \ref{ass:bound} are checkable from the coefficients, but \ref{ass:conv} is not a primitive condition: it requires uniform convergence on a ball of the \emph{Euler} density at time $1-h$ to the \emph{diffusion} density at time $1$, which bundles a discretisation limit together with continuity of $t\mapsto p_t$ in the uniform topology. Results of \citet{BallyTalay1996a,BallyTalay1996b} deliver statements of this kind, but under hypotheses of their own that are stronger than \ref{ass:mu} and \ref{ass:V}, so appealing to them to justify \ref{ass:conv} while citing \ref{ass:mu} and \ref{ass:V} as the primitive conditions would be mildly circular. The honest description is that \ref{ass:conv} is an assumption imported from the Euler-approximation literature, not one the reader can check from $\mu$ and $V$ alone.
+We do not claim the assumption set is directly verifiable. Conditions \ref{ass:mu} to \ref{ass:bound} are checkable from the coefficients, but \ref{ass:conv} is not a primitive condition: it requires uniform convergence on a ball of the \emph{Euler} density at time $1-h$ to the \emph{diffusion} density at time $1$, which bundles a discretisation limit together with continuity of $t\mapsto p_t$ in the uniform topology. Results of \citet{BallyTalay1996a,BallyTalay1996b} deliver statements of this kind, but under hypotheses of their own that are stronger than \ref{ass:mu} and \ref{ass:V}, so appealing to them to justify \ref{ass:conv} while citing \ref{ass:mu} and \ref{ass:V} as the primitive conditions would be mildly circular. The honest description is that \ref{ass:conv} is an assumption imported from the Euler-approximation literature, not one the reader can check from $\mu$ and $V$ alone.
 \end{remark}
 
 \begin{remark}[Time-inhomogeneous coefficients]\label{rem:time_inhomogeneous}
@@ -1109,9 +1134,23 @@ R^{\mathrm{score}}_{M,S}=S\,h^{(K+2)/2}=\frac{S}{M^{(K+2)/2}},
 R_{M,S}=\frac{S}{M^{K/2}}.
 \end{equation}
 
+Before drawing the consequence, one identification must be made explicit rather than assumed, because \Cref{prop:score_moment} differentiates in the \emph{evaluation point} $y$ while hypothesis \ref{it:me_score} concerns $\nabla_\theta$.
+
+\begin{assumption}[Score identification]\label{ass:score_identification}
+The model is such that differentiation of the summand in the parameter reduces to differentiation in the evaluation point, up to a bounded nonsingular linear map: $\nabla_\theta G_h=J\,\nabla_yG_h+\Rem_h$ with $\lVert J\rVert$ and $\lVert J^{-1}\rVert$ bounded and $\E\lVert\Rem_h\rVert^2=o(h^{-(K+2)/2})$.
+\end{assumption}
+
+\begin{remark}[When this holds, and when it must be argued]\label{rem:score_identification}
+In the location model $dY=\theta\,dt+dW$ of \Cref{app:argmax} it holds exactly with $J=-I$, which is the content of \Cref{prop:crn_kde}: the atoms are free of $\theta$, so the parameter enters only through the evaluation point and the two gradients coincide up to sign, with $\Rem_h\equiv0$. For a general diffusion it is a genuine restriction rather than a formality. There $\nabla_\theta$ acts on the drift $\mu$, on the diffusion coefficient $V$ and on the law of the preterminal draws, so the parameter gradient is a sum of three terms rather than a reparameterised evaluation-point gradient. We expect the $h^{-(K+2)/2}$ rate to survive that decomposition, because the term differentiating the Gaussian kernel through its mean carries the same factor $h^{-1}$ that \Cref{prop:score_moment} isolates while the coefficient-sensitivity terms carry lower powers, but we have not carried out that computation and do not claim it. The corollary below is therefore stated under \Cref{ass:score_identification}, and outside models satisfying it the score-level exponent should be regarded as conjectural.
+\end{remark}
+
 \begin{corollary}[The published condition fails more decisively at score level]\label{cor:score_contradiction}
-In $K=4$, hypothesis \ref{it:me_score} of \Cref{prop:m_estimator} requires $S/M^3\to\infty$, whereas the rate condition of \citet{BrandtSantaClara2002}, equivalent to $S/M^2\to0$, requires $S\ll M^2$. Since $M^3\gg M^2$, no sequence satisfies both, and the gap is wider by a factor $M$ than the density-level incompatibility of \Cref{cor:contradiction}.
+Let $K=4$ and suppose \Cref{ass:score_identification} holds. Then hypothesis \ref{it:me_score} of \Cref{prop:m_estimator} requires $S/M^3\to\infty$, whereas the rate condition of \citet{BrandtSantaClara2002}, equivalent to $S/M^2\to0$, requires $S\ll M^2$. Since $M^3\gg M^2$, no sequence satisfies both, and the gap is wider by a factor $M$ than the density-level incompatibility of \Cref{cor:contradiction}.
 \end{corollary}
+
+\begin{proof}
+Hypothesis \ref{it:me_score} asks for $\sup_{\theta\in U}\lVert\nabla\widehat Q_{N,M,S}-\nabla Q_N\rVert=\op(N^{-1/2})$. Fix $\theta$ first. The simulated criterion is the average over $n$ of $\log\widehat q_n$, and the $N$ observations use independent simulation draws, so the pointwise discrepancy is an average of $N$ independent terms each of standard deviation of order $(Sh^{(K+2)/2})^{-1/2}$ by \Cref{prop:score_moment} and \Cref{ass:score_identification}, together with a bias term common across $n$. The stochastic part is therefore of order $N^{-1/2}(Sh^{(K+2)/2})^{-1/2}$, and requiring it to be $\op(N^{-1/2})$ gives $Sh^{(K+2)/2}\to\infty$, which at $K=4$ is $S/M^3\to\infty$. It is $Sh^{(K+2)/2}\to\infty$ rather than $\sqrt N/(Sh^{(K+2)/2})\to0$ that is needed here because averaging over $n$ already supplies the factor $N^{-1/2}$; the bias term, which does not average away, is what produces the second condition in \eqref{eq:parameter_rate_heuristic}. Passing from the pointwise statement to the supremum over $U$ requires a uniform law; we assume rather than prove it, as recorded in \Cref{rem:me_localisation}, so the necessity direction is what the corollary uses and it holds pointwise already. The comparison with $S/M^2\to0$ is immediate.
+\end{proof}
 
 This bears directly on Lemma 4 of \citet{BrandtSantaClara2002}, which asserts $\ln\widehat{\mathcal L}-\ln\mathcal L=o(N/S^{1/2})$ under $S^{1/2}/M\to0$ and derives it from Lemma 3, a statement about the density. The score is not the density, and \Cref{prop:score_moment} quantifies the difference exactly: at $K=4$ the score's Monte Carlo variance is larger by a factor of order $M$. Whether the argmax conclusion survives is still open, for the reasons set out in \Cref{app:argmax}; what is not open is that the rate condition under which the published proof operates is insufficient for the score even to converge.
 
@@ -1123,7 +1162,7 @@ S h^{(K+2)/2}\to\infty,
 \qquad
 \sqrt N\,h\to0,
 \end{equation}
-corresponding respectively to vanishing score simulation noise, vanishing nonlinear simulation bias at the $N^{-1/2}$ scale, and negligible Euler bias. The first condition is now the score-level one of \eqref{eq:score_effective_size} rather than the density-level $Sh^{K/2}\to\infty$ that an earlier version of this display carried; \Cref{prop:score_moment} is what fixes the exponent. Therefore \eqref{eq:parameter_rate_heuristic} is a design implication, not a claimed complete theorem for arbitrary diffusions.
+corresponding respectively to vanishing score simulation noise, vanishing nonlinear simulation bias at the $N^{-1/2}$ scale, and negligible Euler bias. The first condition is the score-level one of \eqref{eq:score_effective_size}, not the density-level $Sh^{K/2}\to\infty$; \Cref{prop:score_moment} is what fixes the exponent. Therefore \eqref{eq:parameter_rate_heuristic} is a design implication, not a claimed complete theorem for arbitrary diffusions.
 
 The broader Monte Carlo likelihood literature treats joint data and simulation limits through empirical-process, importance-sampling, or exact-simulation arguments rather than by combining two pointwise limits; see, among others, \citet{Lee1995,SungGeyer2007,BeskosEtAl2009,MiasojedowEtAl2016}.
 
@@ -1185,6 +1224,8 @@ This gives the iterated limit
 It does not give convergence along every sequence $(M_n,S_n)\to(\infty,\infty)$. The summand changes with $M$ and its variance diverges as $M^{K/2}$. \Cref{thm:collapse} directly refutes the stated joint conclusion.
 
 Two features of Lemma 2 are worth isolating. It is stated as a joint limit in $M$ and $S$ with no rate restriction whatsoever, so the refutation does not depend on the separate discussion of $\sqrt S/M\to0$ below; and it is stated under Assumptions 1 and 2 alone, which standard Brownian motion satisfies. The counterexample therefore meets the lemma on its own terms.
+
+A defender might reply that Lemma 2 was \emph{intended} as the iterated statement, and that the joint phrasing is a slip of exposition rather than a claim. The reply does not save the chain, and the reason is visible in the published proofs rather than in any reconstruction of intent. Lemmas 4 and 5 are both stated ``as $N\to\infty$, $M\to\infty$, and $S\to\infty$, with $S^{1/2}/M\to0$'', that is under a genuine joint limit with a rate tying the two indices together, and Lemma 4's proof invokes Lemma 3, whose proof in turn invokes Lemma 1 together with the same rate condition. An iterated reading of Lemma 2 would therefore be too weak to feed the arguments that use it: one cannot first send $S\to\infty$ at fixed $M$ and then send $M\to\infty$ inside a statement in which $S$ and $M$ are constrained to move together. Either the lemma means what it says, in which case \Cref{thm:collapse} refutes it, or it means the iterated statement, in which case Lemmas 4 and 5 rest on an input weaker than they require. The chain fails on either reading, which is why the quantifier question, though worth settling, does not decide the outcome.
 
 Because Lemmas 3 to 6 take Lemma 2 as an input, and Theorem 1 is stated as the summary of Lemmas 1 to 6, the published proofs of Theorems 1 and 2 fail. That is a statement about the proofs. It does not establish that the conclusions of those theorems are false, and the subsections that follow identify further steps that are independently unproved.
 
@@ -1413,7 +1454,18 @@ The dimensional diagnostic of \Cref{def:effective_size} gives the complementary 
 \begin{equation}\label{eq:implemented_effective_size}
 R_{\mathrm{pair}}=\frac{P}{M^{K/2}}=\frac{5{,}000}{100}=50 .
 \end{equation}
-Each transition density in a $544$-term log likelihood is therefore resolved by an independent-pair count of order $10^2$, not the $10^4$ that the raw evaluation total suggests. The variance-equivalent figure $R_{\mathrm{var}}$ lies between $50$ and $100$ wherever $\rho_A\ge0$ and above $100$ wherever $\rho_A<0$, so the order of magnitude is $10^2$ on any reading short of near-perfect negative pairing. Again this is a scaling statement and not a verdict: a count of $50$ may well be adequate at these parameter values, and the exact Brownian formulas of \Cref{sec:brownian} would be the way to check that for a given target density.
+Each transition density in a $544$-term log likelihood is therefore resolved by an independent-pair count of order $10^2$, not the $10^4$ that the raw evaluation total suggests. The variance-equivalent figure $R_{\mathrm{var}}$ lies between $50$ and $100$ wherever $\rho_A\ge0$ and above $100$ wherever $\rho_A<0$, so the order of magnitude is $10^2$ on any reading short of near-perfect negative pairing. A scaling statement invites the question it does not answer, namely whether $50$ is adequate, and \Cref{prop:brownian_moments} answers it for the Brownian benchmark rather than leaving the reader to wonder. At a coincident endpoint the exact second moment gives
+\begin{equation}\label{eq:relative_second_moment}
+\frac{\E[G_h^2]}{p(y\mid x)^2}=\bigl(h(2-h)\bigr)^{-K/2}=27.70
+\qquad\text{at }K=4,\ h=\tfrac1{10},
+\end{equation}
+so the relative standard deviation of the simulated density from $S=5{,}000$ independent units is
+\[
+\sqrt{\frac{27.70-1}{5{,}000}}=7.3\ \text{per cent},
+\]
+rising to $9.3$ per cent at $\lVert y-x\rVert=1$, where the ratio in \eqref{eq:relative_second_moment} is $44.48$.
+
+Two readings of that figure are both correct and should be kept apart. Pointwise, seven per cent on a single transition density is not catastrophic. In the criterion it is different: by the second-order term of \Cref{prop:log_delta} the log-density expectation is displaced by approximately $-\Var(\widehat q)/(2q^2)$ per observation, which at these values is $-2.7\times10^{-3}$, and summing over the $544$ observations gives a systematic displacement of about $-1.5$ in log-likelihood units, rising to $-2.4$ at the more distant endpoint. A bias of that size does not move a maximiser much when it is common across parameter values, but it does not cancel in comparisons \emph{across specifications} with different fitted densities, which is exactly the use to which a log likelihood is put when models are ranked. That is the practical content of $R_{M,S}=50$, and it is available only because the moments are exact rather than asymptotic.
 
 The last three rows of \Cref{tab:design} record how $R_{M,S}$ responds to refinement, because the arithmetic is easy to get wrong. In four dimensions $R_{M,S}=S/M^2$, so
 \begin{equation}\label{eq:doubling_arithmetic}
@@ -1580,33 +1632,7 @@ None of these points, individually or collectively, proves that the finite-sampl
 \FloatBarrier
 \section{Additional proof details}\label{app:proofs}
 
-\subsection{The Brownian collapse for more general subcritical paths}
-
-The proof of \Cref{thm:collapse} extends well beyond $M=S$, and it is worth stating the general version as a result rather than as a sketch, since the sketch previously carried two vague clauses that turn out to be unnecessary or explicit.
-
-\begin{proposition}[Collapse along any subcritical path]\label{prop:subcritical}
-Let $K\ge1$, let $x,y\in\R^K$, and let $h_n\downarrow0$ with $h_n\le\tfrac12$. Suppose the simulation counts satisfy
-\begin{equation}\label{eq:subcritical_condition}
-S_n\,h_n^{K/2}\bigl\{\log(1/h_n)\bigr\}^{K/2}\longrightarrow0 .
-\end{equation}
-Then the Brownian endpoint estimator satisfies $\widehat q_{M_n,S_n}(y\mid x)\to0$ in probability, while $p(y\mid x)>0$.
-\end{proposition}
-
-\begin{proof}
-Fix any $c>K$ and set $r_n=\sqrt{c\,h_n\log(1/h_n)}$. Let $A_n$ be the event that some preterminal draw lies in $B(y,r_n)$. As in \Cref{thm:collapse}, the preterminal density is bounded by $\pi^{-K/2}$ uniformly, so with $C_K=\pi^{-K/2}\omega_K$,
-\[
-\Pp(A_n)\le C_KS_nr_n^K=C_Kc^{K/2}\,S_nh_n^{K/2}\bigl\{\log(1/h_n)\bigr\}^{K/2}\longrightarrow0
-\]
-by \eqref{eq:subcritical_condition}. On $A_n^{c}$ every summand is at most
-\[
-(2\pi h_n)^{-K/2}\exp\Bigl(-\frac{r_n^2}{2h_n}\Bigr)
-=(2\pi h_n)^{-K/2}h_n^{c/2}
-=(2\pi)^{-K/2}h_n^{(c-K)/2}\longrightarrow0,
-\]
-since $c>K$; the average obeys the same bound. Combining the two displays as in \Cref{thm:collapse} gives the conclusion.
-\end{proof}
-
-Two clauses in the earlier sketch can now be dropped. ``For sufficiently large $c$'' is simply $c>K$, and no growth restriction on $S_n$ beyond \eqref{eq:subcritical_condition} is needed: the bound on each summand does not involve $S_n$ at all, so the average inherits it whatever $S_n$ does. Condition \eqref{eq:subcritical_condition} is the effective-size condition $R_{M,S}\to0$ of \Cref{def:effective_size} weakened by a logarithmic factor, so the proposition says that collapse occurs on the whole subcritical side of the threshold and not merely along the diagonal. \Cref{thm:collapse} uses $M=S$ because that sequence is transparent and, in four dimensions, satisfies the published rate condition directly.
+The subcritical collapse result that formerly appeared here is now \Cref{thm:subcritical} in \Cref{sec:brownian}, where it belongs: it is the general statement, and the diagonal sequence is its corollary.
 
 \FloatBarrier
 \section{Square-root coefficients violate the generic assumptions}\label{app:sqrt}
@@ -2058,7 +2084,7 @@ At every algebraically feasible reference point examined the matrix is positive 
 
 A systematic search reinforces this. Sweeping both interest rates over multiples of their long-run means from zero to one hundred, and the incompleteness state over the values $\epsilon_t^2\in\{0,0.005,0.02,0.10\}$, always taking $v_t$ from the identity \eqref{eq:full_variance_identity}, the smallest minimum eigenvalue encountered over the swept candidate points is $+0.0128$ for the U.S.--U.K. system and $+0.0130$ for the U.S.--Germany system, both at the extreme corner of the sweep where the interest rates are a hundred times their long-run means. \textbf{No algebraically feasible candidate point with an indefinite correlation matrix was found.} We therefore make no claim that an invalid correlation matrix arises at any algebraically feasible point, still less that the process would visit one.
 
-The last row of each block in \Cref{tab:correlation_audit} records what happens at $v_t=\sqrt{Q_t}$, which an earlier version of this analysis mistakenly treated as the floor. There the matrix is indeed indefinite, with minimum eigenvalues $-0.0009$ and $-0.0027$, while every entry remains inside $[-1,1]$. But the implied $\epsilon_t^2$ equals $-C=-0.003$, so the state violates \eqref{eq:full_variance_identity} and lies outside the model. It is reported here only to mark the distinction, not as evidence.
+The last row of each block in \Cref{tab:correlation_audit} records what happens at $v_t=\sqrt{Q_t}$, which is \emph{not} the feasible floor because it requires $C_t=0$. There the matrix is indeed indefinite, with minimum eigenvalues $-0.0009$ and $-0.0027$, while every entry remains inside $[-1,1]$. But the implied $\epsilon_t^2$ equals $-C=-0.003$, so the state violates \eqref{eq:full_variance_identity} and lies outside the model. It is reported here only to mark the distinction, not as evidence.
 
 \subsection{Global validity of the specification}\label{app:psd_global}
 
@@ -2210,7 +2236,7 @@ That is exactly the range-compatibility relation of \Cref{lem:singular_schur} ap
 What it does \emph{not} retain is the separate magnitude restriction. Once compatibility holds the inequality is satisfied with equality, $0\le0$, and the magnitude condition must be obtained from the Moore--Penrose criterion instead: since $B^{+}=\tfrac14\left(\begin{smallmatrix}1&\sigma\\\sigma&1\end{smallmatrix}\right)$, a compatible $d$ gives $d^{\mathsf T}B^{+}d=\tfrac14(\rho_{wy}+\sigma\rho_{w^*y})^2=\rho_{wy}^2$, so the requirement is $|\rho_{wy}|\le1$. This is the only configuration in which the entrywise bound is the operative magnitude constraint, and it arises because $W_t^*=\sigma W_t$ almost surely, so the model has one interest-rate Brownian motion rather than two.
 \end{remark}
 
-That the second condition is not implied by the first is worth seeing concretely, because an earlier version of this analysis asserted that it was. Take $\phi_t=0.03$, $\phi_t^*=0.02$ and $\rho_{ww^*}=0.3$, so that $v_t=\sqrt{Q_t}=0.03066$, and set $\rho_{wy}=\rho_{w^*y}=0.9$. The implied correlations are $\rho_{wx,t}=0.7828$ and $\rho_{w^*x,t}=-0.3588$, and \eqref{eq:induced_rho_xy} gives $\rho_{xy}=0.2935$, so \emph{every} entry of $R_t$ lies well inside $[-1,1]$ and the compatibility relation holds exactly. But the left side of \eqref{eq:three_dim_psd} is $1.134$ against a right side of $0.91$, and the spectrum of $R_t$ is $\{-0.133,\,0,\,1.558,\,2.575\}$. The matrix is indefinite. Compatibility bought the zero eigenvalue that singularity requires; it did nothing about the negative one.
+That the second condition is not implied by the first is worth seeing concretely. Take $\phi_t=0.03$, $\phi_t^*=0.02$ and $\rho_{ww^*}=0.3$, so that $v_t=\sqrt{Q_t}=0.03066$, and set $\rho_{wy}=\rho_{w^*y}=0.9$. The implied correlations are $\rho_{wx,t}=0.7828$ and $\rho_{w^*x,t}=-0.3588$, and \eqref{eq:induced_rho_xy} gives $\rho_{xy}=0.2935$, so \emph{every} entry of $R_t$ lies well inside $[-1,1]$ and the compatibility relation holds exactly. But the left side of \eqref{eq:three_dim_psd} is $1.134$ against a right side of $0.91$, and the spectrum of $R_t$ is $\{-0.133,\,0,\,1.558,\,2.575\}$. The matrix is indefinite. Compatibility bought the zero eigenvalue that singularity requires; it did nothing about the negative one.
 
 Two things follow. First, in the degenerate configuration the correlation $\rho_{xy}$ is not a free parameter but a function of the others, whereas the application estimates it freely. Second, and this is the part that a compatibility condition alone would miss, fixing $\rho_{xy}$ correctly still leaves \eqref{eq:three_dim_psd} to be satisfied by $\rho_{wy}$, $\rho_{w^*y}$ and $\rho_{ww^*}$, and that is a joint restriction on three free parameters which entrywise bounds do not deliver. It is a genuine gap in the specification: nothing in the model enforces either condition, and no Cholesky, partial-correlation, hyperspherical or Schur-complement parameterisation is stated that would enforce \eqref{eq:schur} more generally.
 
@@ -2278,7 +2304,7 @@ For the second part we use the representation
 \begin{equation}\label{eq:constraint_representation}
 \mathcal C=\bigl\{c\in[c_{\mathrm L},c_{\mathrm U}]:\ g_j(c)\le0,\ j=1,\dots,J\bigr\},
 \end{equation}
-with $-\infty<c_{\mathrm L}\le c_{\mathrm U}<\infty$, each $g_j:\R\to\R$ continuous, $J$ finite and $\mathcal C\ne\emptyset$. Both $\mathcal C_{\text{pub}}$ and $\mathcal C_{\text{obs}}$ are of this form: the nonnegativity requirements give $g_t(c)=\gamma_tc-A_t$, the range restriction $\mathcal R$ supplies $[c_{\mathrm L},c_{\mathrm U}]$, and each observed-state semidefiniteness requirement gives $g_t(c)=-\lambda_{\min}(R_t(c))$. $\mathcal C_{\text{glob}}$ is \emph{not} of this form, since its constraints are indexed by a continuum. Restricting attention to the nonnegativity constraints alone, as an earlier version of this analysis did, can identify the wrong active constraint.
+with $-\infty<c_{\mathrm L}\le c_{\mathrm U}<\infty$, each $g_j:\R\to\R$ continuous, $J$ finite and $\mathcal C\ne\emptyset$. Both $\mathcal C_{\text{pub}}$ and $\mathcal C_{\text{obs}}$ are of this form: the nonnegativity requirements give $g_t(c)=\gamma_tc-A_t$, the range restriction $\mathcal R$ supplies $[c_{\mathrm L},c_{\mathrm U}]$, and each observed-state semidefiniteness requirement gives $g_t(c)=-\lambda_{\min}(R_t(c))$. $\mathcal C_{\text{glob}}$ is \emph{not} of this form, since its constraints are indexed by a continuum. Restricting attention to the nonnegativity constraints alone can identify the wrong active constraint.
 
 \begin{proposition}[Corner solution of the minimum-incompleteness rule]\label{prop:min_incomplete}
 Consider the problem
@@ -2323,7 +2349,7 @@ It remains to prove \eqref{eq:active_alternatives}. Suppose not: then $c^*\in(c_
 If $\mathcal C$ is a finite union of compact intervals, the minimiser is an endpoint of one component, by the same argument applied to the component containing it. Statements (i) and (ii) follow according to which of the alternatives in \eqref{eq:active_alternatives} occurs. For (iii), $\gamma_t\equiv1$ gives slope $-N<0$, so the optimum is $\max\mathcal C$; if that equals $\min_tA_t$ then \eqref{eq:min_incomplete_solution} follows and the constraint indexed by $\arg\min_tA_t$ is active.
 \end{proof}
 
-The proposition is conditional in a way the earlier version was not. It does not assert that an incompleteness constraint must always bind, because the optimum may instead be stopped by $\mathcal R$ or by semidefiniteness. Whether the conditional case applies to the published estimates is an empirical question about interiority, and the honest answer is that we cannot settle it. What is available is the following, and it falls short of identifying the active constraint in $\mathcal C_{\text{obs}}$, let alone in $\mathcal C_{\text{glob}}$:
+The proposition is conditional, and deliberately so. It does not assert that an incompleteness constraint must always bind, because the optimum may instead be stopped by $\mathcal R$ or by semidefiniteness. Whether the conditional case applies to the published estimates is an empirical question about interiority, and the honest answer is that we cannot settle it. What is available is the following, and it falls short of identifying the active constraint in $\mathcal C_{\text{obs}}$, let alone in $\mathcal C_{\text{glob}}$:
 \begin{itemize}
 \item the original paper reports that the nonnegativity constraint binds in the time-varying specifications;
 \item where Table 4 of \citet{BrandtSantaClara2002} reports $\rho_{zz^*}$ directly, the estimates $0.89$ and $0.94$ are interior to $[-1,1]$, so the range restriction is slack \emph{at those points};
@@ -2425,13 +2451,13 @@ Fix $n$ and let $d_n=\min_s\lVert\theta-b_{n,s}\rVert^2$. Factoring the minimisi
 Every exponent in the second factor is nonpositive and at least one is zero, so that factor lies in $[1/S,1]$ and its logarithm lies in $[-\log S,0]$. Taking logarithms, adding the constant $-\tfrac K2\log(2\pi h)$ from the Gaussian prefactor, multiplying by $2h$ and summing over $n$ gives \eqref{eq:nearest_atom_sandwich}.
 \end{proof}
 
-The bound is uniform in $\theta$ with slack $2Nh\log S$. After division by $N$ that slack is $2h\log S$, which along $M=S=n$ equals $2(\log n)/n$ and therefore vanishes. What this does \emph{not} settle is whether the comparison is sharp enough to control the maximiser, because that is a question about the slack relative to the variation of $D_N$ near its optimum, and the order and local geometry of $D_N$ are exactly what remain unresolved. An earlier version of this discussion asserted the slack was negligible relative to $D_N$; that was not proved and is withdrawn.
+The bound is uniform in $\theta$ with slack $2Nh\log S$. After division by $N$ that slack is $2h\log S$, which along $M=S=n$ equals $2(\log n)/n$ and therefore vanishes. What this does \emph{not} settle is whether the comparison is sharp enough to control the maximiser, because that is a question about the slack relative to the variation of $D_N$ near its optimum, and the order and local geometry of $D_N$ are exactly what remain unresolved.
 
 So the statement is the one in the title: the scaled simulated log likelihood lies uniformly within $2Nh\log S$ of a transformed nearest-atom criterion. The simulated criterion is not itself a nearest-neighbour functional; it is a smooth log-sum-exp of $NS$ terms, and \Cref{prop:nearest_atom} says only that after scaling and the addition of a constant it is uniformly approximated by one. The exact log likelihood in this model is by contrast the quadratic $-\tfrac12\sum_n\lVert\theta-\Delta Y_n\rVert^2$ with minimiser $\widehat\theta_N$. Whether the approximation controls the maximiser depends on the unresolved local scale of $D_N$, so any argument that the two maximisers agree must be made rather than assumed.
 
 Five things the uniform bound alone does not establish, and which are not claimed anywhere in this paper: convergence of the two maximisers; equality of their finite-sample values; equivalence of local curvature at the optimum; the order of $D_N$; or a contradiction to Lemma 5 of \citet{BrandtSantaClara2002}.
 
-What is missing is the limit of $D_N$, and it is worth being precise about how much is missing, because an earlier version of this appendix misidentified the obstacle.
+What is missing is the limit of $D_N$, and it is worth being precise about how much is missing.
 
 The candidate limit is computable in closed form. By \Cref{prop:crn_kde} the atoms $b_{n,s}=\Delta Y_n-\sqrt{1-h}\,\xi_{n,s}$ do not depend on $\theta$ at all; given $\Delta Y_n$ they are independent across $s$ with the Gaussian density $f_n$, and they are independent across $n$. Classical nearest-neighbour asymptotics for an independent sample from a fixed density then give
 \begin{equation}\label{eq:nn_pointwise}
@@ -2451,9 +2477,9 @@ Two of the three ingredients check out numerically. The conditional statement \e
 
 What is \emph{not} established is the interchange: passing from \eqref{eq:nn_pointwise} to \eqref{eq:nn_limit} requires uniform integrability of $S^{2/K}\min_s\lVert\theta-b_{n,s}\rVert^2$ over the distribution of $\Delta Y_n$, and that is a genuine obstacle rather than a formality. The limit is dominated by centres far from $\theta$: at $K=4$ the nearest $90$ per cent of centres contribute only $58$ per cent of \eqref{eq:nn_limit}, and the outermost $1$ per cent contributes $15$ per cent. Those are exactly the centres for which \eqref{eq:nn_pointwise} needs the largest $S$, since its accuracy is governed by $Sf_n(\theta)$, the expected number of atoms near $\theta$, and $f_n(\theta)$ is exponentially small there. Direct simulation of the unconditional quantity is correspondingly slow: at $K=4$ and $S=5{,}000$ it reaches only about $89$ per cent of \eqref{eq:nn_limit}, approaching it from below as $S$ grows.
 
-An earlier version of this appendix gave a different and incorrect reason for stopping, namely that the atoms are ``exchangeable, not independent''. That is wrong. By \Cref{prop:crn_kde} the atoms are free of $\theta$ and independent across $s$ given the data, which is precisely the setting classical nearest-neighbour asymptotics assume. The real requirements are the uniform integrability just described and a uniform-in-$\theta$ upgrade of the pointwise law, both of which are standard in kind if delicate in execution. We have not carried them out, and \eqref{eq:nn_limit} remains a conjecture; but it is a better-specified conjecture than before, with the constant explicit and the single missing step named.
+It is worth naming what is \emph{not} the obstacle. By \Cref{prop:crn_kde} the atoms are free of $\theta$ and independent across $s$ given the data, which is precisely the setting classical nearest-neighbour asymptotics assume, so no difficulty arises from dependence among the atoms. The requirements are the uniform integrability just described and a uniform-in-$\theta$ upgrade of the pointwise law, both standard in kind if delicate in execution. We have not carried them out, and \eqref{eq:nn_limit} remains a conjecture; but it is a better-specified conjecture than before, with the constant explicit and the single missing step named.
 
-If it were established, the consequence would be substantial. The limit criterion is minimised at $\thetao$, so the simulated argmax would be \emph{consistent}; but its curvature at $\thetao$ is $2/(K-2)$ against the exact maximum-likelihood curvature $2$, and the fluctuation of $N^{-1}S^{2/K}D_N$ about its limit is $\Op(N^{-1/2})$ with a covariance not depending on $S$. Then $\sqrt N(\widetilde\theta_{N,M,S}-\widehat\theta_N)$ would converge to a nondegenerate limit rather than to zero, for every admissible $(M_n,S_n)$ including the regime in which Theorem 2 of \citet{BrandtSantaClara2002} operates. That would refute the \emph{conclusion} of Lemma 5, not merely its proof, and would change the standing of this paper's main claim.
+If it were established, the consequence would be substantial. The limit criterion is minimised at $\thetao$, so the simulated argmax would be \emph{consistent}; but its curvature at $\thetao$ differs from the exact maximum-likelihood curvature. Writing the limit \eqref{eq:nn_limit} as $C_K\exp\{\lVert\theta-\thetao\rVert^2/(K-2)\}$, its Hessian at $\thetao$ is $2C_K/(K-2)$ times the identity, so the comparison carries the constant $C_K$ as well as the factor $2/(K-2)$; the exact criterion has Hessian $2I$. The fluctuation of $N^{-1}S^{2/K}D_N$ about its limit is $\Op(N^{-1/2})$ with a covariance not depending on $S$. Then $\sqrt N(\widetilde\theta_{N,M,S}-\widehat\theta_N)$ would converge to a nondegenerate limit rather than to zero, for every admissible $(M_n,S_n)$ including the regime in which Theorem 2 of \citet{BrandtSantaClara2002} operates. That would refute the \emph{conclusion} of Lemma 5, not merely its proof, and would change the standing of this paper's main claim.
 
 \begin{remark}[Why \Cref{prop:nearest_atom} cannot deliver this]\label{rem:h2_cannot}
 The uniform sandwich has slack $2h\log S$ after division by $N$. Against the \emph{level} $D_N/N\asymp S^{-2/K}$ that slack is negligible whenever $M\gg S^{2/K}\log S$, which along $M=S$ with $K>2$ holds comfortably. So \Cref{prop:nearest_atom} is strong enough to transfer consistency, if the limit above were known. It is not strong enough for the $\sqrt N$ statement, because there the comparison is with the \emph{variation} of $D_N/N$ over a ball of radius $N^{-1/2}$ around the minimiser, where the limit criterion is flat and the slack is not negligible. Any route to the $\sqrt N$ conclusion must therefore go through the limit \eqref{eq:nn_limit} rather than through the sandwich.
