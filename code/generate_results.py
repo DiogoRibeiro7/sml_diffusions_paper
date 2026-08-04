@@ -203,12 +203,19 @@ def make_subcritical_distribution_results(rng: np.random.Generator) -> None:
             rng=rng,
         )
         relative = estimates / q
+        # The mean is carried by rare large draws, so its Monte Carlo standard
+        # error is reported alongside it: without one the value 0.998 at the
+        # finest step reads as far more precise than it is.
+        mean_standard_error = float(
+            np.std(relative, ddof=1) / math.sqrt(replications)
+        )
         rows.append(
             {
                 "M": m,
                 "S": m,
                 "replications": replications,
                 "mean_relative": float(np.mean(relative)),
+                "mean_standard_error": mean_standard_error,
                 "median_relative": float(np.median(relative)),
                 "q10_relative": float(np.quantile(relative, 0.10)),
                 "q90_relative": float(np.quantile(relative, 0.90)),

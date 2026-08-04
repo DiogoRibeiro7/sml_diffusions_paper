@@ -73,6 +73,9 @@
 \newcommand{\Var}{\operatorname{Var}}
 % Lower-case form used only when quoting Brandt and Santa-Clara verbatim.
 \newcommand{\var}{\operatorname{var}}
+% Evaluation count in the antithetic subsection.  Not E, which would sit one
+% glyph away from the expectation symbol.
+\newcommand{\neval}{n_{\mathrm{eval}}}
 \newcommand{\Cov}{\operatorname{Cov}}
 \newcommand{\tr}{\operatorname{tr}}
 \newcommand{\diag}{\operatorname{diag}}
@@ -109,7 +112,7 @@
   \ifdefined\draftmode\\[0.3em]\small Draft for mathematical review\fi}
 
 \newcommand{\papertitle}{Dimensional Asymptotics of Euler-Based Simulated Likelihood for Multidimensional Diffusions}
-\newcommand{\paperkeywords}{simulated maximum likelihood; diffusion processes; Euler scheme; transition density; Monte Carlo variance; curse of dimensionality; diffusion bridges; nonregular inference}
+\newcommand{\paperkeywords}{simulated maximum likelihood; diffusion processes; Euler scheme; transition density; Monte Carlo variance; curse of dimensionality; diffusion bridges; importance sampling}
 
 \hypersetup{
   pdftitle={\papertitle},
@@ -127,10 +130,10 @@
 \maketitle
 
 \begin{abstract}
-A widely used simulation method for likelihood inference in discretely observed diffusions approximates each transition density by simulating an Euler scheme to one step before the observed endpoint and averaging the final Gaussian density. We show that this endpoint estimator is a shrinking-bandwidth kernel estimator whose effective simulation size is $S/M^{K/2}$, not $S$, where $K$ is the state dimension, $M$ the number of Euler substeps and $S$ the number of simulations. We derive exact Brownian moments, the general local moment law, the corrected density-level normalisation $\sqrt{S/M^{K/2}}$, and the pointwise mean squared error, minimised at $M\asymp S^{2/(K+4)}$. We then give a direct counterexample to the joint transition-density statements of \citet{BrandtSantaClara2002}: along $M=S\to\infty$, a sequence satisfying their rate condition and their own regularity assumptions, the simulated density converges in probability to zero for every $K>2$ although the true density is strictly positive. This refutes the consistency asserted in their Lemma 2 and, since $\sqrt S$ times the centred density then diverges, the central-limit statement of their Lemma 3. The proofs of their parameter-estimator theorems consequently fail, and in four dimensions their rate condition is incompatible with mean-square consistency of the simulated density. We do not prove that the resulting argmax estimator is inconsistent, and we set out what such a proof would require. Issues specific to the exchange-rate application are analysed separately in appendices.
+A widely used simulation method for likelihood inference in discretely observed diffusions approximates each transition density by simulating an Euler scheme to one step before the observed endpoint and averaging the final Gaussian density. We show that this endpoint estimator is a shrinking-bandwidth kernel estimator whose effective simulation size is $S/M^{K/2}$, not $S$, where $K$ is the state dimension, $M$ the number of Euler substeps and $S$ the number of simulations. We derive exact Brownian moments, the general local moment law, the corrected density-level normalisation $\sqrt{S/M^{K/2}}$, and the pointwise mean squared error, minimised at $M\asymp S^{2/(K+4)}$. We then give a direct counterexample to the joint transition-density statements of \citet{BrandtSantaClara2002}: along $M=S\to\infty$, a sequence satisfying their rate condition and their own regularity assumptions, the simulated density converges in probability to zero for every $K>2$ although the true density is strictly positive. This refutes the consistency asserted in their Lemma 2 and, since $\sqrt S$ times the centred density then diverges, the central-limit statement of their Lemma 3. The proofs of their parameter-estimator theorems consequently fail, and in four dimensions their rate condition is incompatible with mean-square consistency of the simulated density. \textbf{We do not show that the estimator itself is inconsistent}: the results refute two published statements about the transition density and remove inputs on which the published parameter-estimator proofs rely, but the behaviour of the maximiser remains open, and we set out precisely what a proof either way would require. Issues specific to the exchange-rate application are analysed separately in appendices.
 \end{abstract}
 
-\noindent\textbf{Keywords:} simulated maximum likelihood; diffusion processes; Euler scheme; transition density; Monte Carlo variance; curse of dimensionality; diffusion bridges; nonregular inference.
+\noindent\textbf{Keywords:} simulated maximum likelihood; diffusion processes; Euler scheme; transition density; Monte Carlo variance; curse of dimensionality; diffusion bridges; importance sampling.
 
 \noindent\textbf{JEL classifications:} C13; C15; C32; G12; G15.
 
@@ -905,7 +908,11 @@ The resulting optimal pointwise mean squared error is
 Differentiate the leading expression $B h^2+C/(S h^{K/2})$ with respect to $h$ or equate its two terms. This gives $h^{K/2+2}\asymp S^{-1}$ and hence \eqref{eq:optimal_h}. Substitution yields \eqref{eq:optimal_mse}.
 \end{proof}
 
-The rate is the familiar structure of a kernel-density problem: reducing the bandwidth controls approximation bias but decreases the effective number of simulations. The dimension enters through the volume of the final Gaussian kernel. Some illustrative exponents are
+The rate is the familiar structure of a kernel-density problem: reducing the bandwidth controls approximation bias but decreases the effective number of simulations. The dimension enters through the volume of the final Gaussian kernel.
+
+\begin{remark}[The optimal design is not a design at which the CLT centres at $p$]\label{rem:undersmoothing}
+The mean-squared-error optimum of \Cref{prop:optimal_m} and the recentred central limit theorem of \Cref{cor:diffusion_clt} pull in opposite directions, and the tension is worth naming rather than leaving for a reader to trip over. At $M\asymp S^{2/(K+4)}$ the two error sources are balanced by construction, so the bias-negligibility condition required for a limit centred at $p$, namely $\sqrt S/M^{1+K/4}\to0$, fails exactly there. The consequence is the usual one in nonparametric estimation: at the mean-squared-error optimum the limiting distribution acquires a mean shift, and a confidence interval built from the centred limit needs undersmoothing, that is a smaller $h$ than the optimal one, to remain valid. Neither statement is wrong; they answer different questions, one about point accuracy and one about coverage.
+\end{remark} Some illustrative exponents are
 \begin{center}
 \begin{tabular}{ccc}
 \toprule
@@ -1264,9 +1271,9 @@ Because $S$ is fixed throughout \Cref{sec:estimator} to \Cref{sec:loglik} as the
 \[
 P=\text{number of independent antithetic pairs},
 \quad
-E=2P=\text{number of density evaluations},
+\neval=2P=\text{number of density evaluations},
 \]
-where $E$ is an ordinary italic symbol, distinct from the expectation $\E$. For pair $i$ write $G_i^{+}$ and $G_i^{-}$ for the two contributions and $A_i=\tfrac12(G_i^{+}+G_i^{-})$ for the pair average, so the antithetic estimator is
+For pair $i$ write $G_i^{+}$ and $G_i^{-}$ for the two contributions and $A_i=\tfrac12(G_i^{+}+G_i^{-})$ for the pair average, so the antithetic estimator is
 \begin{equation}\label{eq:antithetic_estimator}
 \widehat q_{\mathrm{ant}}
 =\frac1P\sum_{i=1}^PA_i
@@ -1284,38 +1291,43 @@ so the pair is perfectly \emph{positively} correlated and provides no variance r
 \qquad
 \Var\bigl(\widehat q_{\mathrm{ant}}\bigr)=\frac{\sigma^2(1+\rho_A)}{2P} .
 \end{equation}
-At $\rho_A=+1$ this equals $\sigma^2/P$, the variance of only $P$ independent evaluations, although $E=2P$ were computed. At $\rho_A=-1$ it is zero.
+At $\rho_A=+1$ this equals $\sigma^2/P$, the variance of only $P$ independent evaluations, although $\neval=2P$ were computed. At $\rho_A=-1$ it is zero.
 \end{proposition}
 
 \begin{definition}[Variance-equivalent evaluation count]\label{def:neff}
-For an antithetic design of $P$ pairs and $E=2P$ evaluations with pair correlation $\rho_A\in(-1,1]$, the \emph{variance-equivalent number of independent evaluations} is the number $N_{\mathrm{eff}}$ of independent draws whose average would have the same variance:
+For an antithetic design of $P$ pairs and $
+eval=2P$ evaluations with pair correlation $\rho_A\in(-1,1]$, the \emph{variance-equivalent number of independent evaluations} is the number $N_{\mathrm{eff}}$ of independent draws whose average would have the same variance:
 \begin{equation}\label{eq:neff}
-N_{\mathrm{eff}}(\rho_A)=\frac{E}{1+\rho_A}=\frac{2P}{1+\rho_A} .
+N_{\mathrm{eff}}(\rho_A)=\frac{\neval}{1+\rho_A}=\frac{2P}{1+\rho_A} .
 \end{equation}
 \end{definition}
 
 Two ratios follow from \eqref{eq:neff}, and they must not be confused, because they move in opposite directions:
 \begin{equation}\label{eq:neff_ratios}
-\frac{E}{N_{\mathrm{eff}}}=1+\rho_A,
+\frac{\neval}{N_{\mathrm{eff}}}=1+\rho_A,
 \qquad
 \frac{N_{\mathrm{eff}}}{P}=\frac{2}{1+\rho_A} .
 \end{equation}
-The first says how far the raw evaluation count $E$ misstates the effective count; the second compares the effective count with the number of independent units. At $\rho_A=+1$ the first is $2$ and the second is $1$.
+The first says how far the raw evaluation count $\neval$ misstates the effective count; the second compares the effective count with the number of independent units. At $\rho_A=+1$ the first is $2$ and the second is $1$.
 
 The interpretation in the four cases is as follows.
 \begin{itemize}
-\item $\rho_A=+1$: $N_{\mathrm{eff}}=P=E/2$. The $E$ density evaluations have the variance of only $P$ independent evaluations, so counting $E$ as independent overstates the variance-equivalent count by a factor of two.
-\item $\rho_A=0$: $N_{\mathrm{eff}}=E$. The antithetic evaluations perform exactly like $E$ independent ones.
-\item $-1<\rho_A<0$: $N_{\mathrm{eff}}>E$. Pairing delivers variance reduction beyond what $E$ independent evaluations would give, which is the case antithetic sampling is designed for.
+\item $\rho_A=+1$: $N_{\mathrm{eff}}=P=\neval/2$. The $
+eval$ density evaluations have the variance of only $P$ independent evaluations, so counting $
+eval$ as independent overstates the variance-equivalent count by a factor of two.
+\item $\rho_A=0$: $N_{\mathrm{eff}}=\neval$. The antithetic evaluations perform exactly like $
+eval$ independent ones.
+\item $-1<\rho_A<0$: $N_{\mathrm{eff}}>\neval$. Pairing delivers variance reduction beyond what $
+eval$ independent evaluations would give, which is the case antithetic sampling is designed for.
 \item $\rho_A\to-1$: $N_{\mathrm{eff}}$ diverges, because the idealised pair average has variance tending to zero. This is a statement about a variance-equivalence convention, not a literal count of independent observations; no finite design produces infinitely many of those.
 \end{itemize}
-In short, $E$ overstates the effective count by the factor $1+\rho_A$ when $\rho_A>0$, equals it when $\rho_A=0$, and understates it when $\rho_A<0$.
+In short, $\neval$ overstates the effective count by the factor $1+\rho_A$ when $\rho_A>0$, equals it when $\rho_A=0$, and understates it when $\rho_A<0$.
 
 \begin{proof}
 Reflecting every innovation maps the preterminal state $Z=x+\sqrt{1-h}\,\xi$ to $Z^-=x-\sqrt{1-h}\,\xi$, so $Z^--x=-(Z-x)$. The summand depends on $Z$ only through $\lVert y-Z\rVert^2$, and at $y=x$ this is $\lVert x-Z\rVert^2=\lVert Z-x\rVert^2$, which is invariant under $Z-x\mapsto-(Z-x)$. Hence $G^{-}=G^{+}$ pointwise, giving \eqref{eq:antithetic_identical} and $\rho_A=+1$. For \eqref{eq:antithetic_variance}, $\Var(G_i^{+}+G_i^{-})=2\sigma^2(1+\rho_A)$, so $\Var(A_i)=\tfrac14\cdot2\sigma^2(1+\rho_A)=\sigma^2(1+\rho_A)/2$; the pairs are independent across $i$, so the average of $P$ of them divides this by $P$.
 \end{proof}
 
-\Cref{prop:antithetic} is the case $\rho_A=+1$, where the $E$ evaluations buy exactly what $P$ would have bought. Numerically, at $h=1/10$ and $K=4$, $\rho_A$ is $+1$ at $\lVert y-x\rVert=0$, $+0.063$ at $\lVert y-x\rVert=0.5$ and $-0.012$ at $\lVert y-x\rVert=1.5$; at $K=1$ and $\lVert y-x\rVert=0.5$ it is $-0.479$. These values are illustrative of the mechanism at particular endpoints, not summaries of the estimator's behaviour over a sample.
+\Cref{prop:antithetic} is the case $\rho_A=+1$, where the $\neval$ evaluations buy exactly what $P$ would have bought. Numerically, at $h=1/10$ and $K=4$, $\rho_A$ is $+1$ at $\lVert y-x\rVert=0$, $+0.063$ at $\lVert y-x\rVert=0.5$ and $-0.012$ at $\lVert y-x\rVert=1.5$; at $K=1$ and $\lVert y-x\rVert=0.5$ it is $-0.479$. These values are illustrative of the mechanism at particular endpoints, not summaries of the estimator's behaviour over a sample.
 
 That last point needs emphasis, because it is what stops $N_{\mathrm{eff}}$ from being a single number for a given design. The pair correlation $\rho_A$ depends on the endpoint $y$, the initial state $x$, the state dimension $K$, the discretisation level $h$, the diffusion coefficients and the parameter value. Every transition in the likelihood therefore carries its own $\rho_A$, and a single variance-equivalent count for a $544$-term log likelihood does not exist without evaluating the pair covariance transition by transition. What can be said without that evaluation is that $\rho_A\le1$ always, so $N_{\mathrm{eff}}\ge E/2=P$, and the coincident-endpoint case attains the bound.
 
@@ -1327,7 +1339,7 @@ R_{\mathrm{var}}=\frac{N_{\mathrm{eff}}}{M^{K/2}}=\frac{2P}{(1+\rho_A)M^{K/2}} .
 \end{equation}
 $R_{\mathrm{pair}}$ counts independent units and requires no knowledge of $\rho_A$, and it is the conservative diagnostic in the sense that $R_{\mathrm{var}}\ge R_{\mathrm{pair}}$ always. \Cref{lem:antithetic_exponent} shows that independent pair averages preserve the dimensional consistency scale $P/M^{K/2}$; it does not carry the theory of \Cref{sec:general} across wholesale. A complete antithetic central limit theorem would additionally require the limiting joint second and third moments of each pair, none of which the lemma supplies, as \Cref{rem:antithetic_scope} records. $R_{\mathrm{var}}$ is the variance-equivalent diagnostic and is known only once $\rho_A$ is. Neither quantity is an exact variance equivalence for the antithetic design taken as a whole: \Cref{def:effective_size} is stated for independent contributions, so $R_{\mathrm{pair}}$ is its literal instance under the substitution $S\mapsto P$, and $R_{\mathrm{var}}$ is a per-transition quantity that varies with $\rho_A$.
 
-For the reported design, $P=5{,}000$ independent pairs and $E=10{,}000$ endpoint-density evaluations. \Cref{tab:design} reports both, with $R_{\mathrm{pair}}$ and with $R_{\mathrm{var}}$ evaluated at two reference values of $\rho_A$ rather than at a single assumed one.
+For the reported design, $P=5{,}000$ independent pairs and $\neval=10{,}000$ endpoint-density evaluations. \Cref{tab:design} reports both, with $R_{\mathrm{pair}}$ and with $R_{\mathrm{var}}$ evaluated at two reference values of $\rho_A$ rather than at a single assumed one.
 
 Finally, none of this touches the dimensional exponent. Pairing changes the variance constant and can change it in either direction, but the $h^{-K/2}$ growth of the second moment survives it.
 
@@ -1358,7 +1370,7 @@ Suppose $G_h^{+},G_h^{-}\ge0$ have the common marginal law of $G_h$, with $\E[G_
 \begin{equation}\label{eq:rho_a_lower_bound}
 \rho_A\ \ge\ -\frac{\E[G_h]^2}{\Var(G_h)}\ =\ O\bigl(h^{K/2}\bigr),
 \end{equation}
-so $\liminf_{h\downarrow0}\rho_A\ge0$. Consequently $N_{\mathrm{eff}}\le E\,(1+o(1))$: relative to $E$ independent evaluations, antithetic pairing cannot \emph{reduce} the leading rare-event variance constant as the mesh is refined.
+so $\liminf_{h\downarrow0}\rho_A\ge0$. Consequently $N_{\mathrm{eff}}\le \neval\,(1+o(1))$: relative to $\neval$ independent evaluations, antithetic pairing cannot \emph{reduce} the leading rare-event variance constant as the mesh is refined.
 \end{proposition}
 
 \begin{proof}
@@ -1366,12 +1378,12 @@ Since both variables are nonnegative, $\E[G_h^{+}G_h^{-}]\ge0$, so
 \[
 \Cov\bigl(G_h^{+},G_h^{-}\bigr)=\E\bigl[G_h^{+}G_h^{-}\bigr]-\E[G_h]^2\ \ge\ -\E[G_h]^2 .
 \]
-Dividing by $\Var(G_h)$ gives \eqref{eq:rho_a_lower_bound}. The numerator is $O(1)$ by hypothesis and the denominator diverges at rate $h^{-K/2}$, so the bound tends to zero and $\liminf\rho_A\ge0$. The statement about $N_{\mathrm{eff}}=E/(1+\rho_A)$ follows immediately.
+Dividing by $\Var(G_h)$ gives \eqref{eq:rho_a_lower_bound}. The numerator is $O(1)$ by hypothesis and the denominator diverges at rate $h^{-K/2}$, so the bound tends to zero and $\liminf\rho_A\ge0$. The statement about $N_{\mathrm{eff}}=\neval/(1+\rho_A)$ follows immediately.
 \end{proof}
 
 The mechanism is worth naming. A negative $\rho_A$ requires the pair to be jointly small when one member is large, but both members are nonnegative densities whose variance is driven by a rare event in which one of them is enormous; on that event the product is nonnegative, and the covariance cannot be more negative than $-\E[G_h]^2$, which does not grow.
 
-The direction of the conclusion should be read carefully, because \Cref{prop:antithetic_asymptotic} is one-sided. It says antithetic pairing cannot reduce the leading $h^{-K/2}$ variance constant below the independent-evaluation constant. It does not say the constant is unchanged: if $\rho_A\to c>0$, the constant is multiplied by $1+c$, and at a coincident endpoint $\rho_A=1$ doubles it relative to $E$ independent evaluations. So the possibilities the proposition leaves open are that pairing leaves the leading constant alone or makes it worse, never that it improves it. Antithetic sampling can still reduce variance at a \emph{fixed} $h$ and a favourable endpoint, as the value $\rho_A=-0.479$ above shows, and that is a real finite-sample gain. In the theoretical sections $S$ continues to mean the number of independent contributions.
+The direction of the conclusion should be read carefully, because \Cref{prop:antithetic_asymptotic} is one-sided. It says antithetic pairing cannot reduce the leading $h^{-K/2}$ variance constant below the independent-evaluation constant. It does not say the constant is unchanged: if $\rho_A\to c>0$, the constant is multiplied by $1+c$, and at a coincident endpoint $\rho_A=1$ doubles it relative to $\neval$ independent evaluations. So the possibilities the proposition leaves open are that pairing leaves the leading constant alone or makes it worse, never that it improves it. Antithetic sampling can still reduce variance at a \emph{fixed} $h$ and a favourable endpoint, as the value $\rho_A=-0.479$ above shows, and that is a real finite-sample gain. In the theoretical sections $S$ continues to mean the number of independent contributions.
 
 \begin{remark}[What \Cref{lem:antithetic_exponent} does not give]\label{rem:antithetic_scope}
 The lemma fixes the order of the second moment and, with $\E[A_h]=O(1)$, of the variance. It does not give the exact local variance constant, the third centred-moment constant, the Lyapunov ratio for a pair-level triangular array, or a central limit theorem at either the pair level or the likelihood level. Establishing an antithetic analogue of \Cref{thm:generic_clt} would require the limiting joint second and third moments of $(G_h^{+},G_h^{-})$, which depend on the coupling and are not supplied by a sandwich bound.
@@ -1379,7 +1391,7 @@ The lemma fixes the order of the second moment and, with $\E[A_h]=O(1)$, of the 
 
 \begin{table}[htbp]
 \centering
-\caption{Finite-sample scaling ratios for the implemented design and three variations, at $N=544$ and $K=4$. Here $P=S$ is the number of independent units, equal to the number of antithetic pairs, and $E=2P$ the number of endpoint-density evaluations. $R_{\mathrm{pair}}=P/M^2$ counts independent units and needs no knowledge of $\rho_A$; it is \Cref{def:effective_size} under the substitution $S\mapsto P$, and is a conservative diagnostic rather than an exact variance equivalence. $R_{\mathrm{var}}=N_{\mathrm{eff}}/M^2$ with $N_{\mathrm{eff}}=E/(1+\rho_A)$ is the variance-equivalent diagnostic, and it is reported at \emph{two reference values} of $\rho_A$ because no single value applies to a $544$-term likelihood: $\rho_A=1$ is the worst case, attained at a coincident endpoint, and $\rho_A=0$ the neutral case in which pairing neither helps nor hurts. No separate $N_{\mathrm{eff}}$ column is needed at these two values, because $N_{\mathrm{eff}}(1)=P$ and $N_{\mathrm{eff}}(0)=E$: the variance-equivalent count is read off the $P$ and $E$ columns already shown. Any $\rho_A<0$ gives $R_{\mathrm{var}}$ larger than both columns shown, and $R_{\mathrm{var}}\ge R_{\mathrm{pair}}$ always. These are diagnostics: the columns record how the implementation is placed, not whether any limit holds.}
+\caption{Finite-sample scaling ratios for the implemented design and three variations, at $N=544$ and $K=4$. Here $P=S$ is the number of independent units, equal to the number of antithetic pairs, and $\neval=2P$ the number of endpoint-density evaluations. $R_{\mathrm{pair}}=P/M^2$ counts independent units and needs no knowledge of $\rho_A$; it is \Cref{def:effective_size} under the substitution $S\mapsto P$, and is a conservative diagnostic rather than an exact variance equivalence. $R_{\mathrm{var}}=N_{\mathrm{eff}}/M^2$ with $N_{\mathrm{eff}}=\neval/(1+\rho_A)$ is the variance-equivalent diagnostic, and it is reported at \emph{two reference values} of $\rho_A$ because no single value applies to a $544$-term likelihood: $\rho_A=1$ is the worst case, attained at a coincident endpoint, and $\rho_A=0$ the neutral case in which pairing neither helps nor hurts. No separate $N_{\mathrm{eff}}$ column is needed at these two values, because $N_{\mathrm{eff}}(1)=P$ and $N_{\mathrm{eff}}(0)=\neval$: the variance-equivalent count is read off the $P$ and $\neval$ columns already shown. Any $\rho_A<0$ gives $R_{\mathrm{var}}$ larger than both columns shown, and $R_{\mathrm{var}}\ge R_{\mathrm{pair}}$ always. These are diagnostics: the columns record how the implementation is placed, not whether any limit holds.}
 \label{tab:design}
 \footnotesize
 \setlength{\tabcolsep}{4pt}
@@ -1387,7 +1399,7 @@ The lemma fixes the order of the second moment and, with $\E[A_h]=O(1)$, of the 
 \toprule
 & & & & & \multicolumn{2}{c}{$R_{\mathrm{var}}=N_{\mathrm{eff}}/M^2$} & & \\
 \cmidrule(lr){6-7}
-Scenario & $M$ & $P=S$ & $E=2P$ & $R_{\mathrm{pair}}$ & $\rho_A=1$ & $\rho_A=0$ & $\sqrt P/M$ & $N/P^{1/4}$ \\
+Scenario & $M$ & $P=S$ & $\neval=2P$ & $R_{\mathrm{pair}}$ & $\rho_A=1$ & $\rho_A=0$ & $\sqrt P/M$ & $N/P^{1/4}$ \\
 \midrule
 Implemented & 10 & 5{,}000 & 10{,}000 & 50.0 & 50.0 & 100.0 & 7.07 & 64.7 \\
 Double $M$ and $P$ & 20 & 10{,}000 & 20{,}000 & 25.0 & 25.0 & 50.0 & 5.00 & 54.4 \\
@@ -1457,20 +1469,21 @@ For $K=4$, \Cref{fig:path_rmse} compares the exact relative root mean squared er
 
 \begin{table}[htbp]
 \centering
-\caption{Simulation of the four-dimensional Brownian counterexample path $M=S$. The estimator is divided by the true density.}
+\caption{Simulation of the four-dimensional Brownian counterexample path $M=S$. The estimator is divided by the true density. Replication counts follow $\min\{20{,}000,\max(1{,}500,5\times10^6/M)\}$, a fixed total draw budget, which is why they fall from $20{,}000$ to $9{,}765$ at the largest steps. The parenthesised figure is the Monte Carlo standard error of the mean, and it is the point of the column rather than a decoration: the mean is carried by rare large draws, so at $M=512$ the entry reads $0.998\pm0.121$ and is consistent with unbiasedness without being evidence of precision. The mean stays at one because \Cref{prop:brownian_moments} makes the estimator exactly unbiased at every $M$; the median and lower quantiles are where the collapse of \Cref{thm:collapse} is visible.}
 \label{tab:collapse_stats}
 \small
-\begin{tabular}{rrrrrrr}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{rrrrrrrr}
 \toprule
-$M$ & Replications & Mean & Median & 10th pct. & 90th pct. & $\Pp(\widehat q<0.5p)$ \\
+$M$ & Replications & Mean & (s.e.) & Median & 10th pct. & 90th pct. & $\Pp(\widehat q<0.5p)$ \\
 \midrule
-8   & 20000 & 1.001 & 0.3674 & $1.427\times10^{-2}$ & 2.940 & 0.560 \\
-16  & 20000 & 1.009 & 0.1582 & $1.520\times10^{-3}$ & 3.161 & 0.665 \\
-32  & 20000 & 1.027 & 0.03628 & $5.925\times10^{-5}$ & 2.746 & 0.754 \\
-64  & 20000 & 1.002 & 0.004223 & $8.507\times10^{-7}$ & 1.777 & 0.827 \\
-128 & 20000 & 1.042 & $1.537\times10^{-4}$ & $1.487\times10^{-9}$ & 0.7409 & 0.886 \\
-256 & 19531 & 0.941 & $1.118\times10^{-6}$ & $7.168\times10^{-14}$ & 0.1579 & 0.929 \\
-512 & 9765  & 0.998 & $8.604\times10^{-10}$ & $7.076\times10^{-20}$ & 0.01738 & 0.955 \\
+8   & 20000 & 1.001 & $(0.010)$ & 0.3674 & $1.427\times10^{-2}$ & 2.940 & 0.560 \\
+16  & 20000 & 1.009 & $(0.015)$ & 0.1582 & $1.520\times10^{-3}$ & 3.161 & 0.665 \\
+32  & 20000 & 1.027 & $(0.021)$ & 0.03628 & $5.925\times10^{-5}$ & 2.746 & 0.754 \\
+64  & 20000 & 1.002 & $(0.028)$ & 0.004223 & $8.507\times10^{-7}$ & 1.777 & 0.827 \\
+128 & 20000 & 1.042 & $(0.042)$ & $1.537\times10^{-4}$ & $1.487\times10^{-9}$ & 0.7409 & 0.886 \\
+256 & 19531 & 0.941 & $(0.054)$ & $1.118\times10^{-6}$ & $7.168\times10^{-14}$ & 0.1579 & 0.929 \\
+512 & 9765  & 0.998 & $(0.121)$ & $8.604\times10^{-10}$ & $7.076\times10^{-20}$ & 0.01738 & 0.955 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1530,11 +1543,23 @@ For square-root components, ordinary Euler should be replaced by an exact transi
 
 \subsection{Practical design rule}
 
-If the unconditioned endpoint estimator is nevertheless used, $M$ and $S$ should be calibrated jointly. A minimum diagnostic is the effective endpoint size
+If the unconditioned endpoint estimator is nevertheless used, the practical content of this paper reduces to four points, which we gather here because they are otherwise distributed across \Cref{sec:application} and the results above.
+
+\emph{One: monitor the right quantity.} The diagnostic is not $S$ but the effective endpoint size
 \[
-R_{M,S}=S/M^{K/2}.
+R_{M,S}=\frac{S}{M^{K/2}},
 \]
-Increasing $M$ without increasing $R_{M,S}$ is not an accuracy improvement. For density-level asymptotics, $R_{M,S}$ must diverge. For likelihood-level work, one should also monitor the variance and lower tail of every estimated transition density, use log-sum-exp evaluation, and verify stability after increasing both $M$ and $S$ along a theoretically admissible path.
+and for parameter estimation rather than density evaluation it is the score-level version $S/M^{(K+2)/2}$ of \eqref{eq:score_effective_size}, which is more demanding by one power of $M$. Increasing $M$ without increasing these is not an accuracy improvement.
+
+\emph{Two: refining both at once makes things worse, not better.} This is the point most likely to be missed in practice, because refining $M$ and $S$ together looks like unambiguous progress. In $K=4$,
+\begin{equation}\label{eq:doubling_halves}
+R_{2M,2S}=\frac{2S}{(2M)^2}=\frac{R_{M,S}}{2},
+\end{equation}
+so doubling the substeps and the simulation count halves the effective size. Holding $R_{M,S}$ fixed while doubling $M$ requires \emph{quadrupling} $S$; and in $K$ dimensions, holding it fixed requires $S\propto M^{K/2}$. Stability of estimates under a joint refinement is therefore not evidence of convergence, since the refinement has moved the design in the unfavourable direction.
+
+\emph{Three: know where the implemented design sits.} At the values used by \citet{BrandtSantaClara2002}, $K=4$, $M=10$ and $5{,}000$ independent simulation units, $R_{M,S}=50$. Each transition density in a $544$-term log likelihood is resolved by an effective sample of order $10^2$, not $10^4$. That may be adequate; the point is that it is the number to check, and it is not the one the design appears to supply.
+
+\emph{Four: prefer a proposal that uses the endpoint.} The dimensional penalty comes from the unconditioned proposal, and bridge or guided proposals remove it rather than mitigating it: \citet{StramerYan2007a} show the modified Brownian bridge has importance-weight variance bounded uniformly in $M$, with an optimal allocation that is dimension free. If the endpoint construction is retained, monitor the variance and lower tail of every estimated transition density, use log-sum-exp evaluation, and verify stability along a path that holds $R_{M,S}$ fixed or increasing rather than along $M=S$.
 
 % No float may interrupt the conclusion: everything queued must be placed first.
 \FloatBarrier
@@ -2460,6 +2485,12 @@ The accompanying directory contains:
 \item CSV and LaTeX versions of generated numerical tables.
 \end{itemize}
 The code uses a fixed seed, vectorised Gaussian simulation, and log-sum-exp evaluation of the endpoint estimator. No proprietary data are used.
+
+\paragraph{Environment and cost.} The results in this paper were produced with Python 3.13.5, NumPy 2.3.5, SciPy 1.15.3, pandas 2.3.3 and Matplotlib 3.10.8, from the single seed $20260726$ set in \texttt{code/generate\_results.py}. The full artefact regeneration, which includes the counterexample path of \Cref{tab:collapse_stats} and the six-design grid sweep of \Cref{tab:grid_sensitivity}, takes a few minutes on one desktop core; no run requires special hardware, and none is long enough to warrant checkpointing.
+
+\paragraph{Verification.} Three checks are automated and can be run by a reader. \texttt{make verify} regenerates every figure and table into a scratch directory and compares them with the committed copies, field-wise at relative tolerance $10^{-9}$ for CSV output and by SHA-256 for PDF and PNG; figure output carries no embedded timestamp, so the comparison is exact rather than approximate. \texttt{make test} runs the analytical test suite, in which every closed form quoted here is checked against an independent computation. \texttt{code/verify\_dois.py} checks each bibliography DOI against the Crossref registry by title.
+
+\paragraph{Archive.} The code and manuscript are deposited, not merely described. The concept DOI \texttt{10.5281/zenodo.21719868} resolves to the most recent version and is the one to cite; each release additionally receives its own version DOI, and superseded versions remain resolvable and are listed with the specific correction that supersedes them.
 
 \printbibliography
 
