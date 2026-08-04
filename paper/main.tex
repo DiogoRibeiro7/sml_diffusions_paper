@@ -203,6 +203,8 @@ Separately, \citet{DurhamGallant2002} observe that unconditioned Euler paths rar
 
 We therefore claim \emph{none} of the following as new: the kernel interpretation of the endpoint density; the dimension dependence of the resulting rate, including the exponent $2/(K+4)$; the existence of a bias--variance trade-off between discretisation and simulation and the associated optimal allocation; the observation that the rate condition of \citet{BrandtSantaClara2002} is inadequate; the need for joint rather than sequential limits; the case for bridge proposals; the possibility that the endpoint estimator's importance-weight variance is unbounded in $M$; and the observation that increasing $S$ alone need not rescue it.
 
+\emph{The same pathology in a different literature.} The mechanism identified here is not peculiar to Pedersen's estimator, and saying so places it correctly. In sequential Monte Carlo, \citet{BengtssonBickelLi2008} and \citet{SnyderEtAl2008} analyse the collapse of importance weights in high dimension for a particle filter whose proposal does not use the observation: the largest weight comes to dominate the sum, the effective sample size falls to one, and avoiding this requires the particle count to grow exponentially in an effective dimension. The endpoint estimator is that construction. Its proposal is the unconditioned Euler path, which ignores the endpoint exactly as an untuned particle filter ignores the observation; its weights are the one-step Gaussian densities; and the shrinking bandwidth $\sqrt h$ plays the role of an observation with vanishing error variance, which is the regime in which the weight collapse is sharpest. What \Cref{thm:collapse} adds to that literature is a setting in which the degeneracy is exactly computable, so that a specific admissible sequence can be exhibited rather than a scaling law asserted; what that literature adds here is the assurance that the phenomenon is structural rather than an idiosyncrasy of one estimator.
+
 To restate the point of detail on which the dimensional exponent turns, now in this paper's own symbols: the kernel in the endpoint construction is the model's own one-step Euler density, of covariance $hV$ and therefore of bandwidth $\sqrt h$, not $h$. That is why the effective simulation size is $Sh^{K/2}$ rather than $Sh^K$, and it is the reason a dimension-dependent exponent appears here where \citet{StramerYan2007a} find none for the bridge, whose importance weights carry no shrinking kernel at all.
 
 \emph{What this paper adds.} Against that background the contributions are the following, each stated for the unconditioned endpoint estimator.
@@ -417,14 +419,14 @@ The variance is not uniformly $O(1/S)$. It is $O(M^{K/2}/S)$. The estimator is u
 A variance calculation alone does not prove failure of convergence in probability because a non-uniformly integrable sequence can converge in probability while retaining large or divergent moments. The next theorem gives a direct failure result. It is a statement about the simulated transition density at a single pair of points; \Cref{sec:argmax_gap} explains why it does not transfer automatically to the parameter estimator.
 
 \begin{theorem}[Collapse along $M=S$]\label{thm:collapse}
-Let $K>2$, $x=y=0$, and choose $M_n=S_n=n$. Then the Brownian endpoint estimator satisfies
+Let $K>2$, let $x,y\in\R^K$ be arbitrary, and choose $M_n=S_n=n$. Then the Brownian endpoint estimator satisfies
 \begin{equation}\label{eq:collapse}
-\widehat q_{n,n}(0\mid0)\longrightarrow0
+\widehat q_{n,n}(y\mid x)\longrightarrow0
 \qquad\text{in probability},
 \end{equation}
-although
+although the true density is strictly positive at every such pair,
 \[
-p(0\mid0)=(2\pi)^{-K/2}>0.
+p(y\mid x)=(2\pi)^{-K/2}e^{-\lVert y-x\rVert^2/2}>0.
 \]
 In every dimension the sequence satisfies the rate condition
 \[
@@ -434,19 +436,19 @@ used in Theorems 1 and 2 of \citet{BrandtSantaClara2002}, and it satisfies witho
 \end{theorem}
 
 \begin{proof}
-Write $h_n=1/n$ and let $Z_{n,1},\ldots,Z_{n,n}$ be the preterminal draws, each distributed as $\Normal(0,(1-1/n)I_K)$. Fix a constant $c>K$ and define
+Write $h_n=1/n$ and let $Z_{n,1},\ldots,Z_{n,n}$ be the preterminal draws, each distributed as $\Normal(x,(1-1/n)I_K)$. Fix a constant $c>K$ and define
 \[
 r_n=\sqrt{\frac{c\log n}{n}}.
 \]
-Let $A_n$ be the event that at least one draw lies in the ball $B(0,r_n)$. The Gaussian densities of the $Z_{n,s}$ are uniformly bounded for $n\ge2$, so for a constant $C_K$,
+Let $A_n$ be the event that at least one draw lies in the ball $B(y,r_n)$. For $n\ge2$ the covariance satisfies $1-1/n\ge\tfrac12$, so the density of $Z_{n,1}$ is bounded by $\pi^{-K/2}$ everywhere, uniformly in $n$ and in the pair $(x,y)$. Hence, with $\omega_K$ the volume of the unit ball and $C_K=\pi^{-K/2}\omega_K$,
 \[
 \Pp(A_n)
-\le n\Pp(\|Z_{n,1}\|\le r_n)
+\le n\Pp\bigl(\lVert Z_{n,1}-y\rVert\le r_n\bigr)
 \le C_K n r_n^K
 =C_Kc^{K/2}n^{1-K/2}(\log n)^{K/2}
 \longrightarrow0
 \]
-because $K>2$.
+because $K>2$. Note that this bound does not involve $x$ or $y$: displacing the evaluation point only moves the ball, and the Gaussian density bound is global.
 
 On $A_n^c$, every summand is bounded by
 \[
@@ -459,9 +461,13 @@ which tends to zero because $c>K$. The sample average obeys the same bound. Ther
 \Pp(\widehat q_{n,n}>\varepsilon)
 \le \Pp(A_n)+
 \mathbf{1}\!\left\{(2\pi)^{-K/2}n^{(K-c)/2}>\varepsilon\right\}
-\longrightarrow0.
+\longrightarrow0. \qedhere
 \]
 \end{proof}
+
+\begin{remark}[The collapse is not an artefact of the evaluation point]\label{rem:general_xy}
+Neither bound in the proof depends on $x$ or $y$: the first is a global Gaussian density bound applied to a ball centred at $y$, and the second uses only that every draw lies outside that ball. The collapse is therefore not a feature of evaluating at the mode, where one might suspect the estimator is stressed unusually, nor of the coincident case $x=y$. It holds at every pair of points, and the limit is zero at all of them while $p(y\mid x)$ is strictly positive at all of them. What varies with $(x,y)$ is only the constant in \Cref{prop:brownian_moments}, not the rate or the conclusion.
+\end{remark}
 
 The same sequence refutes a second published statement. Lemma 3 of \citet{BrandtSantaClara2002} asserts that, under $\sqrt S/M\to0$,
 \[
@@ -697,7 +703,9 @@ The constant can be checked against closed forms. For standard Brownian motion $
 \end{remark}
 
 \begin{remark}[Localisation]\label{rem:localisation}
-Only three features of \Cref{ass:local} are used: ellipticity and boundedness of $\mu$ near $y$, which drive the local term; the uniform bound \ref{ass:bound}, which drives domination; and enough global control to make the tail negligible. Global uniform ellipticity is therefore stronger than necessary. It can be replaced by ellipticity on $B(y,\delta_0)$ together with any condition forcing the contribution of $\{Z_h\notin B(y,\delta)\}$ to vanish after multiplication by $h^{(r-1)K/2}\sup_zg_h(y\mid z)^r$, for instance a Gaussian upper bound of Aronson type on $r_h$. We state the global version because it is directly verifiable and because the content of the theorem is the dimensional constant, not the weakest hypotheses.
+Only three features of \Cref{ass:local} are used: ellipticity and boundedness of $\mu$ near $y$, which drive the local term; the uniform bound \ref{ass:bound}, which drives domination; and enough global control to make the tail negligible. Global uniform ellipticity is therefore stronger than necessary. It can be replaced by ellipticity on $B(y,\delta_0)$ together with any condition forcing the contribution of $\{Z_h\notin B(y,\delta)\}$ to vanish after multiplication by $h^{(r-1)K/2}\sup_zg_h(y\mid z)^r$, for instance a Gaussian upper bound of Aronson type on $r_h$. We state the global version because it keeps the proof short and because the content of the theorem is the dimensional constant, not the weakest hypotheses.
+
+We do not claim the assumption set is directly verifiable, and an earlier version did. Conditions \ref{ass:mu} to \ref{ass:bound} are checkable from the coefficients, but \ref{ass:conv} is not a primitive condition: it requires uniform convergence on a ball of the \emph{Euler} density at time $1-h$ to the \emph{diffusion} density at time $1$, which bundles a discretisation limit together with continuity of $t\mapsto p_t$ in the uniform topology. Results of \citet{BallyTalay1996a,BallyTalay1996b} deliver statements of this kind, but under hypotheses of their own that are stronger than \ref{ass:mu} and \ref{ass:V}, so appealing to them to justify \ref{ass:conv} while citing \ref{ass:mu} and \ref{ass:V} as the primitive conditions would be mildly circular. The honest description is that \ref{ass:conv} is an assumption imported from the Euler-approximation literature, not one the reader can check from $\mu$ and $V$ alone.
 \end{remark}
 
 \begin{remark}[Time-inhomogeneous coefficients]\label{rem:time_inhomogeneous}
@@ -1514,7 +1522,7 @@ For restricted classes of diffusions, exact simulation and unbiased transition-d
 
 \subsection{Analytical density expansions}
 
-Closed-form expansions, such as those of \citet{AitSahalia2002}, avoid endpoint Monte Carlo variance but introduce an approximation-order problem of their own. They can be attractive for models that can be transformed to satisfy the required regularity conditions.
+Closed-form expansions avoid endpoint Monte Carlo variance entirely but introduce an approximation-order problem of their own. For the four-dimensional system at issue here the relevant reference is the multivariate expansion of \citet{AitSahalia2008} rather than the univariate one of \citet{AitSahalia2002}: it constructs the expansion for a multivariate diffusion after a reducibility transformation, and it is the natural competitor to a simulated likelihood at $K=4$. Its applicability turns on whether the model can be transformed to satisfy the required regularity conditions, which for square-root states with a Feller ratio of one half is not automatic. Approximate martingale estimating functions, as in \citet{Kessler1997}, are a further discretisation-bias-free alternative that avoids the transition density altogether at some cost in efficiency.
 
 \subsection{Positivity-preserving discretisation}
 
@@ -1549,15 +1557,31 @@ None of these points, individually or collectively, proves that the finite-sampl
 
 \subsection{The Brownian collapse for more general subcritical paths}
 
-The proof of \Cref{thm:collapse} extends beyond $M=S$. Let $h_n\downarrow0$ and choose a radius
+The proof of \Cref{thm:collapse} extends well beyond $M=S$, and it is worth stating the general version as a result rather than as a sketch, since the sketch previously carried two vague clauses that turn out to be unnecessary or explicit.
+
+\begin{proposition}[Collapse along any subcritical path]\label{prop:subcritical}
+Let $K\ge1$, let $x,y\in\R^K$, and let $h_n\downarrow0$ with $h_n\le\tfrac12$. Suppose the simulation counts satisfy
+\begin{equation}\label{eq:subcritical_condition}
+S_n\,h_n^{K/2}\bigl\{\log(1/h_n)\bigr\}^{K/2}\longrightarrow0 .
+\end{equation}
+Then the Brownian endpoint estimator satisfies $\widehat q_{M_n,S_n}(y\mid x)\to0$ in probability, while $p(y\mid x)>0$.
+\end{proposition}
+
+\begin{proof}
+Fix any $c>K$ and set $r_n=\sqrt{c\,h_n\log(1/h_n)}$. Let $A_n$ be the event that some preterminal draw lies in $B(y,r_n)$. As in \Cref{thm:collapse}, the preterminal density is bounded by $\pi^{-K/2}$ uniformly, so with $C_K=\pi^{-K/2}\omega_K$,
 \[
-r_n=\sqrt{c h_n\log(1/h_n)}.
+\Pp(A_n)\le C_KS_nr_n^K=C_Kc^{K/2}\,S_nh_n^{K/2}\bigl\{\log(1/h_n)\bigr\}^{K/2}\longrightarrow0
 \]
-If
+by \eqref{eq:subcritical_condition}. On $A_n^{c}$ every summand is at most
 \[
-S_n h_n^{K/2}\{\log(1/h_n)\}^{K/2}\to0
+(2\pi h_n)^{-K/2}\exp\Bigl(-\frac{r_n^2}{2h_n}\Bigr)
+=(2\pi h_n)^{-K/2}h_n^{c/2}
+=(2\pi)^{-K/2}h_n^{(c-K)/2}\longrightarrow0,
 \]
-and $S_n$ grows at most polynomially in $1/h_n$, then with high probability no preterminal draw lies within $r_n$ of the endpoint, while the maximum kernel outside that ball tends to zero for sufficiently large $c$. Thus the estimator again collapses to zero. The theorem uses $M=S$ because it is transparent and directly satisfies the published rate in four dimensions.
+since $c>K$; the average obeys the same bound. Combining the two displays as in \Cref{thm:collapse} gives the conclusion.
+\end{proof}
+
+Two clauses in the earlier sketch can now be dropped. ``For sufficiently large $c$'' is simply $c>K$, and no growth restriction on $S_n$ beyond \eqref{eq:subcritical_condition} is needed: the bound on each summand does not involve $S_n$ at all, so the average inherits it whatever $S_n$ does. Condition \eqref{eq:subcritical_condition} is the effective-size condition $R_{M,S}\to0$ of \Cref{def:effective_size} weakened by a logarithmic factor, so the proposition says that collapse occurs on the whole subcritical side of the threshold and not merely along the diagonal. \Cref{thm:collapse} uses $M=S$ because that sequence is transparent and, in four dimensions, satisfies the published rate condition directly.
 
 \FloatBarrier
 \section{Square-root coefficients violate the generic assumptions}\label{app:sqrt}
@@ -1616,7 +1640,23 @@ which is a CIR process with $\kappa=2\alpha$, long-run mean $\beta^2/(2\alpha)$,
 =\frac{2\beta^2}{4\beta^2}
 =\frac12
 \]
-for every $\alpha>0$ and every $\beta\ne0$. The ratio is exactly one half independently of the parameter values, so no admissible parameter estimate can make the zero boundary unattainable, and the instantaneous covariance degenerates there. That is a statement about attainability, not about where the state typically sits: it does not say the process is usually near zero. This is a structural feature of the specification, not a property of a particular estimate. Whether the boundary is not merely attainable in principle but attained in the reported results depends on the specification, and \Cref{tab:binding_status} records the three different statuses. In brief: under the conditions of \Cref{prop:min_incomplete}(iii) the constant-risk-price optimisation yields an exact zero; for the time-varying specifications \citet{BrandtSantaClara2002} report that the nonnegativity constraint binds, which we repeat rather than verify.
+for every $\alpha>0$ and every $\beta\ne0$.
+
+The parameter-independence is not a coincidence, and identifying its source changes how the rest of this appendix should be read. Suppose $\epsilon_t$ itself follows the Ornstein--Uhlenbeck process
+\begin{equation}\label{eq:epsilon_ou}
+d\epsilon_t=-\alpha\epsilon_t\,dt+\beta\,dY_t .
+\end{equation}
+Then It\^o's lemma applied to $H=\epsilon^2$ gives $dH=2\epsilon\,d\epsilon+(d\epsilon)^2=(\beta^2-2\alpha H)\,dt+2\beta\epsilon\,dY$, which is \eqref{eq:epsilon_cir} exactly, with $2\beta\epsilon=2\beta\sqrt H$ on $\epsilon>0$. The incompleteness specification is therefore the \emph{square of an Ornstein--Uhlenbeck process}, and its Feller ratio is one half for the same reason that a squared Gaussian has a chi-square distribution with one degree of freedom: it is a property of the squaring map, not of $\alpha$ or $\beta$.
+
+Three consequences follow, and they cut in different directions.
+
+First, the attainability of zero is demystified rather than alarming. An Ornstein--Uhlenbeck process crosses zero almost surely; $H$ touching zero is that crossing, seen through the square. Nothing pathological is happening to the model.
+
+Second, the natural state is $\epsilon$, not $H$. In the coordinate $\epsilon$ there is no boundary, no positivity constraint, and an exact Gaussian transition density requiring no Euler scheme at all. Moreover $\epsilon_t$ enters the exchange-rate diffusion only through $\epsilon_t\,dU_t$, so its sign is immaterial to the model. A competent implementation would simulate \eqref{eq:epsilon_ou} exactly and never meet a square root.
+
+Third, and consequently, the calculation in the remainder of this appendix concerns a discretisation that the natural parameterisation makes unnecessary, and which \Cref{app:reality} establishes the published implementation did not use. We retain it because it is exact and because it isolates the mechanism cleanly, but it should be read as a worked illustration of how a shrinking-bandwidth boundary problem behaves, not as a diagnosis of anything in \citet{BrandtSantaClara2002}. The criticism that does bear on their implementation is the radicand condition of \Cref{app:reality}, which no change of coordinates removes because the estimator eliminates $\epsilon$ in favour of $v$.
+
+Returning to the direct discretisation: no admissible parameter estimate can make the zero boundary of $H$ unattainable, and the instantaneous covariance degenerates there. That is a statement about attainability, not about where the state typically sits: it does not say the process is usually near zero. This is a structural feature of the specification, not a property of a particular estimate. Whether the boundary is not merely attainable in principle but attained in the reported results depends on the specification, and \Cref{tab:binding_status} records the three different statuses. In brief: under the conditions of \Cref{prop:min_incomplete}(iii) the constant-risk-price optimisation yields an exact zero; for the time-varying specifications \citet{BrandtSantaClara2002} report that the nonnegativity constraint binds, which we repeat rather than verify.
 
 \begin{table}[htbp]
 \centering

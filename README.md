@@ -44,7 +44,7 @@ make            # regenerate figures and tables, then build the PDF
 make check      # tests, reproducibility, forbidden-phrase gate
 ```
 
-The manuscript builds to `paper/main.pdf` (66 pages). Python 3.11+, NumPy, SciPy, pandas and
+The manuscript builds to `paper/main.pdf` (67 pages). Python 3.11+, NumPy, SciPy, pandas and
 Matplotlib; LaTeX with `latexmk` and `biber`.
 
 ## Layout
@@ -53,7 +53,7 @@ Matplotlib; LaTeX with `latexmk` and `biber`.
 paper/                    the manuscript and everything it includes
   main.tex                LaTeX source
   main.pdf                compiled manuscript
-  references.bib          bibliography, 27 entries, its 24 DOIs Crossref-verified
+  references.bib          bibliography, 31 entries, its 28 DOIs Crossref-verified
   figures/                5 figures, vector PDF and PNG (generated)
   tables/                 10 LaTeX tables and 13 CSV files (generated)
 code/
