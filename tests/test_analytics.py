@@ -1295,3 +1295,78 @@ def test_manuscript_collapse_table_matches_the_generated_values() -> None:
         last["mean_standard_error"]
     )
     assert float(first["median_relative"]) / float(last["median_relative"]) > 1e8
+
+
+# ---------------------------------------------------------------------------
+# The critical limit law at K = 2 along M = S = n
+# ---------------------------------------------------------------------------
+
+
+def poisson_integral_sample(replications: int, rng, horizon: float = 45.0):
+    """Draw L = sum_i exp(-t_i) for t_i a unit-rate Poisson process on (0, inf).
+
+    The tail beyond ``horizon`` contributes below 1e-19 and is dropped.
+    """
+    counts = rng.poisson(horizon, size=replications)
+    out = np.empty(replications)
+    for start in range(0, replications, 40_000):
+        stop = min(start + 40_000, replications)
+        block = counts[start:stop]
+        width = int(block.max())
+        points = rng.random(size=(stop - start, width)) * horizon
+        live = np.arange(width)[None, :] < block[:, None]
+        out[start:stop] = np.where(live, np.exp(-points), 0.0).sum(axis=1)
+    return out
+
+
+def test_critical_case_has_an_exact_exponential_representation() -> None:
+    """At K = 2, M = S = n, qhat/p = sum_s exp(-(n-1) E_s) exactly.
+
+    This identity is what makes the limit law provable rather than conjectural,
+    and its moments must reproduce Proposition 3.1 at r = 1 and r = 2.
+    """
+    for n in (4, 16, 128, 1024):
+        # E[exp(-(n-1)E)] = 1/n, so the estimator is exactly unbiased.
+        assert 1.0 / n == pytest.approx(1.0 / n)
+        mean_relative = n * (1.0 / n)
+        assert mean_relative == pytest.approx(1.0)
+
+        # Var = n(1/(2n-1) - 1/n^2) = n/(2n-1) - 1/n, matching Proposition 3.1.
+        variance = n / (2.0 * n - 1.0) - 1.0 / n
+        density_squared = ((2.0 * math.pi) ** -1) ** 2
+        from_moments = gr.brownian_estimator_variance(2, n, n) / density_squared
+        assert variance == pytest.approx(from_moments, rel=1e-9)
+
+    # And the variance tends to the Campbell value 1/2.
+    assert 8192 / (2.0 * 8192 - 1.0) - 1.0 / 8192 == pytest.approx(0.5, abs=1e-3)
+
+
+def test_critical_limit_law_matches_simulation() -> None:
+    """qhat/p at K = 2 converges to the Poisson integral, not to 1."""
+    rng = np.random.default_rng(606)
+
+    limit = poisson_integral_sample(120_000, rng)
+    assert float(limit.mean()) == pytest.approx(1.0, abs=0.02)
+    assert float(limit.var()) == pytest.approx(0.5, abs=0.02)
+
+    estimates = gr.simulate_brownian_estimator(
+        dimension=2, m_steps=2048, simulations=2048, replications=40_000, rng=rng
+    )
+    relative = estimates / gr.true_brownian_density_at_origin(2)
+
+    # The finite-n law already agrees with the limit on every summary that
+    # distinguishes it from the degenerate law at 1.
+    assert float(np.median(relative)) == pytest.approx(
+        float(np.median(limit)), abs=0.02
+    )
+    assert float((relative < 0.5).mean()) == pytest.approx(
+        float((limit < 0.5).mean()), abs=0.02
+    )
+    assert float((relative < 0.1).mean()) == pytest.approx(
+        float((limit < 0.1).mean()), abs=0.01
+    )
+
+    # Non-degeneracy: the median is well away from 1 and the estimator falls
+    # below half the true density with probability bounded away from zero.
+    assert float(np.median(relative)) < 0.93
+    assert float((relative < 0.5).mean()) > 0.2

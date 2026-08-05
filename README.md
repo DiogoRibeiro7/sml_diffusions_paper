@@ -44,7 +44,7 @@ make            # regenerate figures and tables, then build the PDF
 make check      # tests, reproducibility, forbidden-phrase gate
 ```
 
-The manuscript builds to `paper/main.pdf` (71 pages). Python 3.11+, NumPy, SciPy, pandas and
+The manuscript builds to `paper/main.pdf` (75 pages). Python 3.11+, NumPy, SciPy, pandas and
 Matplotlib; LaTeX with `latexmk` and `biber`.
 
 ## Layout
@@ -53,7 +53,7 @@ Matplotlib; LaTeX with `latexmk` and `biber`.
 paper/                    the manuscript and everything it includes
   main.tex                LaTeX source
   main.pdf                compiled manuscript
-  references.bib          bibliography, 37 entries, its 34 DOIs Crossref-verified
+  references.bib          bibliography, 41 entries, its 38 DOIs Crossref-verified
   figures/                5 figures, vector PDF and PNG (generated)
   tables/                 10 LaTeX tables and 13 CSV files (generated)
 code/
@@ -85,7 +85,7 @@ gates keep the manuscript and the code from drifting apart.
 
 | Gate | Command | What it enforces |
 | --- | --- | --- |
-| Tests | `make test` | 248 tests. Every closed form is checked against an independent computation: numerical integration, direct Monte Carlo, or brute force. Tolerances are stated at each assertion. |
+| Tests | `make test` | 250 tests. Every closed form is checked against an independent computation: numerical integration, direct Monte Carlo, or brute force. Tolerances are stated at each assertion. |
 | Reproducibility | `make verify` | 33 artefacts regenerated into a scratch directory and compared with the committed copies. CSV field-wise at `1e-9`; PDF and PNG by SHA-256. Figure output carries no embedded timestamp, so the comparison is exact. |
 | Wording | `make phrases` | 54 patterns for claims retracted in an earlier review round. Guards against an overstatement removed from one section reappearing in another later. |
 | Release | `python code/make_release.py` | All of the above, plus a clean LaTeX log, resolved front-matter metadata, no draft label, deposit metadata that parses, and every release document present. |
