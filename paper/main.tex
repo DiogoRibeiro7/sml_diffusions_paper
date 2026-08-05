@@ -207,7 +207,7 @@ Separately, \citet{DurhamGallant2002} observe that unconditioned Euler paths rar
 
 We therefore claim \emph{none} of the following as new: the kernel interpretation of the endpoint density; the dimension dependence of the resulting rate, including the exponent $2/(K+4)$; the existence of a bias--variance trade-off between discretisation and simulation and the associated optimal allocation; the observation that the rate condition of \citet{BrandtSantaClara2002} is inadequate; the need for joint rather than sequential limits; the case for bridge proposals; the possibility that the endpoint estimator's importance-weight variance is unbounded in $M$; and the observation that increasing $S$ alone need not rescue it.
 
-\emph{The same pathology in a different literature.} The mechanism identified here is not peculiar to Pedersen's estimator, and saying so places it correctly. In sequential Monte Carlo, \citet{BengtssonBickelLi2008} and \citet{SnyderEtAl2008} analyse the collapse of importance weights in high dimension for a particle filter whose proposal does not use the observation: the largest weight comes to dominate the sum, the effective sample size falls to one, and avoiding this requires the particle count to grow exponentially in an effective dimension. The endpoint estimator is that construction. Its proposal is the unconditioned Euler path, which ignores the endpoint exactly as an untuned particle filter ignores the observation; its weights are the one-step Gaussian densities; and the shrinking bandwidth $\sqrt h$ plays the role of an observation with vanishing error variance, which is the regime in which the weight collapse is sharpest. What \Cref{thm:collapse} adds to that literature is a setting in which the degeneracy is exactly computable, so that a specific admissible sequence can be exhibited rather than a scaling law asserted; what that literature adds here is the assurance that the phenomenon is structural rather than an idiosyncrasy of one estimator.
+\emph{The same pathology in a different literature.} The mechanism identified here is not peculiar to Pedersen's estimator, and saying so places it correctly. In sequential Monte Carlo, \citet{BengtssonBickelLi2008} and \citet{SnyderEtAl2008} analyse the collapse of importance weights in high dimension for a particle filter whose proposal does not use the observation: the largest weight comes to dominate the sum, the effective sample size falls to one, and avoiding this requires the particle count to grow exponentially in an effective dimension. The endpoint estimator is that construction. Its proposal is the unconditioned Euler path, which ignores the endpoint exactly as an untuned particle filter ignores the observation; its weights are the one-step Gaussian densities; and the shrinking bandwidth $\sqrt h$ plays the role of an observation with vanishing error variance, which is the regime in which the weight collapse is sharpest. What \Cref{thm:subcritical} adds to that literature is a setting in which the degeneracy is exactly computable, so that an explicit region of collapse can be exhibited rather than a scaling law asserted; what that literature adds here is the assurance that the phenomenon is structural rather than an idiosyncrasy of one estimator. The remedy is also the same on both sides: \citet{BeskosEtAl2017} stabilise the high-dimensional filter by localising the resampling, which is the sequential-Monte-Carlo analogue of replacing an unconditioned proposal by one that uses the endpoint.
 
 To restate the point of detail on which the dimensional exponent turns, now in this paper's own symbols: the kernel in the endpoint construction is the model's own one-step Euler density, of covariance $hV$ and therefore of bandwidth $\sqrt h$, not $h$. That is why the effective simulation size is $Sh^{K/2}$ rather than $Sh^K$, and it is the reason a dimension-dependent exponent appears here where \citet{StramerYan2007a} find none for the bridge, whose importance weights carry no shrinking kernel at all.
 
@@ -625,7 +625,7 @@ Two comments on the content of these conditions. \ref{ass:conv} is a joint requi
 The following theorem proves the dimensional moment law under \Cref{ass:local}. It concerns the simulated transition density.
 
 \begin{theorem}[Local moment law]\label{thm:local_moments}
-Under \Cref{ass:local}, for every fixed $r>1$,
+Under \Cref{ass:local}, for every fixed $r\ge1$,
 \begin{equation}\label{eq:general_r_moment}
  h^{(r-1)K/2}\E[G_h^r]
 \longrightarrow
@@ -727,6 +727,31 @@ This limit does not depend on $\delta$, and $T_h(\delta)\to0$ by \eqref{eq:tail_
 \end{proof}
 
 \begin{remark}[Verification in exactly solvable cases]\label{rem:verification}
+Two remarks on the statement before the constant is checked. First, $r=1$ is admissible and the proof covers it verbatim; there $c_{1,K}=1$ and the conclusion reads $\E[G_h]=q_M(y\mid x)\to p(y\mid x)$, so the convergence of the Euler density is the $r=1$ case of the moment law rather than a separate input. \Cref{lem:qM_bounded} remains useful because it supplies a bound uniform in $h$ with an explicit constant, which is what the central limit theorem needs, and it does so without invoking \ref{ass:conv}.
+
+Second, the conclusion holds well outside \Cref{ass:local}, and one case can be settled completely rather than asserted. The Ornstein--Uhlenbeck process has unbounded drift and so violates \ref{ass:mu}; it is also the process used for the numerical check in \Cref{sec:numerics}. For it the preterminal law is exactly Gaussian and the moment law can be proved directly.
+
+\begin{proposition}[The moment law for Ornstein--Uhlenbeck processes]\label{prop:ou_moment}
+Let $dY_t=-\alpha Y_t\,dt+\sigma\,dW_t$ in $\R^K$ with $\alpha>0$ and $\sigma>0$, so that $V\equiv\sigma^2I_K$. Then for every $x,y\in\R^K$ and every $r\ge1$, the conclusion \eqref{eq:general_r_moment} of \Cref{thm:local_moments} holds, with the same constant $c_{r,K}=(2\pi)^{-(r-1)K/2}r^{-K/2}$.
+\end{proposition}
+
+\begin{proof}
+The Euler chain at time $1-h$ has the exact Gaussian law $Z_h\sim\Normal(m_h,v_hI_K)$ for some $m_h\to xe^{-\alpha}$ and $v_h\to v_1=\sigma^2(1-e^{-2\alpha})/(2\alpha)>0$, and its density $r_h$ converges to the diffusion density $p(\cdot\mid x)$ uniformly on compacts. The summand is $G_h=\varphi_{h\sigma^2I}\bigl(y-(1-\alpha h)Z_h\bigr)$. Substituting $u=y-(1-\alpha h)z$, whose Jacobian is $(1-\alpha h)^{-K}$,
+\[
+\E[G_h^r]=(1-\alpha h)^{-K}\int\varphi_{h\sigma^2I}(u)^r\,r_h\Bigl(\frac{y-u}{1-\alpha h}\Bigr)du .
+\]
+Now $\varphi_{h\sigma^2I}(u)^r=(2\pi h\sigma^2)^{-(r-1)K/2}r^{-K/2}\varphi_{(h\sigma^2/r)I}(u)$, an exact identity, so
+\[
+h^{(r-1)K/2}\E[G_h^r]
+=(1-\alpha h)^{-K}(2\pi\sigma^2)^{-(r-1)K/2}r^{-K/2}\;
+\E\Bigl[r_h\Bigl(\tfrac{y-U_h}{1-\alpha h}\Bigr)\Bigr],
+\qquad U_h\sim\Normal\bigl(0,\tfrac{h\sigma^2}{r}I\bigr).
+\]
+As $h\downarrow0$ the first factor tends to one and $U_h\to0$ in probability, so the expectation tends to $p(y\mid x)$ by uniform convergence of $r_h$ on a neighbourhood of $y$ together with continuity of $p$. Since $|V|^{-(r-1)/2}=\sigma^{-K(r-1)}=(\sigma^2)^{-(r-1)K/2}$, the limit is $c_{r,K}\,p(y\mid x)\,|V(y)|^{-(r-1)/2}$.
+\end{proof}
+
+This is what \Cref{fig:ou_scaling} illustrates, and it means the figure now confirms a proposition rather than gesturing beyond a theorem's hypotheses. It also indicates what the general localised version would need: not global bounds on $\mu$ and $V$, but ellipticity and drift boundedness near $y$ together with a Gaussian upper bound on $r_h$ of Aronson type, which is what \citet{BallyTalay1996a,BallyTalay1996b} and \citet{KonakovMammen2002} establish for Euler schemes and which would subsume \ref{ass:bound} and the tail control at once. We state \Cref{ass:local} globally because it keeps the proof short, and record the localisation as the natural strengthening rather than carrying it out.
+
 The constant can be checked against closed forms. For standard Brownian motion $V\equiv I_K$, and substituting $p(y\mid x)=(2\pi)^{-K/2}e^{-\lVert y-x\rVert^2/2}$ into \eqref{eq:general_r_moment} reproduces the exact limit of \Cref{prop:brownian_moments} term by term. For a constant-coefficient diffusion $dY=\mu\,dt+\Sigma\,dW$ the same computation with $V=\Sigma\Sigma^{\mathsf T}$ reproduces \eqref{eq:general_r_moment} including the determinant factor. For a multidimensional Ornstein--Uhlenbeck process the preterminal law is Gaussian and the second moment is again available in closed form; \Cref{fig:ou_scaling} confirms convergence to \eqref{eq:general_second} numerically. The cases $r=2$ and $r=3$ supply exactly the second and third moments used in \Cref{thm:generic_clt}.
 \end{remark}
 
@@ -1592,6 +1617,8 @@ Closed-form expansions avoid endpoint Monte Carlo variance entirely but introduc
 \subsection{Positivity-preserving discretisation}
 
 For square-root components, ordinary Euler should be replaced by an exact transition where available or by a specified positivity-preserving approximation. The choice is part of the estimator, not an implementation detail, because different truncation and reflection rules define different transition densities.
+
+This is a solved problem for the square-root process, which is why leaving the rule unspecified is a real omission rather than a pedantic one. \citet{Alfonsi2005} classifies the discretisation schemes for the Cox--Ingersoll--Ross and squared-Bessel processes and characterises which preserve positivity, and \citet{Alfonsi2010} constructs higher-order schemes with the same property. \citet{HighamMaoStuart2002} give the general strong-convergence theory for Euler-type methods when the coefficients fail the usual global Lipschitz and linear-growth conditions, which is exactly the regime a square root creates at the origin. For the incompleteness state specifically, \Cref{app:sqrt} notes a simpler route still: the natural coordinate is the Ornstein--Uhlenbeck process whose square it is, and there the transition is exactly Gaussian and no positivity rule is needed at all.
 
 \subsection{Practical design rule}
 
