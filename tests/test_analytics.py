@@ -1264,3 +1264,34 @@ def test_subcritical_condition_covers_the_diagonal() -> None:
             assert values[-1] < 0.2 * values[0], f"K={dimension} should be falling fast"
         else:
             assert values[-1] > values[0], f"K={dimension} should not be subcritical"
+
+
+def test_manuscript_collapse_table_matches_the_generated_values() -> None:
+    """Table 4 is hand-typed in the manuscript; it must not drift from the CSV.
+
+    The same guard already covers Table 5.  Replication counts must also be
+    constant across rows: a fixed draw budget estimates the quantiles worst at
+    the largest M, which is where the collapse is sharpest.
+    """
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "brownian_subcritical_path.csv")
+    manuscript = (ROOT / "paper" / "main.tex").read_text(encoding="utf-8")
+
+    assert frame["replications"].nunique() == 1, "replication count must be constant"
+    assert int(frame["replications"].iloc[0]) == 20_000
+
+    # Spot-check the two ends of the table against what the manuscript prints.
+    first = frame[frame["M"] == 8].iloc[0]
+    last = frame[frame["M"] == 512].iloc[0]
+    assert round(float(first["mean_relative"]), 3) == 1.001
+    assert round(float(first["mean_standard_error"]), 3) == 0.010
+    assert round(float(last["mean_relative"]), 3) == 0.879
+    assert round(float(last["mean_standard_error"]), 3) == 0.073
+    for text in ("0.879", "(0.073)", "0.3674"):
+        assert text in manuscript, f"{text} missing from the manuscript"
+
+    # The mean is pinned at one while the median falls by ten orders of
+    # magnitude: that contrast is the content of the table.
+    assert abs(float(last["mean_relative"]) - 1.0) < 2.0 * float(
+        last["mean_standard_error"]
+    )
+    assert float(first["median_relative"]) / float(last["median_relative"]) > 1e8

@@ -192,9 +192,11 @@ def make_subcritical_distribution_results(rng: np.random.Generator) -> None:
     rows: list[dict[str, float | int]] = []
 
     for m in m_values:
-        # Keep the total number of endpoint draws roughly controlled while
-        # retaining enough replications to estimate medians and quantiles.
-        replications = int(min(20_000, max(1_500, 5_000_000 // m)))
+        # A fixed replication count across rows, not a fixed draw budget.
+        # The quantiles are what the table is for, and a budget that falls with
+        # M estimates them worst exactly where the collapse is sharpest; the
+        # mean needs no draws at all, being exactly p by Proposition 3.1.
+        replications = 20_000
         estimates = simulate_brownian_estimator(
             dimension=dimension,
             m_steps=m,
