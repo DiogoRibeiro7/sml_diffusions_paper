@@ -31,10 +31,21 @@ central-limit statement of their Lemma 3. The proofs of their parameter-estimato
 consequently fail, and in the four dimensions the application uses, their rate condition is
 incompatible with mean-square consistency of the simulated density.
 
+The threshold is sharp. Collapse holds throughout the subcritical region, under `R_{M,S} → 0` alone,
+and the density-level central limit theorem throughout its complement, so no designs are left
+unsettled between them — the collapse rate is `O(R (log 1/R)^(K/2))`. The scaling that produces the
+threshold does not depend on the paper's one imported hypothesis: under Aronson-type two-sided
+Gaussian bounds on the Euler density, which are checkable from `μ` and `V`, the moment law holds with
+its constant bracketed, so the exponent of `h` — and hence the effective size — follows from
+primitive conditions. Assumption (A5) does exactly one thing, which is to replace that bracket by
+the single value `p(y|x)`.
+
 **What the paper does not claim.** It does not prove that the resulting argmax estimator is
 inconsistent — Section 7.7 and Appendix A set out exactly what such a proof would require and why
-the density counterexample does not transfer. It does not claim the published empirical estimates
-are wrong.
+the density counterexample does not transfer. In the location model the nearest-atom limit is now
+proved rather than conjectured, but transferring it to the maximiser needs a uniform-in-`θ`
+statement that is shown to carry a rate condition relating `N` to `S`, and that condition is not
+determined. It does not claim the published empirical estimates are wrong.
 
 ## The companion note
 
@@ -72,9 +83,9 @@ paper/                    the two manuscripts and everything they include
   main.pdf                theory paper, compiled
   companion.tex           application companion, LaTeX source
   companion.pdf           application companion, compiled
-  references.bib          bibliography, 41 entries, its 38 DOIs Crossref-verified
+  references.bib          bibliography, 42 entries, its 39 DOIs Crossref-verified
   figures/                5 figures, vector PDF and PNG (generated)
-  tables/                 10 LaTeX tables and 13 CSV files (generated)
+  tables/                 12 LaTeX tables and 15 CSV files (generated)
 code/
   generate_results.py         every figure and table
   check_correlation_matrix.py correlation-matrix and grid-domain diagnostics
@@ -104,8 +115,8 @@ gates keep the manuscript and the code from drifting apart.
 
 | Gate | Command | What it enforces |
 | --- | --- | --- |
-| Tests | `make test` | 250 tests. Every closed form is checked against an independent computation: numerical integration, direct Monte Carlo, or brute force. Tolerances are stated at each assertion. |
-| Reproducibility | `make verify` | 33 artefacts regenerated into a scratch directory and compared with the committed copies. CSV field-wise at `1e-9`; PDF and PNG by SHA-256. Figure output carries no embedded timestamp, so the comparison is exact. |
+| Tests | `make test` | 259 tests. Every closed form is checked against an independent computation: numerical integration, direct Monte Carlo, or brute force. Tolerances are stated at each assertion. |
+| Reproducibility | `make verify` | 37 artefacts regenerated into a scratch directory and compared with the committed copies. CSV field-wise at `1e-9`; PDF and PNG by SHA-256. Figure output carries no embedded timestamp, so the comparison is exact. |
 | Wording | `make phrases` | 54 patterns for claims retracted in an earlier review round. Guards against an overstatement removed from one section reappearing in another later. |
 | Release | `python code/make_release.py` | All of the above, plus a clean LaTeX log, resolved front-matter metadata, no draft label, deposit metadata that parses, and every release document present. |
 

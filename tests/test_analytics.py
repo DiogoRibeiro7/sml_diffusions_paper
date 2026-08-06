@@ -1441,3 +1441,231 @@ def test_critical_limit_law_matches_simulation() -> None:
     # below half the true density with probability bounded away from zero.
     assert float(np.median(relative)) < 0.93
     assert float((relative < 0.5).mean()) > 0.2
+
+
+# ---------------------------------------------------------------------------
+# The subcritical collapse bound.
+# ---------------------------------------------------------------------------
+
+
+def test_collapse_bound_dominates_the_exact_exceedance_probability() -> None:
+    """The theorem's bound must actually hold, not merely be plausible.
+
+    P(qhat > eps) <= C_K lam R^K + P(chi_K > R) / (eps pi^{K/2}) for every R.
+    The exceedance probability is computed exactly, without simulating the full
+    estimator, by the reduction the proof itself uses.
+    """
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "collapse_bound.csv")
+
+    assert len(frame) == 7
+    assert frame["holds"].all(), "the bound fails at some design"
+
+    # It must also be informative, not vacuous, once the effective size is small.
+    small = frame[frame["effective_size"] <= 1e-3]
+    assert (small["bound"] < 1.0).all(), "bound is vacuous where it should bite"
+
+    # The bound is an upper bound but should not be wildly loose.
+    ratio = small["bound"] / small["exceedance"].clip(lower=1e-4)
+    assert ratio.max() < 60, "bound is far looser than the simulation warrants"
+
+
+def test_collapse_bound_beats_the_earlier_logarithmic_condition() -> None:
+    """The new hypothesis must be strictly weaker than the one it replaces.
+
+    The earlier theorem required lam * (log(1/h))^{K/2} -> 0.  The table's top
+    rows have that quantity of order one while the estimator already collapses,
+    which is the content of closing the gap.
+    """
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "collapse_bound.csv")
+
+    strengthened = frame["log_strengthened"].to_numpy()
+    effective = frame["effective_size"].to_numpy()
+
+    # The strengthened quantity is uniformly larger, so the old hypothesis is
+    # strictly stronger and its region strictly smaller.
+    assert np.all(strengthened > effective)
+
+    # And there is at least one design the old condition does not cover in any
+    # useful sense while the exceedance probability is already small.
+    covered = frame[(frame["log_strengthened"] > 0.2) & (frame["exceedance"] < 0.3)]
+    assert len(covered) >= 1
+
+
+def test_collapse_rate_is_linear_in_the_effective_size_up_to_a_logarithm() -> None:
+    """The optimised bound must scale like lam (log(1/lam))^{K/2}."""
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "collapse_bound.csv")
+    dimension = 4
+
+    effective = frame["effective_size"].to_numpy()
+    bound = frame["bound"].to_numpy()
+    predicted = effective * np.log(1.0 / effective) ** (dimension / 2)
+
+    # The ratio must be bounded above and below across four orders of magnitude.
+    ratio = bound / predicted
+    assert ratio.max() / ratio.min() < 6.0
+
+
+# ---------------------------------------------------------------------------
+# The nearest-neighbour limit behind the argmax appendix.
+# ---------------------------------------------------------------------------
+
+
+def test_nearest_neighbour_limit_is_attained() -> None:
+    """The quadrature must converge to the closed form, from below."""
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "nn_convergence.csv")
+
+    for (dimension, offset), group in frame.groupby(["dimension", "offset"]):
+        group = group.sort_values("log10_S")
+        ratios = group["ratio"].to_numpy()
+
+        # Monotone increasing towards the limit, and reaching it.
+        assert np.all(np.diff(ratios) > 0), f"not monotone at K={dimension}"
+        # The offset-1.5 case is the slowest: its centres sit further into the
+        # tail, where the conditional law needs the largest S.
+        assert ratios[-1] == pytest.approx(1.0, abs=1e-3), f"limit missed at K={dimension}"
+        assert ratios[0] < 0.95, "convergence should be visibly slow at small S"
+
+
+def test_nearest_neighbour_limit_matches_an_independent_formula() -> None:
+    """Recompute the closed form from its definition, not from the generator."""
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "nn_convergence.csv")
+
+    for _, row in frame.iterrows():
+        dimension = int(row["dimension"])
+        offset = float(row["offset"])
+        omega = math.pi ** (dimension / 2) / math.gamma(dimension / 2 + 1)
+        expected = (
+            2
+            * math.pi
+            * math.gamma(1 + 2 / dimension)
+            * omega ** (-2 / dimension)
+            * (dimension / (dimension - 2)) ** (dimension / 2)
+            * math.exp(offset**2 / (dimension - 2))
+        )
+        assert row["limit"] == pytest.approx(expected, rel=1e-12)
+
+
+def test_nearest_neighbour_conditional_law_matches_simulation() -> None:
+    """The conditional nearest-neighbour law underpinning the proof.
+
+    S^{2/K} min_s ||theta - b_s||^2 -> Weibull-type with mean
+    Gamma(1 + 2/K) (omega_K f(theta))^{-2/K}.  Checked by direct simulation at
+    one centre, which is feasible because no averaging over centres is involved.
+    """
+    rng = np.random.default_rng(7_314)
+    dimension, simulations, replications = 4, 40_000, 600
+    theta = np.zeros(dimension)
+    centre = np.zeros(dimension)
+    centre[0] = 1.0  # a centre at distance one from theta
+
+    # One replication at a time: the full array would be tens of gigabytes.
+    minima = np.empty(replications)
+    for index in range(replications):
+        atoms = centre + rng.normal(size=(simulations, dimension))
+        minima[index] = np.min(np.sum((theta - atoms) ** 2, axis=1))
+
+    omega = math.pi ** (dimension / 2) / math.gamma(dimension / 2 + 1)
+    density = (2 * math.pi) ** (-dimension / 2) * math.exp(-1.0 / 2)
+    expected = math.gamma(1 + 2 / dimension) * (omega * density) ** (-2 / dimension)
+
+    observed = simulations ** (2 / dimension) * float(np.mean(minima))
+    standard_error = simulations ** (2 / dimension) * float(
+        np.std(minima, ddof=1)
+    ) / math.sqrt(replications)
+
+    assert observed == pytest.approx(expected, abs=MC_SIGMAS * standard_error)
+
+
+# ---------------------------------------------------------------------------
+# The Aronson bracketing of the moment law.
+# ---------------------------------------------------------------------------
+
+
+def test_aronson_bracket_contains_the_exact_brownian_moment() -> None:
+    """The bracket must contain the truth in a case where the truth is known.
+
+    Brownian motion has preterminal density exactly N(x, (1-h) I), so the
+    preterminal variance ranges over [1/2, 1) as h ranges over (0, 1/2].  The
+    Aronson bound must hold uniformly in h, which forces a_- <= 1/2 and
+    a_+ >= 1; the valid constants are then c_- = a_-^{K/2} and
+    c_+ = (2 a_+)^{K/2}, since the Gaussian ratio is monotone in ||z-x|| and the
+    binding variance is v = 1 for the lower bound and v = 1/2 for the upper.
+
+    An earlier version of this test built the bound at one value of h and failed:
+    a bound valid at h = 0.01 need not dominate the h -> 0 limit density, which
+    is what the bracket has to contain.  The uniform requirement is what makes
+    the bracket wide, and the proposition claims containment, not tightness.
+    """
+    offset = 1.3
+
+    def bracket(dimension, order, a_minus, a_plus):
+        constant = (2 * math.pi) ** (-(order - 1) * dimension / 2) * order ** (
+            -dimension / 2
+        )
+        c_minus = a_minus ** (dimension / 2)
+        c_plus = (2 * a_plus) ** (dimension / 2)
+        lower = (
+            c_minus
+            * (2 * math.pi * a_minus) ** (-dimension / 2)
+            * math.exp(-(offset**2) / (2 * a_minus))
+            * constant
+        )
+        upper = (
+            c_plus
+            * (2 * math.pi * a_plus) ** (-dimension / 2)
+            * math.exp(-(offset**2) / (2 * a_plus))
+            * constant
+        )
+        return lower, upper
+
+    widening = ((0.5, 1.0), (0.4, 1.3), (0.2, 2.0))
+
+    for dimension in (1, 2, 3, 4, 6):
+        for order in (1, 2, 3):
+            constant = (2 * math.pi) ** (-(order - 1) * dimension / 2) * order ** (
+                -dimension / 2
+            )
+            # The exact limit: p(y|x) times c_{r,K}, with V = I.
+            exact = (2 * math.pi) ** (-dimension / 2) * math.exp(-(offset**2) / 2) * constant
+
+            widths = []
+            for a_minus, a_plus in widening:
+                assert a_minus <= 0.5 and a_plus >= 1.0
+                lower, upper = bracket(dimension, order, a_minus, a_plus)
+                assert lower < exact < upper, (
+                    f"bracket misses the truth at K={dimension}, r={order}, "
+                    f"a=({a_minus},{a_plus})"
+                )
+                widths.append(upper - lower)
+
+            # Loosening the Gaussian bounds must widen the bracket, never narrow it.
+            assert widths[0] < widths[1] < widths[2]
+            assert widths[0] > 0
+
+
+def test_aronson_bracket_is_strictly_positive_and_finite() -> None:
+    """A nondegenerate bracket must still pin the scale.
+
+    With genuinely different Gaussian bounds the bracket is wide but both ends
+    are strictly positive and finite, which is the whole content of the
+    proposition: the exponent of h is determined without any convergence
+    assumption.
+    """
+    dimension, order = 4, 2
+    constant = (2 * math.pi) ** (-(order - 1) * dimension / 2) * order ** (-dimension / 2)
+    offset = 1.3
+
+    for c_minus, c_plus, a_minus, a_plus in ((0.4, 2.5, 0.7, 1.9), (0.9, 1.1, 0.95, 1.05)):
+        lower = (
+            c_minus
+            * (2 * math.pi * a_minus) ** (-dimension / 2)
+            * math.exp(-(offset**2) / (2 * a_minus))
+            * constant
+        )
+        upper = (
+            c_plus
+            * (2 * math.pi * a_plus) ** (-dimension / 2)
+            * math.exp(-(offset**2) / (2 * a_plus))
+            * constant
+        )
+        assert 0 < lower <= upper < math.inf

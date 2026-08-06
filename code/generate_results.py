@@ -14,8 +14,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
+from scipy import integrate
+from scipy.special import gamma as gamma_function
 from scipy.special import logsumexp
-from scipy.stats import norm
+from scipy.stats import chi, chi2, ncx2, norm
 
 ROOT = Path(__file__).resolve().parents[1]
 PAPER = ROOT / "paper"
@@ -802,6 +804,189 @@ def make_correlation_tables() -> None:
     search.to_csv(TABLES / "correlation_feasible_search.csv", index=False)
 
 
+
+# ---------------------------------------------------------------------------
+# The nearest-neighbour limit behind the argmax appendix.
+#
+# Direct simulation is the wrong instrument here: convergence is slow enough
+# that 5,000 draws reach only 89 per cent of the limit.  But the quantity is a
+# pair of one-dimensional integrals, because the conditional distribution of the
+# distance from theta to one atom is a noncentral chi-squared in closed form.
+# Quadrature therefore reaches any S, and the whole table is deterministic.
+# ---------------------------------------------------------------------------
+
+NN_DIMENSIONS = ((4, 0.0), (4, 1.5), (6, 0.0), (3, 0.0))
+NN_SIZES = (10.0**3, 10.0**5, 10.0**8, 10.0**12, 10.0**18)
+NN_SIGMA2 = 1.0  # the h -> 0 limit of 1 - h
+
+
+def unit_ball_volume(dimension: int) -> float:
+    """Return the volume of the unit ball in the given dimension."""
+    return math.pi ** (dimension / 2) / gamma_function(dimension / 2 + 1)
+
+
+def nearest_neighbour_limit(dimension: int, offset: float) -> float:
+    """Return the closed-form limit of S^{2/K} E[min_s ||theta - b_s||^2]."""
+    return (
+        2
+        * math.pi
+        * NN_SIGMA2
+        * gamma_function(1 + 2 / dimension)
+        * unit_ball_volume(dimension) ** (-2 / dimension)
+        * (dimension * NN_SIGMA2 / (dimension * NN_SIGMA2 - 2)) ** (dimension / 2)
+        * math.exp(offset**2 / (dimension * NN_SIGMA2 - 2))
+    )
+
+
+def _nn_conditional(dimension: int, m: float, size: float) -> float:
+    """Return S^{2/K} E[rho^2 | m] by quadrature in the rescaled variable."""
+
+    def integrand(w: float) -> float:
+        if w <= 0.0:
+            return 1.0
+        radius2 = size ** (-2 / dimension) * w / NN_SIGMA2
+        cdf = ncx2.cdf(radius2, dimension, m * m / NN_SIGMA2)
+        if cdf >= 1.0:
+            return 0.0
+        return float(np.exp(size * np.log1p(-cdf)))
+
+    density = (2 * math.pi * NN_SIGMA2) ** (-dimension / 2) * math.exp(
+        -m * m / (2 * NN_SIGMA2)
+    )
+    scale = (unit_ball_volume(dimension) * max(density, 1e-300)) ** (-2 / dimension)
+    total, _ = integrate.quad(integrand, 0.0, max(40.0 * scale, 40.0), limit=400)
+    return total
+
+
+def nearest_neighbour_expectation(dimension: int, offset: float, size: float) -> float:
+    """Return S^{2/K} E[min_s ||theta - b_s||^2], averaged over the centre."""
+    ncp = offset**2
+
+    def integrand(m: float) -> float:
+        weight = 2 * m * ncx2.pdf(m * m, dimension, ncp)
+        if weight <= 0.0:
+            return 0.0
+        return weight * _nn_conditional(dimension, m, size)
+
+    total, _ = integrate.quad(integrand, 0.0, 14.0, limit=400)
+    return total
+
+
+def make_nn_convergence_table() -> None:
+    """Tabulate convergence to the nearest-neighbour limit."""
+    rows = []
+    for dimension, offset in NN_DIMENSIONS:
+        target = nearest_neighbour_limit(dimension, offset)
+        for size in NN_SIZES:
+            value = nearest_neighbour_expectation(dimension, offset, size)
+            rows.append(
+                {
+                    "dimension": dimension,
+                    "offset": offset,
+                    "log10_S": round(math.log10(size)),
+                    "expectation": value,
+                    "limit": target,
+                    "ratio": value / target,
+                }
+            )
+    frame = pd.DataFrame(rows)
+    frame.to_csv(TABLES / "nn_convergence.csv", index=False)
+    (TABLES / "nn_convergence.tex").write_text(
+        frame.to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.6g}",
+            escape=False,
+            column_format="rrrrrr",
+        ),
+        encoding="utf-8",
+    )
+
+
+# ---------------------------------------------------------------------------
+# The collapse bound of the subcritical theorem.
+#
+# The theorem bounds P(qhat > eps) by C_K lam R^K + P(chi_K > R) / (eps pi^{K/2})
+# for every R > 0.  Both terms are deterministic, so the table records the
+# optimised bound alongside the exact exceedance probability, which is itself
+# computable without simulation: every summand depends on the draw only through
+# its distance to the target, so the count inside a ball is binomial and the
+# radius inside it is a truncated chi-squared.
+# ---------------------------------------------------------------------------
+
+COLLAPSE_DIMENSION = 4
+COLLAPSE_TRUNCATION = 12.0
+COLLAPSE_REPLICATIONS = 4000
+
+
+def collapse_bound(effective_size: float, threshold: float, dimension: int) -> tuple[float, float]:
+    """Return the optimised collapse bound and the radius attaining it."""
+    constant = 1.0 / gamma_function(dimension / 2 + 1)
+    grid = np.linspace(0.5, 40.0, 8000)
+    total = constant * effective_size * grid**dimension + chi.sf(grid, dimension) / (
+        threshold * math.pi ** (dimension / 2)
+    )
+    index = int(np.argmin(total))
+    return float(total[index]), float(grid[index])
+
+
+def simulate_collapse(
+    m_steps: int, draws: int, rng: np.random.Generator, dimension: int
+) -> NDArray[np.float64]:
+    """Return exact draws of the Brownian endpoint estimator at x = y = 0."""
+    h = 1.0 / m_steps
+    variance = 1.0 - h
+    effective_size = draws * h ** (dimension / 2)
+    cut = h * COLLAPSE_TRUNCATION**2 / variance
+    inside = chi2.cdf(cut, dimension)
+
+    counts = rng.binomial(draws, inside, size=COLLAPSE_REPLICATIONS)
+    values = np.empty(COLLAPSE_REPLICATIONS)
+    for index, count in enumerate(counts):
+        if count == 0:
+            values[index] = 0.0
+            continue
+        radii = chi2.ppf(rng.random(count) * inside, dimension)
+        values[index] = float(np.sum(np.exp(-variance * radii / (2 * h))))
+    return (2 * math.pi) ** (-dimension / 2) * values / effective_size
+
+
+def make_collapse_bound_table(rng: np.random.Generator) -> None:
+    """Compare the exact exceedance probability with the theorem's bound."""
+    dimension = COLLAPSE_DIMENSION
+    true_density = true_brownian_density_at_origin(dimension)
+    threshold = true_density / 10
+    rows = []
+    for exponent in range(1, 8):
+        m_steps = 10**exponent
+        effective_size = 10.0 ** (-exponent)
+        draws = int(round(effective_size * m_steps ** (dimension / 2)))
+        values = simulate_collapse(m_steps, draws, rng, dimension)
+        bound, radius = collapse_bound(effective_size, threshold, dimension)
+        rows.append(
+            {
+                "m_steps": m_steps,
+                "draws": draws,
+                "effective_size": effective_size,
+                "log_strengthened": effective_size * math.log(m_steps) ** (dimension / 2),
+                "exceedance": float(np.mean(values > threshold)),
+                "bound": bound,
+                "radius": radius,
+                "holds": bool(np.mean(values > threshold) <= bound),
+            }
+        )
+    frame = pd.DataFrame(rows)
+    frame.to_csv(TABLES / "collapse_bound.csv", index=False)
+    (TABLES / "collapse_bound.tex").write_text(
+        frame.to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.6g}",
+            escape=False,
+            column_format="rrrrrrrl",
+        ),
+        encoding="utf-8",
+    )
+
+
 def main(output_root: Path | None = None) -> None:
     """Generate all reproducible manuscript outputs.
 
@@ -831,6 +1016,8 @@ def main(output_root: Path | None = None) -> None:
     make_literature_comparison_table()
     make_boundary_maximum_table()
     make_cir_negativity_table()
+    make_nn_convergence_table()
+    make_collapse_bound_table(rng)
 
 
 if __name__ == "__main__":
