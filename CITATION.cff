@@ -39,7 +39,7 @@ keywords:
 license: CC-BY-4.0
 repository-code: "https://github.com/DiogoRibeiro7/sml_diffusions_paper"
 date-released: 2026-08-06
-version: v1.2.0
+version: v1.3.0
 doi: 10.5281/zenodo.21719868
 # Zenodo mints a version DOI only when a release is published, and the identifier
 # it issues cannot be predicted, so the entry for the release named above is added
@@ -54,8 +54,10 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.21823961
     description: >-
-      Version DOI for v1.2.0, the current release. It splits the work into a
-      theory paper and an application companion, both deposited in this record.
+      Version DOI for v1.2.0, superseded by v1.3.0, which closes two problems
+      v1.2.0 records as open: the logarithmic gap in the subcritical collapse
+      theorem, and the dependence of the scaling law on assumption (A5).
+      Nothing in v1.2.0 is known to be wrong; its results are weaker.
   - type: doi
     value: 10.5281/zenodo.21763715
     description: >-
