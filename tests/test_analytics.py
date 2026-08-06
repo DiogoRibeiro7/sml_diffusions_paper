@@ -899,9 +899,12 @@ def test_cir_probability_is_strictly_positive_in_exact_arithmetic() -> None:
 
 
 def test_manuscript_cir_table_matches_the_generated_values() -> None:
-    """The hand-typed Table 5 must not drift from the computed diagnostics."""
+    """The hand-typed CIR table must not drift from the computed diagnostics.
+
+    The table lives in the companion note, not the theory paper, since the split.
+    """
     frame = pd.read_csv(ROOT / "paper" / "tables" / "cir_negativity.csv")
-    manuscript = (ROOT / "paper" / "main.tex").read_text(encoding="utf-8")
+    manuscript = (ROOT / "paper" / "companion.tex").read_text(encoding="utf-8")
 
     lookup = {
         ("U.S. (vs. U.K.)", "long-run mean"): ("187.5", "-7636", "yes"),

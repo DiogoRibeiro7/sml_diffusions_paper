@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # retracted wording on purpose, in order to record what was withdrawn.
 SEARCHED = (
     "paper/main.tex",
+    "paper/companion.tex",
     "README.md",
     "dist/literature_novelty_matrix.md",
     "dist/application_feasibility_matrix.md",

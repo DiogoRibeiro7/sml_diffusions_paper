@@ -1,8 +1,12 @@
 """Assemble the release artefacts under ``dist/``.
 
-Runs the final checks, then writes ``dist/main.pdf``, ``dist/source.zip``,
-``dist/reproducibility.zip``, ``dist/change_log.md`` and
+Runs the final checks, then writes ``dist/main.pdf``, ``dist/companion.pdf``,
+``dist/source.zip``, ``dist/reproducibility.zip``, ``dist/change_log.md`` and
 ``dist/mathematical_claims_matrix.md``.
+
+The deposit is two documents: the theory paper (``main``) and the application
+companion (``companion``).  Every source-level gate below runs over both, so a
+placeholder or a retracted phrase in either one blocks the release.
 
 The release build is refused if any check fails.  Nothing here contacts
 authors, editors, repositories or any external service.
@@ -23,8 +27,13 @@ ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
 PAPER = ROOT / "paper"
 
+# The two deposited documents, by base name.  Everything that checks a source
+# file or a build log iterates over this.
+DOCUMENTS = ("main", "companion")
+
 SOURCE_MEMBERS = [
     "paper/main.tex",
+    "paper/companion.tex",
     "paper/references.bib",
     "Makefile",
     "README.md",
@@ -63,33 +72,39 @@ def run_checks(skip: bool) -> None:
 
 
 def check_log_is_clean() -> list[str]:
-    """Return any LaTeX log conditions that should block a release."""
-    log = PAPER / "main.log"
-    if not log.exists():
-        return ["paper/main.log is missing; run `make pdf` first"]
-    text = log.read_text(encoding="utf-8", errors="replace")
+    """Return any LaTeX log conditions that should block a release, for both documents."""
     problems = []
-    for needle, message in (
-        ("Overfull", "overfull box"),
-        ("Underfull", "underfull box"),
-        ("undefined", "undefined reference or citation"),
-        ("Token not allowed", "hyperref bookmark warning"),
-    ):
-        count = text.lower().count(needle.lower())
-        if count:
-            problems.append(f"{count} x {message}")
+    for document in DOCUMENTS:
+        log = PAPER / f"{document}.log"
+        if not log.exists():
+            problems.append(f"paper/{document}.log is missing; run `make pdf` first")
+            continue
+        text = log.read_text(encoding="utf-8", errors="replace")
+        for needle, message in (
+            ("Overfull", "overfull box"),
+            ("Underfull", "underfull box"),
+            ("undefined", "undefined reference or citation"),
+            ("Token not allowed", "hyperref bookmark warning"),
+        ):
+            count = text.lower().count(needle.lower())
+            if count:
+                problems.append(f"{document}: {count} x {message}")
     return problems
 
 
 def check_no_draft_labels() -> list[str]:
-    """Return a problem if the draft label would appear in the release PDF."""
-    source = (PAPER / "main.tex").read_text(encoding="utf-8")
-    active = [
-        line
-        for line in source.splitlines()
-        if line.strip().startswith("\\newcommand{\\draftmode}")
-    ]
-    return ["\\draftmode is still defined, so the draft label will be printed"] if active else []
+    """Return a problem if the draft label would appear in either release PDF."""
+    problems = []
+    for document in DOCUMENTS:
+        source = (PAPER / f"{document}.tex").read_text(encoding="utf-8")
+        if any(
+            line.strip().startswith("\\newcommand{\\draftmode}")
+            for line in source.splitlines()
+        ):
+            problems.append(
+                f"{document}: \\draftmode is still defined, so the draft label will be printed"
+            )
+    return problems
 
 
 # Front-matter fields that must carry real values before a release.
@@ -166,17 +181,20 @@ def check_metadata_resolved() -> list[str]:
     This is deliberately build-blocking: the fields are the author's to fill in,
     and inventing them would be worse than failing.
     """
-    source = (PAPER / "main.tex").read_text(encoding="utf-8")
     problems = []
-    for field in METADATA_COMMANDS:
-        for line in source.splitlines():
-            stripped = line.strip()
-            if stripped.startswith(f"\\newcommand{{\\{field}}}"):
-                if PLACEHOLDER_MARKER in stripped:
-                    problems.append(f"front-matter field \\{field} is still a placeholder")
-                break
-        else:
-            problems.append(f"front-matter field \\{field} is not defined")
+    for document in DOCUMENTS:
+        source = (PAPER / f"{document}.tex").read_text(encoding="utf-8")
+        for field in METADATA_COMMANDS:
+            for line in source.splitlines():
+                stripped = line.strip()
+                if stripped.startswith(f"\\newcommand{{\\{field}}}"):
+                    if PLACEHOLDER_MARKER in stripped:
+                        problems.append(
+                            f"{document}: front-matter field \\{field} is still a placeholder"
+                        )
+                    break
+            else:
+                problems.append(f"{document}: front-matter field \\{field} is not defined")
     return problems
 
 
@@ -231,7 +249,8 @@ def main() -> int:
         print("continuing anyway because --allow-draft was given")
 
     DIST.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(PAPER / "main.pdf", DIST / "main.pdf")
+    for document in DOCUMENTS:
+        shutil.copy2(PAPER / f"{document}.pdf", DIST / f"{document}.pdf")
 
     source_members = [ROOT / m for m in SOURCE_MEMBERS]
     source_members += collect("paper/figures")
@@ -250,13 +269,14 @@ def main() -> int:
     ]
     write_zip(DIST / "reproducibility.zip", [m for m in repro_members if m.exists()])
 
-    for artefact in ("main.pdf", "source.zip", "reproducibility.zip"):
+    for artefact in ("main.pdf", "companion.pdf", "source.zip", "reproducibility.zip"):
         size = (DIST / artefact).stat().st_size
         print(f"  wrote dist/{artefact} ({size:,} bytes)")
     hand_written = (
         "change_log.md",
         "change_log_round2.md",
         "change_log_final.md",
+        "change_log_split.md",
         "mathematical_claims_matrix.md",
         "literature_novelty_matrix.md",
         "application_feasibility_matrix.md",

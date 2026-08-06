@@ -6,18 +6,25 @@ PAPER_DIR := paper
 # later pass with a misleading "Missing \begin{document}".
 LATEXMK := latexmk -pdf -interaction=nonstopmode -halt-on-error
 
-.PHONY: all figures pdf paper verify test check clean
+.PHONY: all figures pdf theory companion paper verify test check clean
 
 all: figures pdf
 
 figures:
 	python code/generate_results.py
 
-# `pdf` is the primary name because `paper` is now a directory; `paper` is kept
-# as a .PHONY alias so the documented command still works.
-pdf:
+# Two documents since the split: the theory paper and the application companion.
+# They share a preamble and a bibliography but neither input the other, so they
+# build independently and in either order.
+pdf: theory companion
+
+theory:
 	cd $(PAPER_DIR) && $(LATEXMK) main.tex
 
+companion:
+	cd $(PAPER_DIR) && $(LATEXMK) companion.tex
+
+# `paper` is kept as a .PHONY alias so the documented command still works.
 paper: pdf
 
 # Regenerate every figure and table into a scratch directory and compare with
@@ -34,6 +41,6 @@ phrases:
 
 check: test verify phrases
 
-# -c removes auxiliary files but keeps main.pdf, which is tracked.
+# -c removes auxiliary files but keeps the PDFs, which are tracked.
 clean:
-	cd $(PAPER_DIR) && latexmk -c main.tex
+	cd $(PAPER_DIR) && latexmk -c main.tex companion.tex

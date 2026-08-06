@@ -1,7 +1,7 @@
 # Dimensional Asymptotics of Euler-Based Simulated Likelihood for Multidimensional Diffusions
 
-A mathematical manuscript, the code that generates every number in it, and the machinery that keeps
-the two in agreement.
+Two mathematical manuscripts, the code that generates every number in them, and the machinery that
+keeps the two in agreement.
 
 ## What the paper argues
 
@@ -32,9 +32,25 @@ consequently fail, and in the four dimensions the application uses, their rate c
 incompatible with mean-square consistency of the simulated density.
 
 **What the paper does not claim.** It does not prove that the resulting argmax estimator is
-inconsistent — Section 7.6 and Appendix H set out exactly what such a proof would require and why
+inconsistent — Section 7.7 and Appendix A set out exactly what such a proof would require and why
 the density counterexample does not transfer. It does not claim the published empirical estimates
-are wrong. Application-specific findings are labelled as diagnostics, not theorems.
+are wrong.
+
+## The companion note
+
+The exchange-rate application of Brandt and Santa-Clara (2002) raises a separate set of questions,
+about that specification rather than about the estimator, and they are answered in a companion note:
+*Mathematical Status of the Exchange-Rate Application in Brandt and Santa-Clara (2002)*, built from
+`paper/companion.tex`. It covers the square-root boundaries and the Feller ratios, the reality of
+the incompleteness state under the implemented parameterisation, the invertibility of the
+volatility map, the validity of the Brownian correlation matrix, the minimum-incompleteness
+identification rule, and the constrained-inference question.
+
+Its results are algebraic propositions and numerical diagnostics, not limit theorems, and several
+are negative — establishing that no problem arises where one might have been suspected. Each claim
+is labelled as a proved proposition, a numerical diagnostic, a statement reported by the original
+authors, or an implementation detail the published description does not settle. Nothing in the
+theory paper depends on the companion; the dependence runs one way.
 
 ## Quick start
 
@@ -44,15 +60,18 @@ make            # regenerate figures and tables, then build the PDF
 make check      # tests, reproducibility, forbidden-phrase gate
 ```
 
-The manuscript builds to `paper/main.pdf` (75 pages). Python 3.11+, NumPy, SciPy, pandas and
-Matplotlib; LaTeX with `latexmk` and `biber`.
+`make` builds both documents: `paper/main.pdf`, the theory paper, and `paper/companion.pdf`,
+the application note. Python 3.11+, NumPy, SciPy, pandas and Matplotlib; LaTeX with `latexmk`
+and `biber`.
 
 ## Layout
 
 ```text
-paper/                    the manuscript and everything it includes
-  main.tex                LaTeX source
-  main.pdf                compiled manuscript
+paper/                    the two manuscripts and everything they include
+  main.tex                theory paper, LaTeX source
+  main.pdf                theory paper, compiled
+  companion.tex           application companion, LaTeX source
+  companion.pdf           application companion, compiled
   references.bib          bibliography, 41 entries, its 38 DOIs Crossref-verified
   figures/                5 figures, vector PDF and PNG (generated)
   tables/                 10 LaTeX tables and 13 CSV files (generated)
@@ -66,9 +85,9 @@ code/
   make_release.py             gated release artefacts into dist/
 tests/
   test_analytics.py             every analytical formula, checked independently
-  test_singular_psd_condition.py the block PSD lemma of Appendix E
+  test_singular_psd_condition.py the singular-block PSD lemma of the companion
   test_antithetic.py            the pair-average variance and the h-exponent
-  test_feasible_sets.py         the two parts of Proposition F.1
+  test_feasible_sets.py         the two parts of the feasibility proposition
 docs/                     audit trail; see below
 notes/                    the argmax investigation and its go/no-go conclusion
 reference/                literature under review; local only, never committed
@@ -128,16 +147,18 @@ compatibility condition the same appendix had just established. Every internal r
 phrasings; an independent reader checked the algebra. Claims withdrawn across the rounds are recorded
 in the change logs rather than quietly deleted.
 
-Every claim in the manuscript is labelled as one of: proved theorem, proved algebraic proposition,
+Every claim in both documents is labelled as one of: proved theorem, proved algebraic proposition,
 conditional statement, numerical diagnostic, statement reported by the original authors, unknown
 implementation detail, or literature-based claim. `docs/final_claim_dependency_audit.md` is the
 index.
 
 ## Building by hand
 
-The document uses `biblatex` with the `biber` backend and compiles from inside `paper/` so the
-relative `figures/` and `tables/` paths resolve. `make pdf` drives `latexmk`, which orders the passes
-correctly. To run the cycle yourself, let each pass finish:
+Both documents use `biblatex` with the `biber` backend and compile from inside `paper/` so the
+relative `figures/` and `tables/` paths resolve. They share a preamble and a bibliography but
+neither inputs the other, so they build independently and in either order. `make pdf` drives
+`latexmk` for both, which orders the passes correctly. To run the cycle yourself, let each pass
+finish, and repeat it with `companion` in place of `main`:
 
 ```bash
 cd paper
@@ -147,8 +168,8 @@ pdflatex -interaction=nonstopmode main.tex
 pdflatex -interaction=nonstopmode main.tex
 ```
 
-All `make` targets: `all`, `figures`, `pdf` (alias `paper`), `test`, `verify`, `phrases`, `check`,
-`clean`.
+All `make` targets: `all`, `figures`, `pdf` (alias `paper`), `theory`, `companion`, `test`,
+`verify`, `phrases`, `check`, `clean`.
 
 ## Archiving
 
@@ -158,9 +179,9 @@ keywords, licence, and the related identifiers that register this work as **revi
 `10.1016/S0304-405X(01)00093-9` and citing the four asymptotic analyses it is positioned against.
 
 What Zenodo archives is a snapshot of the repository at the tagged commit, not the contents of
-`dist/`, which is gitignored. That snapshot is self-contained: it carries `paper/main.tex` and the
-compiled `paper/main.pdf`, the generated figures and tables, all of `code/` and `tests/`, and the
-audit documents in `docs/`. Anyone with the tarball can rebuild the manuscript and reproduce every
+`dist/`, which is gitignored. That snapshot is self-contained: it carries both `.tex` sources and
+both compiled PDFs, the generated figures and tables, all of `code/` and `tests/`, and the audit
+documents in `docs/`. Anyone with the tarball can rebuild both documents and reproduce every
 artefact. The bundles under `dist/` remain useful for sending the paper to a person rather than to an
 archive, and `code/make_release.py` still produces them.
 
@@ -224,4 +245,5 @@ what each found is in `docs/`.
 this repository" control and which `cffconvert` turns into BibTeX, RIS and other formats. It also
 records Brandt and Santa-Clara (2002) as the article under review. A test asserts that the title,
 author ORCID, affiliation, licence and DOI agree across `CITATION.cff`, `.zenodo.json` and
-`paper/main.tex`, so they cannot drift apart.
+`paper/main.tex`, so they cannot drift apart. Both documents are deposited in the same record, so
+one concept DOI covers the pair.

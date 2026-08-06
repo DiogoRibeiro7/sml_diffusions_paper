@@ -1,0 +1,968 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.7cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{aliascnt}
+\usepackage{booktabs,array,longtable,makecell}
+\usepackage{tablefootnote}
+\usepackage{placeins}
+% Floats are placed near their first citation.  LaTeX's defaults allow at most
+% three floats per page and reserve 30 per cent of every page for text, which in
+% a table-heavy document pushes the queue many pages past the citation; Table 1
+% was landing 28 pages after the text that cites it.  These values relax the
+% queue without permitting float-only pages to swallow the body.
+\setcounter{topnumber}{4}
+\setcounter{bottomnumber}{3}
+\setcounter{totalnumber}{6}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.7}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.7}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage[backend=biber,style=authoryear,natbib=true,maxcitenames=2,maxbibnames=99]{biblatex}
+\addbibresource{references.bib}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\setlength{\parindent}{1.2em}
+\setlength{\parskip}{0.25em}
+\setlist{nosep,leftmargin=2em}
+
+% All environments share the theorem counter so that numbering runs in a single
+% sequence.  Plain [theorem] sharing would make cleveref name every cross-
+% reference "Theorem", because it keys names off the counter.  aliascnt gives
+% each environment a distinct counter name that aliases the shared one, which
+% keeps the numbering and lets cleveref recover the correct name.
+\newtheorem{theorem}{Theorem}[section]
+\newaliascnt{proposition}{theorem}
+\newtheorem{proposition}[proposition]{Proposition}
+\aliascntresetthe{proposition}
+\newaliascnt{corollary}{theorem}
+\newtheorem{corollary}[corollary]{Corollary}
+\aliascntresetthe{corollary}
+\newaliascnt{lemma}{theorem}
+\newtheorem{lemma}[lemma]{Lemma}
+\aliascntresetthe{lemma}
+\newaliascnt{assumption}{theorem}
+\newtheorem{assumption}[assumption]{Assumption}
+\aliascntresetthe{assumption}
+\theoremstyle{definition}
+\newaliascnt{definition}{theorem}
+\newtheorem{definition}[definition]{Definition}
+\aliascntresetthe{definition}
+\newaliascnt{remark}{theorem}
+\newtheorem{remark}[remark]{Remark}
+\aliascntresetthe{remark}
+\crefname{proposition}{Proposition}{Propositions}
+\crefname{corollary}{Corollary}{Corollaries}
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{assumption}{Assumption}{Assumptions}
+\crefname{definition}{Definition}{Definitions}
+\crefname{remark}{Remark}{Remarks}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Pp}{\mathbb{P}}
+\newcommand{\Var}{\operatorname{Var}}
+% Lower-case form used only when quoting Brandt and Santa-Clara verbatim.
+\newcommand{\var}{\operatorname{var}}
+% Evaluation count in the antithetic subsection.  Not E, which would sit one
+% glyph away from the expectation symbol.
+\newcommand{\neval}{n_{\mathrm{eval}}}
+\newcommand{\Rem}{\mathcal{R}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\Range}{\operatorname{Range}}
+\newcommand{\Null}{\operatorname{Null}}
+% Neutral symbols for quantities in the cited literature, whose M, N and delta
+% do not match ours.  Used only in Section 1.1.
+\newcommand{\ndata}{n_{\mathrm{data}}}
+\newcommand{\nmc}{n_{\mathrm{MC}}}
+\newcommand{\meuler}{m_{\mathrm{Euler}}}
+\newcommand{\bkernel}{b_{\mathrm{ker}}}
+\newcommand{\op}{o_{\Pp}}
+\newcommand{\Op}{O_{\Pp}}
+\newcommand{\Normal}{\mathcal{N}}
+\newcommand{\ThetaSet}{\boldsymbol{\Theta}}
+\newcommand{\thetao}{\theta_0}
+\newcommand{\phik}{\varphi_K}
+\newcommand{\BS}{Brandt and Santa-Clara}
+
+% ---------------------------------------------------------------------------
+% Front-matter metadata.  Do not leave placeholder text in a release build;
+% code/make_release.py blocks on it.  \draftlabel is printed only when
+% \draftmode is set below.
+\newcommand{\authorname}{Diogo Ribeiro}
+\newcommand{\affiliation}{School of Media Arts and Design, Polytechnic of Porto}
+\newcommand{\email}{\href{mailto:dfr@esmad.ipp.pt}{\texttt{dfr@esmad.ipp.pt}}}
+\newcommand{\orcidid}{0009-0001-2022-7072}
+\newcommand{\orcid}{ORCID \href{https://orcid.org/\orcidid}{\texttt{\orcidid}}}
+
+% Uncomment the next line for a draft build; it must stay commented for a release.
+%\newcommand{\draftmode}{}
+
+\newcommand{\draftlabel}{%
+  \ifdefined\draftmode\\[0.3em]\small Draft for mathematical review\fi}
+
+\newcommand{\papertitle}{Mathematical Status of the Exchange-Rate Application in Brandt and Santa-Clara (2002)}
+\newcommand{\paperkeywords}{market incompleteness; square-root diffusions; Feller condition; correlation matrices; positive semidefiniteness; constrained estimation; exchange rates}
+
+\hypersetup{
+  pdftitle={\papertitle},
+  pdfauthor={\authorname},
+  pdfsubject={Diagnostics for the exchange-rate application of Brandt and Santa-Clara (2002)},
+  pdfkeywords={\paperkeywords}
+}
+% ---------------------------------------------------------------------------
+
+\title{\textbf{\papertitle}}
+\author{\authorname\\[0.2em]\small\affiliation\\[0.1em]\small\email\quad\textperiodcentered\quad\orcid\draftlabel}
+\date{30 July 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note is a companion to \emph{Dimensional Asymptotics of Euler-Based Simulated Likelihood for
+Multidimensional Diffusions} (the ``theory paper''), and reports the mathematical status of the
+four-dimensional exchange-rate application of \citet{BrandtSantaClara2002}. It is separated from
+that paper because its results are of a different kind: they are algebraic propositions and
+numerical diagnostics about one published specification, not asymptotic theorems about an
+estimator, and several of them are negative or inconclusive.
+
+The findings are these. The square-root states fall outside the smooth uniformly elliptic theory;
+for the interest rates the Feller ratios exceed one, so the exact origin is unattainable and the
+displayed benchmark Euler probabilities are negligible, while the incompleteness state has Feller
+ratio exactly one half for every parameter value because it is the square of an Ornstein--Uhlenbeck
+process. The estimator eliminates that state in favour of volatility, so the operative requirement
+is that a reconstructed radicand stay nonnegative at every simulated intermediate state, and no
+convention for violations is documented. The inverse map from incompleteness to positive volatility
+is not single-valued at the reported U.S.--U.K. loadings. The Brownian correlation matrix is
+positive definite at every algebraically feasible point examined, over six grid designs and five
+thousand perturbation draws per system; what is missing is a parameterisation guaranteeing validity,
+and in the degenerate configuration positive semidefiniteness requires both a compatibility relation
+and a separate magnitude condition, neither of which the specification imposes. The
+minimum-incompleteness rule is an affine corner rule rather than identification by the likelihood.
+Binding constraints are not covered by interior asymptotics.
+
+None of this shows that the published empirical estimates are wrong, and much of it establishes that
+no problem arises where one might have been suspected. Each claim is labelled as a proved
+proposition, a numerical diagnostic, a statement reported by the original authors, or an unknown
+implementation detail.
+\end{abstract}
+
+\noindent\textbf{Keywords:} \paperkeywords.
+
+\noindent\textbf{JEL classifications:} C13; C15; C32; G12; G15.
+
+\section{Scope and relation to the theory paper}\label{sec:companion_scope}
+
+This note accompanies the theory paper \emph{Dimensional Asymptotics of Euler-Based Simulated Likelihood for Multidimensional Diffusions}, deposited in the same archive record (concept DOI \texttt{10.5281/zenodo.21719868}). Numbered results cited below without further qualification --- ``Theorem 3.4'', ``Proposition 3.1'' and the like --- are that paper's. Nothing in this note is used there; the dependence runs one way, and the two documents can be read in either order or separately.
+
+The separation is one of kind. The theory paper proves asymptotic theorems about an estimator: the simulated transition density of \citet{BrandtSantaClara2002} behaves as a kernel estimator with effective sample size $S/M^{K/2}$, which collapses in probability along their own admissible rate sequences once $K>2$. Those results are about the estimator, and hold whatever specification it is applied to. This note asks a narrower and quite different question: taking the four-dimensional exchange-rate model of that paper as written, what can be established about the model itself? The answers are algebraic propositions and numerical diagnostics rather than limit theorems, and several are negative or inconclusive by design --- a demonstration that a suspected difficulty does not in fact arise is as much a result here as one that does.
+
+Nothing below shows that the published empirical estimates are wrong. Each claim is labelled in \Cref{sec:application_summary} as a proved proposition, a numerical diagnostic, a statement reported by the original authors, or an implementation detail that the published description does not settle; the distinctions matter, and we have tried not to let the fourth category masquerade as the first.
+
+\section{Summary of findings}\label{sec:application_summary}
+
+\begin{enumerate}[label=(\roman*)]
+\item \emph{The coefficients are outside the assumptions, but not equally so.} The interest rates follow square-root processes, which violate the uniform ellipticity condition (V) of the theory paper at the origin. At the reported estimates the Feller ratios range from $6.4$ to $48.5$, so the exact origin is unattainable, and at the benchmark states of \Cref{tab:cir_negativity} the one-step Euler negativity probabilities, though strictly positive, are of order $10^{-2667}$ or smaller at the long-run means. Unattainability does not mean the process cannot come arbitrarily close to zero, and without the observed rate path we do not establish a maximum over the empirical sample; what we claim is a gap in proof coverage together with negligible probabilities at the states displayed. The incompleteness state is different. Its Feller ratio is exactly $1/2$ for every admissible parameter value, so no estimate can move it away from its boundary, and the worst-case one-step Euler negativity probability equals $\Phi(-\sqrt{1-2\alpha h})$ exactly, which decreases to $\Phi(-1)\approx0.16$ as the step is refined rather than to zero. See \Cref{app:sqrt}.
+\item \emph{The estimator does not simulate the state whose boundary is at issue.} The implementation eliminates the incompleteness state and simulates $(r,r^*,e,v)$, recovering $\epsilon_t$ from a square root of the variance identity. Every Euler substep therefore requires that radicand to stay nonnegative at a \emph{simulated} state, not merely at the observed data, and a violation makes the next substep's coefficients complex rather than merely inaccurate. See \Cref{app:reality}.
+\item \emph{The two state representations are not interchangeable.} Taking volatility as primitive, which is what the estimator does, the variance identity reconstructs incompleteness uniquely. Taking incompleteness as primitive, recovering positive volatility requires solving a quadratic, and at the reported U.S.--U.K. loadings the inverse map is not globally single-valued: the quadratic has either no positive root or two distinct ones, coinciding only on a repeated-root boundary. A branch-selection condition would be needed to read the specification that way, and none is supplied. See \Cref{app:invert}.
+\item \emph{Correlation validity holds wherever we can check it; only the global guarantee is missing.} The reported matrices are positive definite at every algebraically feasible reference point examined, with minimum eigenvalues from $0.68$ down to $0.013$ at rates a hundred times their long-run means, and no violation arose in $5{,}000$ perturbation draws per system. We find no algebraically feasible point at which the matrix is indefinite, in any examined specification, that is models A, B and C across both currency systems, once the time-varying cases are evaluated by solving the variance identity for volatility rather than reading it from data. What remains is a gap in the specification rather than a defect in the estimates. The variance identity automatically bounds the two implied, state-dependent entries, so the entrywise constraint is not what secures those; the four free entries of $R_t$ and the fifth primitive parameter $\rho_{zz^*}$, which enters through $C_t$ rather than through $R_t$, still require their own restrictions, and the joint semidefiniteness condition is nowhere enforced. In the degenerate configuration the joint condition splits into a compatibility relation fixing $\rho_{xy}$ and a separate magnitude condition on $\rho_{ww^*}$, $\rho_{wy}$ and $\rho_{w^*y}$, and neither is imposed. A separate finding emerges from the same sweep: on $37{,}536$ of the $56{,}784$ baseline candidate grid points, the U.S.--U.K. model-C inverse identity admits no positive volatility solution, and no point on any grid admits exactly one. See \Cref{app:psd}.
+\item \emph{Identification is by a corner rule, not by the likelihood.} The minimum-incompleteness objective is affine in the selected scalar parameter, so over any compact feasible set its optimum is the minimum or maximum feasible value of that parameter. For the published affine constraints this is a one-dimensional linear programme and the optimum is a vertex; once positive-semidefinite requirements are added the feasible set need not be polyhedral, and the optimum is a boundary point rather than a vertex. Which constraint is active depends on the full feasible set. See \Cref{app:mincomp}.
+\item \emph{The final estimator is not the one the theorem describes.} It combines simulated likelihood, auxiliary least squares, a corner selection rule, and inequality constraints that the paper reports as binding. See \Cref{app:constrained}.
+\end{enumerate}
+
+Taken together these say that the estimator analysed in the theory paper and the estimator implemented in the application are different objects, quite apart from the rate conditions. The remaining sections establish each item in turn.
+
+\section{Square-root coefficients violate the generic assumptions}\label{app:sqrt}
+
+The interest rates are modelled as correlated Cox--Ingersoll--Ross processes \citep{CoxIngersollRoss1985},
+\begin{equation}\label{eq:cir_rates}
+dr_t=\lambda(\vartheta-r_t)dt+\sigma\sqrt{r_t}\,dW_t,
+\qquad
+d r_t^*=\lambda^*(\vartheta^*-r_t^*)dt+\sigma^*\sqrt{r_t^*}\,dW_t^*.
+\end{equation}
+The generic theory assumes infinitely differentiable coefficients with bounded derivatives and a positive-definite covariance matrix. The function $r\mapsto\sqrt r$ is not differentiable at zero, has unbounded derivatives near zero, is not defined on the negative half-line as a real coefficient, and makes the covariance degenerate at the boundary. The same singularity appears explicitly in the transformed system of Appendix B of \citet{BrandtSantaClara2002}, whose drift for $\sqrt{r_t}$ contains the term $-\tfrac18\sigma^2r_t^{-1/2}$.
+
+It is important to separate this structural violation from its practical consequences, and the two point in opposite directions for the interest rates. \Cref{tab:feller} reports the Feller ratio $2\lambda\vartheta/\sigma^2$ at the estimates of Table 3 of \citet{BrandtSantaClara2002}. It ranges from $6.4$ to $48.5$, so in every case the ratio comfortably exceeds one and the origin is unattainable for the exact processes. Unattainable is not the same as unapproachable: the Feller condition prevents the process from reaching zero, not from coming arbitrarily close to it, and it says nothing about how close the observed path came.
+
+The corresponding Euler negativity probabilities are strictly positive, because a Gaussian increment has full support, and they should not be called zero. At the displayed benchmark states they are, however, numerically negligible. \Cref{tab:cir_negativity} reports them at $h=1/520$, corresponding to weekly data with $M=10$. At the long-run means the standardised distance to the boundary ranges from $111$ to $203$ standard deviations, so the one-step probabilities are of order $10^{-2667}$ to $10^{-8986}$. Even from the implausibly low state $r=0.001$ the smallest distance is $13.8$ standard deviations and the largest probability is about $2\times10^{-43}$. Many of these tails underflow to exactly zero in binary64 arithmetic; \Cref{tab:cir_negativity} records the result state by state, and that is why the table reports base-ten logarithms rather than the probabilities themselves.
+
+The observed rate path is not reconstructed here, so none of this is a sample-wide bound. What the calculation supports is that at the states displayed the one-step positivity problem is numerically negligible, not that no simulated or observed state could behave otherwise.
+
+The assumptions of the generic theorem are genuinely violated by \eqref{eq:cir_rates}, and the estimator applied is therefore not the estimator analysed. But for $r$ and $r^*$ that gap is a matter of proof coverage rather than of demonstrated numerical damage: at the displayed benchmark states, where the one-step violation probability is of order $10^{-2667}$, such a violation is numerically negligible for any realistically sized simulation.
+
+\begin{table}[htbp]
+\centering
+\caption{One-step Euler negativity diagnostics for the square-root interest-rate processes at $h=1/520$, using the estimates of Table 3 of \citet{BrandtSantaClara2002}. Definitions: from a current state $r>0$ the Euler update has mean $r+\lambda(\vartheta-r)h$ and standard deviation $\sigma\sqrt{rh}$, so the negativity probability is $\Phi(-z)$ with $z=[r+\lambda(\vartheta-r)h]/(\sigma\sqrt{rh})$; the table reports $z$ and $\log_{10}\Phi(-z)$, computed through a numerically stable log-CDF rather than by taking the logarithm of an evaluated tail. ``Underflow'' records whether direct IEEE-754 binary64 evaluation of $\Phi(-z)$ returns exactly zero. Binary64 represents positive values down to about $5\times10^{-324}$, using subnormal numbers below the smallest normal value of about $2.2\times10^{-308}$, but a particular cumulative-distribution routine may return zero earlier: the implementation used here does so at about $6\times10^{-311}$, inside the subnormal range. The flag therefore reports what that routine returns, not a property of the mathematics, and the probability is strictly positive at every state. These are the displayed benchmark states only, not a sample-wide bound.}
+\label{tab:cir_negativity}
+\small
+\begin{tabular}{llrrrrc}
+\toprule
+Process & State & $r$ & $2\lambda\vartheta/\sigma^2$ & $z$ & $\log_{10}\Pp(\text{negative})$ & Underflow \\
+\midrule
+U.S. (vs. U.K.) & long-run mean & 0.053 & 38.4 & 187.5 & $-7636$ & yes \\
+ & half the mean & 0.0265 & & 132.6 & $-3823$ & yes \\
+ & 1 per cent & 0.01 & & 81.6 & $-1449$ & yes \\
+ & 0.1 per cent & 0.001 & & 26.5 & $-154$ & no \\
+\midrule
+U.K. & long-run mean & 0.074 & 22.9 & 110.8 & $-2667$ & yes \\
+ & half the mean & 0.037 & & 78.4 & $-1337$ & yes \\
+ & 1 per cent & 0.01 & & 41.0 & $-366$ & yes \\
+ & 0.1 per cent & 0.001 & & 13.8 & $-42.6$ & no \\
+\midrule
+U.S. (vs. Germany) & long-run mean & 0.058 & 48.5 & 203.4 & $-8986$ & yes \\
+ & 0.1 per cent & 0.001 & & 27.6 & $-167$ & no \\
+\midrule
+Germany & long-run mean & 0.064 & 6.4 & 137.4 & $-4099$ & yes \\
+ & 0.1 per cent & 0.001 & & 17.4 & $-67.0$ & no \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The market-incompleteness state behaves differently. Write $H_t=\epsilon_t^2$ for it; the letter $X$ is reserved for the Brownian motion driving the log exchange rate in \eqref{eq:corr_block}. Equation (37) of \citet{BrandtSantaClara2002} specifies
+\begin{equation}\label{eq:epsilon_cir}
+dH_t=(\beta^2-2\alpha H_t)dt+2\beta\sqrt{H_t}\,dY_t,
+\end{equation}
+which is a CIR process with $\kappa=2\alpha$, long-run mean $\beta^2/(2\alpha)$, and diffusion coefficient $2\beta$. Its Feller ratio is
+\[
+\frac{2\kappa\vartheta_X}{\sigma_X^2}
+=\frac{2\beta^2}{4\beta^2}
+=\frac12
+\]
+for every $\alpha>0$ and every $\beta\ne0$.
+
+The parameter-independence is not a coincidence, and identifying its source changes how the rest of this appendix should be read. Suppose $\epsilon_t$ itself follows the Ornstein--Uhlenbeck process
+\begin{equation}\label{eq:epsilon_ou}
+d\epsilon_t=-\alpha\epsilon_t\,dt+\beta\,dY_t .
+\end{equation}
+Then It\^o's lemma applied to $H=\epsilon^2$ gives $dH=2\epsilon\,d\epsilon+(d\epsilon)^2=(\beta^2-2\alpha H)\,dt+2\beta\epsilon\,dY$, which is \eqref{eq:epsilon_cir} exactly, with $2\beta\epsilon=2\beta\sqrt H$ on $\epsilon>0$. The incompleteness specification is therefore the \emph{square of an Ornstein--Uhlenbeck process}, and its Feller ratio is one half for the same reason that a squared Gaussian has a chi-square distribution with one degree of freedom: it is a property of the squaring map, not of $\alpha$ or $\beta$.
+
+Three consequences follow, and they cut in different directions.
+
+First, the attainability of zero is demystified rather than alarming. An Ornstein--Uhlenbeck process crosses zero almost surely; $H$ touching zero is that crossing, seen through the square. Nothing pathological is happening to the model.
+
+Second, the natural state is $\epsilon$, not $H$. In the coordinate $\epsilon$ there is no boundary, no positivity constraint, and an exact Gaussian transition density requiring no Euler scheme at all. Moreover $\epsilon_t$ enters the exchange-rate diffusion only through $\epsilon_t\,dU_t$, so its sign is immaterial to the model. A competent implementation would simulate \eqref{eq:epsilon_ou} exactly and never meet a square root.
+
+Third, and consequently, the calculation in the remainder of this appendix concerns a discretisation that the natural parameterisation makes unnecessary, and which \Cref{app:reality} establishes the published implementation did not use. We retain it because it is exact and because it isolates the mechanism cleanly, but it should be read as a worked illustration of how a shrinking-bandwidth boundary problem behaves, not as a diagnosis of anything in \citet{BrandtSantaClara2002}. The criticism that does bear on their implementation is the radicand condition of \Cref{app:reality}, which no change of coordinates removes because the estimator eliminates $\epsilon$ in favour of $v$.
+
+Returning to the direct discretisation: no admissible parameter estimate can make the zero boundary of $H$ unattainable, and the instantaneous covariance degenerates there. That is a statement about attainability, not about where the state typically sits: it does not say the process is usually near zero. This is a structural feature of the specification, not a property of a particular estimate. Whether the boundary is not merely attainable in principle but attained in the reported results depends on the specification, and \Cref{tab:binding_status} records the three different statuses. In brief: under the conditions of \Cref{prop:min_incomplete}(iii) the constant-risk-price optimisation yields an exact zero; for the time-varying specifications \citet{BrandtSantaClara2002} report that the nonnegativity constraint binds, which we repeat rather than verify.
+
+\begin{table}[htbp]
+\centering
+\caption{Feller ratios at the estimates reported in Table 3 of \citet{BrandtSantaClara2002}. For a process $dZ=\kappa(\vartheta_Z-Z)dt+\sigma_Z\sqrt Z\,dB$ the ratio is $2\kappa\vartheta_Z/\sigma_Z^2$, and the origin is unattainable if and only if it is at least one. For the incompleteness state the ratio equals $1/2$ for all admissible parameters.}
+\label{tab:feller}
+\begin{tabular}{llrrrr}
+\toprule
+System & State & $\kappa$ & $\vartheta_Z$ & $\sigma_Z$ & $2\kappa\vartheta_Z/\sigma_Z^2$ \\
+\midrule
+U.S. vs. U.K. & $r$ (U.S.) & 0.284 & 0.053 & 0.028 & 38.4 \\
+              & $r^*$ (U.K.) & 0.486 & 0.074 & 0.056 & 22.9 \\
+              & $H=\epsilon^2$ & 0.640 & 0.0121 & 0.176 & 0.5 \\
+U.S. vs. Germany & $r$ (U.S.) & 0.305 & 0.058 & 0.027 & 48.5 \\
+              & $r^*$ (Germany) & 0.088 & 0.064 & 0.042 & 6.4 \\
+              & $H=\epsilon^2$ & 0.676 & 0.0151 & 0.202 & 0.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\FloatBarrier
+\section{The simulated state and the reality of the incompleteness process}\label{app:reality}
+
+The previous subsection treats \eqref{eq:epsilon_cir} as a state in its own right, which is how the model presents it. The estimator does not. Equation (31) and Appendix B of \citet{BrandtSantaClara2002} eliminate $\epsilon_t$ using the variance identity and simulate the four-dimensional state
+\begin{equation}\label{eq:simulated_state}
+(r_t,\;r_t^*,\;e_t,\;v_t),
+\end{equation}
+where $e_t$ is the log exchange rate and $v_t$ is its instantaneous volatility, proxied by a one-week at-the-money implied volatility. The incompleteness state is therefore never discretised directly. This relocates the boundary problem rather than removing it, and the relocated version is the one that binds.
+
+The identity that eliminates $\epsilon_t$ is
+\begin{equation}\label{eq:epsilon_recovered}
+\epsilon_t
+=\sqrt{
+v_t^2
+-(\phi_t^2+\phi_t^{*2}-2\rho_{ww^*}\phi_t\phi_t^*)
+-(\psi_t^2+\psi_t^{*2}-2\rho\,\psi_t\psi_t^*)
+},
+\end{equation}
+where $\phi_t=\phi\sqrt{r_t}$ and $\phi_t^*=\phi^*\sqrt{r_t^*}$ are the market prices of domestic and foreign interest-rate risk and $\psi_t,\psi_t^*$ are the market prices of pure currency risk. The state $\epsilon_t$ appears in the diffusion of the log exchange rate, through $v_t\,dX_t=\phi_t dW_t-\phi_t^*dW_t^*+\psi_t dZ_t-\psi_t^*dZ_t^*+\epsilon_t dU_t$, and in the coefficients of the $v_t$ equation obtained from It\^o's lemma. Every Euler substep of \eqref{eq:simulated_state} therefore requires the radicand of \eqref{eq:epsilon_recovered} to be nonnegative at the simulated state, not merely at the observed data. Ordinary Euler discretisation of a system whose coefficients are defined by \eqref{eq:epsilon_recovered} offers no such guarantee. The mechanism is not that the Gaussian increment of $v_t$ is unbounded below, which would be the wrong reading: the radicand contains $v_t^2$, so a large negative $v_t$ makes the radicand large and positive, not negative. What matters is that the update is not constrained to preserve the algebraic domain $v_t^2\ge Q_t+C_t$. A nondegenerate Gaussian update assigns positive probability to every neighbourhood of any point, including neighbourhoods in which $|v_t|$ is small, while the subtracted terms are continuous and need not be small there. The discretisation therefore supplies no positivity-preserving guarantee for the reconstructed radicand.
+
+We stop at that. Turning it into a violation probability would require the joint conditional covariance of the full state update, since $Q_t$ and $C_t$ move with the other components rather than staying fixed while $v_t$ wanders, and that calculation is not available to us.
+
+This is the operative form of the degeneracy, and three features make it sharp rather than hypothetical.
+
+First, the constraint is not generically slack, though what can be asserted differs by specification and \Cref{tab:binding_status} is the reference. In the constant specification, the corner formula \eqref{eq:min_incomplete_solution} implies an observed-date zero under its stated assumptions. In the time-varying specifications, \citet{BrandtSantaClara2002} report that the nonnegativity constraint binds; that is their statement, not our derivation. In either case an observed-date zero means one sample date at which the reconstructed incompleteness state sits on the boundary, and the transition simulated \emph{out of} that date starts there, unless the active date is the terminal observation, from which no transition is simulated.
+
+Three things do not follow, and we assert none of them. A binding observed-date constraint does not show that every simulation starts from the boundary; it does not show that any intermediate simulated state reaches the boundary; and it does not show that the original code ever evaluated coefficients at an exact floating-point zero, which is a question about the implementation rather than about the optimisation. The minima of $0.0000$ in Table 4 of \citet{BrandtSantaClara2002} are rounded to four decimal places and corroborate rather than prove.
+
+Second, the failure is not a recoverable numerical event such as a negative variance that can be floored at zero. It makes the drift and diffusion coefficients of the next substep complex-valued, so the chain is undefined rather than inaccurate.
+
+Third, the paper reports assigning zero likelihood to parameter values that violate $\epsilon_t^2\ge0$ at the observed dates. That is a restriction on parameters, not a rule for what the simulator does when an \emph{intermediate} Euler state violates it, and the two are different objects: the constraint is checked at $N$ observation dates, whereas the chain visits $NMS$ intermediate states.
+
+As with the interest rates, a truncation, reflection, absorption, or exact-transition rule would resolve the issue. Each such rule defines a \emph{different} approximating chain, with a different transition density and therefore a different estimator, and each requires its own convergence analysis; they are not interchangeable implementation details. The published paper does not specify one.
+
+The size of the problem can be computed exactly on the incompleteness specification \eqref{eq:epsilon_cir} taken at face value, that is on the state $H_t=\epsilon_t^2$ discretised directly. Because the implemented estimator does not simulate that state, it is worth fixing in advance what the calculation below does and does not deliver.
+
+It establishes four things about the \emph{directly discretised} process: that the exact CIR specification for $H$ has an attainable boundary; that ordinary Euler applied directly to $H$ is not positivity preserving; that the worst-case one-step negativity probability has the closed form \eqref{eq:worst_case}; and that refining the step moves the worst-case location towards zero while lowering the maximum only to the strictly positive limit $\Phi(-1)$.
+
+It establishes none of the following, and no claim in this paper rests on it as though it did: the probability that the implemented $v$-state Euler chain produces a negative radicand in \eqref{eq:epsilon_recovered}; the probability of complex coefficients arising in the published code; the frequency of intermediate-state violations along a simulated path; the probability of an invalid likelihood evaluation; or the finite-sample accuracy of the reported estimates. Analysing the implemented chain would require the explicit drift and diffusion coefficients for $v_t$, the numerical convention actually used, simulation of the intermediate states, monitoring of the radicand, probability or moment bounds for it, and a stated treatment of failed paths in the likelihood. The first is available from Appendix B of \citet{BrandtSantaClara2002}; the rest are not.
+
+For an Euler step of size $h$ the probability of a negative next state from $H_t=x>0$ is
+\begin{equation}\label{eq:negative_prob}
+P_h(x)=\Phi\!\left(
+-\frac{x+(\beta^2-2\alpha x)h}{2\beta\sqrt{xh}}
+\right).
+\end{equation}
+This vanishes at $x=0$, where the diffusion term vanishes while the drift $\beta^2h$ is strictly positive, and again for large $x$, so it has an interior maximum. That maximum has a closed form, and it is not what one would hope.
+
+\begin{proposition}[Exact worst case of the one-step violation probability]\label{prop:worst_case_boundary}
+Let $\alpha>0$, $\beta>0$ and $0<h<1/(2\alpha)$. Then $P_h$ attains its supremum on $(0,\infty)$ at
+\begin{equation}\label{eq:worst_case_argmax}
+x_h^*=\frac{\beta^2h}{1-2\alpha h},
+\end{equation}
+and the supremum equals
+\begin{equation}\label{eq:worst_case}
+\sup_{x>0}P_h(x)=\Phi\!\left(-\sqrt{1-2\alpha h}\right).
+\end{equation}
+Consequently $x_h^*\sim\beta^2h$, and $h\mapsto\sup_xP_h(x)$ is strictly increasing on $(0,1/(2\alpha))$, so as $h\downarrow0$ the worst case \emph{decreases} to
+\[
+\Phi(-1)\approx0.1587
+\]
+from above. The limit depends on neither $\alpha$ nor $\beta$.
+\end{proposition}
+
+The sign convention matters here. We take $\beta>0$, which matches the reported estimates; for $\beta<0$ the process is unchanged in law and every occurrence of $\beta$ in the standard deviation should be read as $|\beta|$, after which the statement is identical with $\beta^2=|\beta|^2$ throughout.
+
+\begin{proof}
+Write $a=1-2\alpha h>0$ and $b=\beta^2h>0$. The argument of $\Phi$ in \eqref{eq:negative_prob} is $-g(x)$ with
+\[
+g(x)=\frac{x+(\beta^2-2\alpha x)h}{2\beta\sqrt{xh}}=\frac{ax+b}{2\beta\sqrt h\,\sqrt x},
+\]
+so, $\Phi$ being strictly increasing, maximising $P_h$ is minimising $g$ over $x>0$. Differentiating the numerator of $g$ with respect to $\sqrt x$, or directly,
+\[
+g'(x)=\frac{1}{2\beta\sqrt h}\cdot\frac{a\sqrt x-(ax+b)/(2\sqrt x)}{x}
+=\frac{ax-b}{4\beta\sqrt h\,x^{3/2}},
+\]
+which is negative for $x<b/a$, zero at $x=b/a$ and positive for $x>b/a$. Hence $g$ has a unique minimum at $x_h^*=b/a$, which is \eqref{eq:worst_case_argmax}. There
+\[
+g(x_h^*)=\frac{a(b/a)+b}{2\beta\sqrt h\,\sqrt{b/a}}=\frac{2b}{2\beta\sqrt h\,\sqrt{b/a}}=\frac{\sqrt{ab}}{\beta\sqrt h}=\frac{\beta\sqrt{ah}}{\beta\sqrt h}=\sqrt a,
+\]
+giving \eqref{eq:worst_case}.
+
+For the monotonicity, write $f(h)=\Phi(-\sqrt{1-2\alpha h})$ on $(0,1/(2\alpha))$. Then
+\[
+\frac{d}{dh}\Bigl(-\sqrt{1-2\alpha h}\Bigr)=\frac{\alpha}{\sqrt{1-2\alpha h}}>0,
+\qquad\text{so}\qquad
+f'(h)=\varphi\bigl(\sqrt{1-2\alpha h}\bigr)\,\frac{\alpha}{\sqrt{1-2\alpha h}}>0,
+\]
+with $\varphi$ the standard normal density. Hence $f$ is strictly increasing in $h$, so refining the mesh strictly decreases the worst case; and since $a=1-2\alpha h\uparrow1$ as $h\downarrow0$, the limit $\Phi(-1)$ is approached from above.
+\end{proof}
+
+The practical reading needs care in both directions. Refining the Euler step does reduce the worst-case one-step violation probability, but it does not drive it to zero: the maximum decreases monotonically to the strictly positive limit $\Phi(-1)\approx0.1587$, and by the time $h$ is small the reduction is in the fourth decimal place. Refinement also moves the dangerous state towards zero in proportion to $h$. So mesh refinement alone does not eliminate the local positivity problem; it relocates it and leaves its severity essentially unchanged. \Cref{tab:boundary_max} reports \eqref{eq:worst_case_argmax} and \eqref{eq:worst_case} at the reported estimates, and its final column is strictly decreasing as $h$ falls, from $0.1602$ at $h=0.02$ to $0.1588$ at $h=1/520$ and $0.1587$ at $h=1/1040$.
+
+The scope of this must be stated carefully, because a shrinking region invites an inference it does not support. The maximising state $x_h^*$ is of order $h$, so the region in which the one-step violation probability is large moves toward zero as the mesh is refined. This geometric shrinkage alone does not determine how often the discretised chain occupies that region. Occupation probabilities depend on the transition law, the initial condition, the boundary behaviour and, where relevant, the invariant distribution of the numerical scheme; near an attainable boundary the state distribution may itself concentrate towards zero as $h$ falls, and nothing in \Cref{prop:worst_case_boundary} excludes that. The proposition establishes a local worst-case result, not an integrated pathwise violation probability.
+
+Five quantities must be kept apart, and only the first two are computed here:
+\begin{enumerate}[label=(\alph*)]
+\item the pointwise one-step probability $P_h(x)$ at a given current state $x$;
+\item its supremum $\sup_xP_h(x)$ over current states, which is \eqref{eq:worst_case};
+\item the distribution $\pi_h$ of the current state under the scheme;
+\item the integrated one-step failure probability $\int P_h(x)\,\pi_h(dx)$, which requires $\pi_h$;
+\item the cumulative pathwise probability of any failure over $m$ steps.
+\end{enumerate}
+\Cref{prop:worst_case_boundary} bounds (d) above by (b) and says nothing else about it, because it does not analyse $\pi_h$.
+
+Quantity (e) deserves a precise statement, and the events need care before it can be written down. The naive choice $\{H^{\mathrm{Euler}}_{j+1}<0\}$ is not well defined once an earlier step has already gone negative, because the square root in the next update is then undefined and the chain does not continue. We therefore work with the chain stopped at its first invalid step and use \emph{first-failure} events,
+\begin{equation}\label{eq:first_failure}
+F_j=\bigl\{H^{\mathrm E}_0\ge0,\ \ldots,\ H^{\mathrm E}_j\ge0,\ H^{\mathrm E}_{j+1}<0\bigr\},
+\end{equation}
+which are well defined on the stopped chain and, being indexed by the step at which failure first occurs, are pairwise disjoint. A union bound is then available and requires no independence:
+\begin{equation}\label{eq:union_bound}
+\Pp\Bigl(\bigcup_{j=0}^{m-1}F_j\Bigr)=\sum_{j=0}^{m-1}\Pp(F_j)\ \le\ m\,\sup_{x\ge0}P_h(x).
+\end{equation}
+The first relation is an equality rather than an inequality precisely because the events are disjoint; the inequality comes from bounding each $\Pp(F_j)=\E\bigl[\mathbf 1\{\text{survived to }j\}P_h(H^{\mathrm E}_j)\bigr]$ by the supremum.
+What is \emph{not} available is any product formula such as $1-(1-p)^m$, which would require the failure events to be independent, or at least a conditional structure that makes the product a valid bound. Successive Euler states are dependent, so no such formula may be used here.
+
+The union bound is therefore correct but uninformative at the probabilities in question. Since $\sup_xP_h(x)\approx0.1587$ by \eqref{eq:worst_case}, the right-hand side of \eqref{eq:union_bound} reaches one at $m=7$, and beyond that the bound is the trivial statement $\Pp(\cdot)\le1$. At $m=10$ it gives $1.59$, at $m=20$ it gives $3.17$, and at the $m=520$ steps of one year at $h=1/520$ it gives $82.5$; all three clip to $1$. A useful pathwise statement would need the distribution of $H_j$, the conditional transition probabilities, the dependence across steps, and probably occupation estimates near the boundary. What \Cref{prop:worst_case_boundary} rules out is the comfortable assumption that refinement makes the per-step boundary problem itself disappear.
+
+\subsection{Euler boundary violations in the incompleteness process}
+
+\Cref{fig:negative_euler} evaluates \eqref{eq:negative_prob} at the reported estimates $(\alpha,\beta)=(0.320,0.088)$ and $(0.338,0.101)$, using the step sizes $h=1/520$ and $h=1/1040$ that correspond to weekly data with $M=10$ and $M=20$, with a coarser value shown only as a labelled illustration. The horizontal scale is logarithmic so that the region near the boundary is visible; on a linear scale the entire phenomenon is compressed into a sliver next to the origin.
+
+The figure makes \Cref{prop:worst_case_boundary} visible: refining the step translates the curve to the left and lowers its peak only slightly, towards the strictly positive limit $\Phi(-1)$. As explained in \Cref{app:reality}, this calculation applies to the incompleteness specification \eqref{eq:epsilon_cir} treated as a state in its own right. The implemented chain simulates $(r,r^*,e,v)$ and recovers $\epsilon_t$ from \eqref{eq:epsilon_recovered}, so the boundary that must not be crossed is the complete-markets surface rather than $\{H=0\}$; the figure is an exact illustration of the mechanism rather than of the implemented chain. In particular, the curves give one-step probabilities conditional on the current state; they are not occupation frequencies, and we make no claim about how often either chain visits the region where they peak. The contrast with the interest rates in \Cref{tab:feller} is the substantive content: for $r$ and $r^*$ the Feller ratios exceed one by an order of magnitude, so the exact origin is unattainable and the displayed benchmark-state Euler probabilities in \Cref{tab:cir_negativity} are negligible, whereas for the incompleteness state the ratio is exactly $1/2$ for all parameter values and zero is attainable. Unattainable is not the same as unapproachable, and we do not reconstruct the observed rate path, so no sample-wide bound is claimed for the interest rates either.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/epsilon_squared_euler_negative_probability.pdf}
+\caption{One-step probability that ordinary Euler discretisation of the incompleteness specification $H_t=\epsilon_t^2$ in \eqref{eq:epsilon_cir} produces a negative state, at the estimates in Table 3 of \citet{BrandtSantaClara2002}. Solid lines are the U.S.--U.K. estimates and dashed lines the U.S.--Germany estimates. The application step sizes $h=1/520$ and $h=1/1040$ are shown together with a coarser illustrative value. Halving $h$ shifts each curve left and lowers its peak slightly, the maximum decreasing monotonically to $\Phi(-1)\approx0.1587$ from above rather than to zero; see \Cref{prop:worst_case_boundary}. Three points about scope. The figure concerns \emph{direct} Euler discretisation of $H$; it is not a simulation of the implemented transformed chain, which substitutes $\epsilon_t$ out and simulates $(r,r^*,e,v)$; and it illustrates the boundary mechanism only. Each curve is a one-step probability conditional on the current state, so no point on it is a frequency with which any chain visits that state. See \Cref{app:reality}.}
+\label{fig:negative_euler}
+\end{figure}
+
+\FloatBarrier
+
+\begin{table}[htbp]
+\centering
+\caption{Worst-case one-step Euler negativity probability for the incompleteness specification \eqref{eq:epsilon_cir}, at the estimates of Table 3 of \citet{BrandtSantaClara2002}. The step $h=1/520$ corresponds to weekly data with $M=10$ and $h=1/1040$ to $M=20$; the third row is a coarser illustration. The maximum decreases strictly as $h$ is refined, from $0.1602$ through $0.1588$ to $0.1587$, converging to $\Phi(-1)\approx0.15866$ from above rather than to zero, in accordance with \Cref{prop:worst_case_boundary}; the maximising state scales with $h$.}
+\label{tab:boundary_max}
+\begin{tabular}{llrrr}
+\toprule
+System & Step & $H^*_h$ & $\epsilon^*_h=\sqrt{H^*_h}$ & $\max_xP_h(x)$ \\
+\midrule
+U.S. vs. U.K.
+ & $h=1/520$ & $1.49\times10^{-5}$ & 0.00386 & 0.1588 \\
+ & $h=1/1040$ & $7.45\times10^{-6}$ & 0.00273 & 0.1587 \\
+ & $h=0.02$ & $1.57\times10^{-4}$ & 0.01253 & 0.1602 \\
+\midrule
+U.S. vs. Germany
+ & $h=1/520$ & $1.96\times10^{-5}$ & 0.00443 & 0.1588 \\
+ & $h=1/1040$ & $9.82\times10^{-6}$ & 0.00313 & 0.1587 \\
+ & $h=0.02$ & $2.07\times10^{-4}$ & 0.01438 & 0.1603 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\FloatBarrier
+\section{Invertibility of the volatility--incompleteness map}\label{app:invert}
+
+The model can be written with either volatility or incompleteness as the primitive state, and the two representations are equivalent only if the map between them is well defined in both directions. This subsection analyses that map. It is not a claim about what the implemented estimator computes: as described in \Cref{app:reality}, the implementation takes $v_t$ as the primitive simulated state and uses the variance identity in the easy direction, to reconstruct $\epsilon_t$. No quadratic is solved at any Euler step.
+
+The time-varying pure-currency risk prices have the form
+\begin{equation}\label{eq:risk_price_v}
+\psi_t=a_t+bv_t,
+\qquad
+\psi_t^*=a_t^*+b^*v_t,
+\end{equation}
+where $a_t$ and $a_t^*$ depend on the interest-rate differential and the log exchange rate. The variance identity is
+\begin{equation}\label{eq:vol_identity}
+v_t^2
+=D_t+\psi_t^2+(\psi_t^*)^2-2\rho\psi_t\psi_t^*,
+\end{equation}
+where $D_t$ collects the interest-rate risk term and $\epsilon_t^2$, and $\rho=\rho_{zz^*}$.
+
+Substituting \eqref{eq:risk_price_v} into \eqref{eq:vol_identity} and collecting terms defines
+\begin{equation}\label{eq:F_definition}
+F(v;\,\text{state})=(1-\kappa_b)v^2-2\eta_tv-\zeta_t,
+\end{equation}
+so that the identity reads $F(v_t;\text{state})=0$, where
+\begin{align}
+\kappa_b&=b^2+(b^*)^2-2\rho bb^*, \label{eq:kappa_b}\\
+\eta_t&=a_tb+a_t^*b^*-\rho(a_tb^*+a_t^*b),\\
+\zeta_t&=D_t+a_t^2+(a_t^*)^2-2\rho a_ta_t^*.
+\end{align}
+Both $\kappa_b$ and the state-dependent part of $\zeta_t$ are quadratic forms in the two-dimensional correlation matrix $\bigl(\begin{smallmatrix}1&\rho\\\rho&1\end{smallmatrix}\bigr)$, evaluated at $(b,-b^*)$ and $(a_t,-a_t^*)$ respectively. When that matrix is positive semidefinite and $D_t\ge0$ one therefore has $\kappa_b\ge0$ and $\zeta_t\ge0$.
+
+The two directions of the map are not symmetric.
+
+\emph{Volatility primitive.} Given $v_t$ and the remaining states, \eqref{eq:vol_identity} determines $\epsilon_t^2$ by subtraction, uniquely and without any branch condition. This is the direction the estimator uses, and it is unproblematic apart from the reality requirement discussed in \Cref{app:reality}.
+
+\emph{Incompleteness primitive.} Given $\epsilon_t^2$ and the remaining states, recovering a positive $v_t$ requires solving $F(v;\text{state})=0$. This is the direction implied by reading equations (30) and (37) of \citet{BrandtSantaClara2002} as the primitive specification, with the volatility dynamics of their equation (31) derived from it by It\^o's lemma. The implicit function theorem gives local solvability wherever
+\begin{equation}\label{eq:implicit_derivative}
+\frac{\partial F}{\partial v}(v;\text{state})=2(1-\kappa_b)v-2\eta_t\ne0,
+\end{equation}
+that is away from the singular set
+\begin{equation}\label{eq:singular_set}
+v=\frac{\eta_t}{1-\kappa_b}
+\qquad(\kappa_b\ne1),
+\end{equation}
+at which the two roots coalesce and the local inverse fails to exist. Local solvability is not global uniqueness, and the following proposition describes the global branch structure.
+
+The following proposition concerns the state transformation between volatility and incompleteness. It is not a statement about the implemented optimisation algorithm, which uses the identity only in the direction described above.
+
+\begin{proposition}[Branch structure of the volatility identity]\label{prop:vol_branch}
+Let $\zeta_t>0$.
+\begin{enumerate}[label=(\roman*)]
+\item If $\kappa_b<1$, equation $F(v;\text{state})=0$ has exactly one positive root and one negative root, so at every state satisfying the standing hypothesis $\zeta_t>0$ the positive branch is unique and the inverse map is single valued on the positive half-line.
+\item If $\kappa_b>1$, write $\Delta_t=\eta_t^2-(\kappa_b-1)\zeta_t$. Then exactly one of the following holds:
+\begin{enumerate}[label=(\alph*)]
+\item $\eta_t<0$ and $\Delta_t>0$: two \emph{distinct} positive roots,
+\[
+v_t^{\pm}=\frac{-\eta_t\pm\sqrt{\Delta_t}}{\kappa_b-1};
+\]
+\item $\eta_t<0$ and $\Delta_t=0$: one positive root of multiplicity two, $v_t=-\eta_t/(\kappa_b-1)$, which is exactly the singular set \eqref{eq:singular_set};
+\item otherwise, that is $\Delta_t<0$ or $\eta_t\ge0$: no positive root.
+\end{enumerate}
+\end{enumerate}
+\end{proposition}
+
+\begin{remark}[Counting roots]\label{rem:root_counting}
+Case (b) is why the classification is stated this way rather than as ``no positive root or exactly two''. That shorter phrasing is consistent only if roots are counted with multiplicity, and the distinction matters for the inverse map: at a repeated root the two branches coincide, so the map is single valued there, but it is single valued on a set where the two branches meet rather than on a region where only one exists. Away from the singular set the inverse map is either undefined or two-valued, never genuinely single valued.
+
+Case (b) is also a codimension-one condition on the state, so a grid of candidate points will not meet it except by construction. That is precisely what the sweep of \Cref{app:psd_feasible} reports: across every grid design, no candidate point yields exactly one positive root, which is case (b) failing to occur rather than case (b) being impossible.
+\end{remark}
+
+\begin{proof}
+Rewrite $F(v;\text{state})=0$ as $(\kappa_b-1)v^2+2\eta_tv+\zeta_t=0$.
+
+(i) If $1-\kappa_b>0$ the product of the roots is $-\zeta_t/(1-\kappa_b)<0$, so the real roots have opposite signs. The discriminant $4\{\eta_t^2+(1-\kappa_b)\zeta_t\}$ is strictly positive, so both roots are real and exactly one is positive.
+
+(ii) If $\kappa_b-1>0$ the product of the roots is $\zeta_t/(\kappa_b-1)>0$ and their sum is $-2\eta_t/(\kappa_b-1)$. A positive product excludes roots of opposite signs and excludes a zero root, so real roots are either both positive or both negative, and both are positive exactly when the sum is positive, that is when $\eta_t<0$. Real roots exist when the discriminant $4\{\eta_t^2-(\kappa_b-1)\zeta_t\}$ is nonnegative, and the stated formula is the quadratic formula. The roots coincide when $\eta_t^2=(\kappa_b-1)\zeta_t$, in which case the common value is $-\eta_t/(\kappa_b-1)=\eta_t/(1-\kappa_b)$, which is \eqref{eq:singular_set}.
+\end{proof}
+
+\Cref{tab:implicit_coefficients} evaluates $\kappa_b$ at the model-C estimates of Table 4 of \citet{BrandtSantaClara2002}. The two systems fall on opposite sides of the threshold.
+
+For the U.S.--Germany system, $\kappa_b\approx0.0702<1$, case (i) applies, and the inverse map is single valued on the states the proposition covers: at any state with $\zeta_t>0$ there is exactly one positive volatility consistent with the identity. The restriction to $\zeta_t>0$ is the proposition's own hypothesis and is not removed here. Establishing $\zeta_t>0$ throughout the model domain would need a separate argument, which we do not give, so this is uniqueness on admissible states rather than global uniqueness.
+
+For the U.S.--U.K. system, $\kappa_b\approx1.9982>1$ and case (ii) applies. The reported coefficients therefore do not define a globally unique inverse mapping from the incompleteness state to positive volatility without a branch-selection condition. At states where positive roots exist there are two distinct ones, except on the repeated-root boundary $\Delta_t=0$ of case (b), and the specification does not say which is intended; at states where $\eta_t\ge0$ or $\Delta_t<0$ there is none. Because $\zeta_t\ge0$ follows from positive semidefiniteness of the two-dimensional correlation matrix together with $D_t\ge0$, both of which hold by construction, this is a consequence of $\kappa_b>1$ alone and not of a knife-edge parameter value.
+
+Two qualifications matter for how much weight this carries. It does not affect the reconstruction of $\epsilon_t$ from an observed implied volatility, which is the direction the estimation uses and which is unique. And it does not by itself show that the reported estimates are wrong. What it shows is that the two representations of the model are not interchangeable at the U.S.--U.K. estimates, so that reading the specification as a generative diffusion in the incompleteness state requires an additional branch-selection rule that the paper does not supply. Appendix B of \citet{BrandtSantaClara2002} defines the drift and diffusion of $v_t$ only implicitly, with those coefficients appearing inside the formulas used to define them, so a well-posedness condition is required there in any case.
+
+\begin{table}[htbp]
+\centering
+\caption{Quadratic coefficient implied by the model-C volatility loadings reported in Table 4 of \citet{BrandtSantaClara2002}, where $\kappa_b=b^2+(b^*)^2-2\rho bb^*$ with $b=c_3$, $b^*=c_3^*$ and $\rho=\rho_{zz^*}$. The sign of $1-\kappa_b$ determines which case of \Cref{prop:vol_branch} applies.}
+\label{tab:implicit_coefficients}
+\begin{tabular}{lrrrrrl}
+\toprule
+Market & $b$ & $b^*$ & $\rho$ & $\kappa_b$ & $1-\kappa_b$ & Branch structure \\
+\midrule
+U.S. vs. U.K. & 1.514 & 2.581 & 0.89 & 1.9982 & $-0.9982$ & zero or two positive roots \\
+U.S. vs. Germany & $-0.142$ & 0.127 & 0.94 & 0.0702 & 0.9298 & unique positive root \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\FloatBarrier
+\section{Feasibility of the Brownian correlation matrix}\label{app:psd}
+
+The application specifies an instantaneous correlation matrix for the four Brownian motions $(W_t,W_t^*,X_t,Y_t)$, where $W$ and $W^*$ drive the two interest rates, $X$ drives the log exchange rate and $Y$ drives the incompleteness state. Write it in block form as
+\begin{equation}\label{eq:corr_block}
+R_t=
+\begin{pmatrix}
+A_t&r_t\\
+r_t^{\mathsf T}&1
+\end{pmatrix},
+\end{equation}
+where $A_t$ is the $3\times3$ block for $(W_t,W_t^*,X_t)$ and $r_t=(\rho_{wy},\rho_{w^*y},\rho_{xy})^{\mathsf T}$ collects the three correlations with $Y_t$.
+
+A symmetric $4\times4$ correlation matrix has six off-diagonal entries, and it is worth listing them, because the count is easy to get wrong. $R_t$ contains \emph{four} free entries, namely $\rho_{ww^*}$ together with the three components of $r_t$, and \emph{two} state-dependent implied entries, $\rho_{wx,t}$ and $\rho_{w^*x,t}$. The structural model contains one further primitive correlation parameter, $\rho_{zz^*}$, which enters the currency-risk quadratic form $C_t$ rather than $R_t$ directly, and so reaches $R_t$ only through the volatility $v_t$. That gives five primitive correlation parameters in the model, four of which are entries of $R_t$. \Cref{tab:corr_roles} sets this out row by row. From equation (28) of \citet{BrandtSantaClara2002},
+\begin{equation}\label{eq:implied_corr}
+\rho_{wx,t}=\frac{\phi_t-\rho_{ww^*}\phi_t^*}{v_t},
+\qquad
+\rho_{w^*x,t}=\frac{\rho_{ww^*}\phi_t-\phi_t^*}{v_t},
+\end{equation}
+state dependent through $\phi_t=\phi\sqrt{r_t}$, $\phi_t^*=\phi^*\sqrt{r_t^*}$ and $v_t$.
+
+Three different questions must be kept apart, and the three subsections below answer them separately. First, is the matrix valid at the reported estimates and at reference points satisfying the reported algebraic restrictions? Second, does the specification guarantee validity for every admissible parameter and state? Third, did the numerical implementation impose safeguards not described in the published paper? The answers are yes, no, and unknown.
+
+\begin{remark}[Algebraic feasibility is not dynamic accessibility]\label{rem:algebraic_only}
+Every statement in this appendix concerns whether a candidate point satisfies the model's algebraic identities: whether the variance identity holds with $\epsilon_t^2\ge0$, whether the inverse mapping admits a positive volatility, and whether the resulting matrix is positive semidefinite. None of it concerns whether the diffusion visits such a point. Establishing that would require a support theorem for the process, an accessibility argument, or analysis of the transition or invariant densities, none of which is attempted here. Accordingly a point is called \emph{algebraically feasible} or \emph{infeasible}, never reachable or unreachable, and counts of grid points are reported as counts rather than as proportions of a state domain.
+\end{remark}
+
+\subsection{Algebraic domain of the state transformation}\label{app:psd_feasible}
+
+Everything here depends on the algebraic relation between the states, so we begin with the complete variance identity. Equation (29) of \citet{BrandtSantaClara2002} is
+\begin{equation}\label{eq:full_variance_identity}
+v_t^2=Q_t+C_t+\epsilon_t^2,
+\end{equation}
+where
+\[
+Q_t=\phi_t^2+\phi_t^{*2}-2\rho_{ww^*}\phi_t\phi_t^*,
+\qquad
+C_t=\psi_t^2+\psi_t^{*2}-2\rho_{zz^*}\psi_t\psi_t^*,
+\]
+are the interest-rate and currency-risk quadratic forms and $\epsilon_t^2\ge0$ is the incompleteness state. Both quadratic forms are nonnegative whenever the corresponding two-dimensional correlation matrix is positive semidefinite. A state is feasible precisely when \eqref{eq:full_variance_identity} holds with $\epsilon_t^2\ge0$, that is when
+\begin{equation}\label{eq:true_floor}
+v_t^2\ \ge\ Q_t+C_t .
+\end{equation}
+The weaker bound $v_t^2\ge Q_t$ is necessary but not sufficient, and it is attained only in the degenerate configuration $C_t=\epsilon_t^2=0$.
+
+For the constant-risk-price specification, $C_t$ is a constant that can be read directly from the published estimates. Table 3 of \citet{BrandtSantaClara2002} reports $\psi^2-\rho_{zz^*}\psi\psi^*$ and $\psi^{*2}-\rho_{zz^*}\psi\psi^*$ separately, and their sum is exactly $C$. This gives
+\[
+C_{\text{U.K.}}=0.024+(-0.021)=0.003,
+\qquad
+C_{\text{Germany}}=(-0.010)+0.013=0.003 .
+\]
+Both are strictly positive, so at the reported estimates the degenerate configuration is \emph{algebraically infeasible}, because it requires $C_t=0$ while the reported constant currency-risk term is $C=0.003>0$: the least volatility satisfying the variance identity exceeds $\sqrt{Q_t}$ by a margin that does not vanish. At the long-run mean rates the feasible minimum is $0.0640$ for the U.S.--U.K. system against $\sqrt{Q_t}=0.0330$, and $0.0622$ against $0.0295$ for the U.S.--Germany system.
+
+For the time-varying specifications $C_t$ is state dependent, and in model C it depends on $v_t$ itself through \eqref{eq:risk_price_v}. That looks like an obstruction and is not one, for two reasons.
+
+First, model B carries no volatility loading: Table 4 reports three coefficients per risk price for that specification against four for model C, so under model B the quantity $C_t$ is an explicit function of the interest-rate differential and the log exchange rate, and $v_t$ follows from \eqref{eq:full_variance_identity} by taking a square root.
+
+Second, the apparent circularity in model C is exactly the quadratic of \Cref{app:invert}. Substituting \eqref{eq:risk_price_v} into $C_t$ and then into \eqref{eq:full_variance_identity} gives
+\begin{equation}\label{eq:model_c_fixed_point}
+(1-\kappa_b)v_t^2-2\eta_tv_t-\left(Q_t+\zeta^a_t+\epsilon_t^2\right)=0,
+\qquad
+\zeta^a_t=a_t^2+a_t^{*2}-2\rho a_ta_t^*,
+\end{equation}
+so $v_t$ is \emph{determined} by $(r_t,r_t^*,e_t,\epsilon_t^2)$ rather than being an independent unknown. The fixed point is solvable in closed form, and by \Cref{prop:vol_branch} it has one positive solution when $\kappa_b<1$ and either none or two when $\kappa_b>1$.
+
+What remains genuinely unobserved is only the level of the log exchange rate $e_t$. Rather than requiring its realised path we sweep it over a grid of candidate values.
+
+What this diagnostic does and does not establish must be stated precisely, because the temptation to read a grid as a state space is strong. The grid evaluates, at each of a finite collection of candidate state combinations, whether the inverse variance identity admits no positive volatility solution, exactly one, or two. That is an algebraic question about the map \eqref{eq:model_c_fixed_point} at a point. It establishes nothing about dynamic accessibility, about the support of the diffusion, about the probability of visiting any point, about occupation times, about the invariant distribution, or about the measure of any subset of the state domain. Counts of grid points are counts of grid points. They are reported below as such, and they are not percentages of a state space.
+
+\Cref{tab:time_varying} reports the result over a grid of $56{,}784$ candidate points per specification, spanning interest rates from $0.05$ to $5$ times their long-run means, $e_t\in[-2,2]$, and $\epsilon_t^2\in\{0,0.002,0.01,0.05\}$. Because Table 4 does not re-report the interest-rate risk prices or the three free correlations, those are taken from Table 3; that is an assumption, and it is the only one.
+
+For three of the four specifications, no algebraic branch or positive-semidefinite problem was found on the examined grids. For model B in both systems and for model C in the U.S.--Germany system, every candidate point examined admits exactly one positive volatility and the correlation matrix is positive definite at all of them, with worst minimum eigenvalues of $0.070$, $0.135$ and $0.088$ respectively. This does not prove global validity outside the examined grids, and no such claim is made.
+
+The U.S.--U.K. model C specification behaves differently, and the behaviour sharpens \Cref{prop:vol_branch} from a statement about what can happen into a statement about what does happen throughout the grid. On $37{,}536$ of the $56{,}784$ candidate points examined, the inverse identity admits \emph{no positive volatility solution}; on the remaining $19{,}248$ it admits two. Not one candidate point admits exactly one, which is \Cref{prop:vol_branch}(ii) confirmed as a computational fact rather than a possibility. Where a branch does exist the correlation matrix is comfortably valid, with minimum eigenvalue at least $0.445$, so this is a well-posedness failure of the inverse representation rather than a correlation failure. The no-solution region also grows with incompleteness: at the long-run mean rates a branch exists only for $e_t\gtrsim0.3$ when $\epsilon_t^2=0$, and for no $e_t$ in the swept range once $\epsilon_t^2=0.05$.
+
+The stable qualitative conclusion, and the only one we draw, is this: across every grid examined in \Cref{tab:grid_sensitivity}, the U.S.--U.K. model-C inverse mapping fails to be globally defined and is never single-valued at any candidate point where it is defined. The grid establishes an algebraic-domain failure of the inverse representation. It does not establish how often, or whether, the corresponding diffusion visits those candidate states.
+
+Establishing that would require a different argument altogether: a support theorem for the diffusion, an accessibility argument for the region in question, analysis of the invariant or transition densities, or direct simulation under a fully specified and well-posed process. None of these is available here, in part because the well-posedness failure is precisely what obstructs the last of them.
+
+\paragraph{Grid sensitivity.} Because a single grid could produce an artefact of its own spacing, the diagnostic is repeated under five further designs: a denser grid, a wider and a narrower log-exchange-rate interval, logarithmically spaced rate multipliers, and additional incompleteness levels. \Cref{tab:grid_sensitivity} reports all six. The counts change with the grid, as counts must; the two qualitative findings do not. On no grid does any candidate point yield exactly one positive root, and on every grid a substantial share of points yields none. The methodology, including every tolerance, is recorded in \texttt{docs/grid\_diagnostic\_methodology.md}.
+
+\begin{table}[htbp]
+\centering
+\caption{Grid sensitivity of the algebraic-domain diagnostic for the U.S.--U.K. model-C specification. Each row is a different candidate grid. ``No root'' counts points at which \eqref{eq:model_c_fixed_point} admits no positive solution, ``one'' and ``two'' count positive roots, and the matrix column counts branch-specific correlation matrices, one per positive root, so it equals twice the two-root count. Roots are counted positive above $10^{-12}$ and treated as repeated when within $10^{-9}$; eigenvalues are called negative below $-10^{-10}$. No design yields a point with exactly one positive root, and none yields an indefinite matrix.}
+\label{tab:grid_sensitivity}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\input{tables/grid_sensitivity.tex}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Algebraic-domain diagnostic for the time-varying specifications over a grid of candidate states, using the Table 4 loadings together with the Table 3 interest-rate risk prices and correlations. Volatility is obtained from \eqref{eq:full_variance_identity}, through \eqref{eq:model_c_fixed_point} under model C, so every matrix evaluated satisfies the variance identity by construction. The final column counts \emph{branch-specific} matrices, one for each positive root: a candidate point with two positive roots contributes two matrices, which is why the U.S.--U.K. model-C row records $38{,}496=2\times19{,}248$ matrices from $19{,}248$ two-root points and none from the $37{,}536$ points with no root. Counts are counts of grid points and carry no probabilistic interpretation. No candidate point yielded an indefinite matrix in any specification.}
+\label{tab:time_varying}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llrrrrr}
+\toprule
+System & Model & \makecell[r]{Candidate\\points} & \makecell[r]{No\\root} & \makecell[r]{Two\\roots} & \makecell[r]{Branch-specific\\matrices} & $\min\lambda_{\min}$ \\
+\midrule
+U.S. vs. U.K. & B & 56{,}784 & 0 & 0 & 56{,}784 & $+0.0699$ \\
+ & C & 56{,}784 & 37{,}536 & 19{,}248 & 38{,}496 & $+0.4455$ \\
+\midrule
+U.S. vs. Germany & B & 56{,}784 & 0 & 0 & 56{,}784 & $+0.1351$ \\
+ & C & 56{,}784 & 0 & 0 & 56{,}784 & $+0.0880$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Validity at reported reference states}\label{app:psd_reported}
+
+\Cref{tab:correlation_audit} evaluates $R_t$ across reference states, reporting the complete decomposition \eqref{eq:full_variance_identity} so that feasibility can be judged from the identity rather than from the insufficient bound.
+
+At every algebraically feasible reference point examined the matrix is positive definite. At the long-run means with the sample mean volatility the minimum eigenvalue is $0.683$ for the U.S.--U.K. system and $0.639$ for the U.S.--Germany system, with Schur complements of $0.997$ and $0.994$. Pushing to the feasible minimum volatility at rates ten times their long-run means still leaves minimum eigenvalues of $0.115$ and $0.125$. Perturbing the four estimated correlations independently by their reported standard errors, in $5{,}000$ draws per system, produced no violation of positive semidefiniteness and no entrywise violation.
+
+A systematic search reinforces this. Sweeping both interest rates over multiples of their long-run means from zero to one hundred, and the incompleteness state over the values $\epsilon_t^2\in\{0,0.005,0.02,0.10\}$, always taking $v_t$ from the identity \eqref{eq:full_variance_identity}, the smallest minimum eigenvalue encountered over the swept candidate points is $+0.0128$ for the U.S.--U.K. system and $+0.0130$ for the U.S.--Germany system, both at the extreme corner of the sweep where the interest rates are a hundred times their long-run means. \textbf{No algebraically feasible candidate point with an indefinite correlation matrix was found.} We therefore make no claim that an invalid correlation matrix arises at any algebraically feasible point, still less that the process would visit one.
+
+The last row of each block in \Cref{tab:correlation_audit} records what happens at $v_t=\sqrt{Q_t}$, which is \emph{not} the feasible floor because it requires $C_t=0$. There the matrix is indeed indefinite, with minimum eigenvalues $-0.0009$ and $-0.0027$, while every entry remains inside $[-1,1]$. But the implied $\epsilon_t^2$ equals $-C=-0.003$, so the state violates \eqref{eq:full_variance_identity} and lies outside the model. It is reported here only to mark the distinction, not as evidence.
+
+\subsection{Global validity of the specification}\label{app:psd_global}
+
+That the reported estimates are valid is not the same as the specification guaranteeing validity. Two results bear on this, and both are conditional algebraic statements rather than claims about the calibrated model.
+
+\begin{proposition}[The two implied correlations are automatically bounded]\label{prop:entrywise}
+Suppose $v_t>0$, $|\rho_{ww^*}|\le1$, and $v_t^2\ge Q_t$, the last being implied by \eqref{eq:full_variance_identity}. Then the two \emph{implied} correlations of \eqref{eq:implied_corr} satisfy $|\rho_{wx,t}|\le1$ and $|\rho_{w^*x,t}|\le1$. The proposition says nothing about the free entries $\rho_{wy}$, $\rho_{w^*y}$, $\rho_{xy}$ and $\rho_{ww^*}$, nor about the primitive parameter $\rho_{zz^*}$.
+\end{proposition}
+
+\begin{remark}[Why positivity is needed]\label{rem:vol_positive}
+Both side conditions are load-bearing, and neither follows from $v_t^2\ge Q_t$. The strict inequality $v_t>0$ is needed because \eqref{eq:implied_corr} divides by $v_t$, and $v_t^2\ge Q_t$ alone permits $v_t=Q_t=0$; the correlations of a degenerate Brownian motion are undefined in any case, so nothing is lost by excluding it. The bound $|\rho_{ww^*}|\le1$ is needed because the proof uses $1-\rho_{ww^*}^2\ge0$, and without it the conclusion is false as a standalone algebraic statement. That $\rho_{ww^*}$ is a correlation makes the bound true in the model, and \Cref{tab:corr_roles} records that the published parameterisation imposes it entrywise; but it is a hypothesis of the proposition rather than a consequence of the variance identity, and is stated as one. In the empirical application both conditions hold at every reported estimate, so they are stated because the algebra requires them, not because the data threaten them.
+\end{remark}
+
+\begin{proof}
+$Q_t-(\phi_t-\rho_{ww^*}\phi_t^*)^2=\phi_t^{*2}(1-\rho_{ww^*}^2)\ge0$, so $(\phi_t-\rho_{ww^*}\phi_t^*)^2\le Q_t\le v_t^2$, giving $|\rho_{wx,t}|\le1$. The second bound is symmetric, using $Q_t-(\rho_{ww^*}\phi_t-\phi_t^*)^2=\phi_t^2(1-\rho_{ww^*}^2)\ge0$.
+\end{proof}
+
+The scope of this result must be stated carefully, because it is easy to over-read, and so must the inventory of correlations it is being read against. The model contains \emph{five primitive correlation parameters}. Four of them, $\rho_{ww^*}$, $\rho_{wy}$, $\rho_{w^*y}$ and $\rho_{xy}$, are entries of the reduced $4\times4$ Brownian correlation matrix $R_t$ directly. The fifth, $\rho_{zz^*}$, is \emph{not} an entry of $R_t$ at all: it enters the currency-risk quadratic form $C_t$ in \eqref{eq:full_variance_identity} and so affects $R_t$ only through the volatility $v_t$ that the variance identity determines. Alongside the four primitive entries, $R_t$ carries two state-dependent \emph{implied} entries, $\rho_{wx,t}$ and $\rho_{w^*x,t}$, given by \eqref{eq:implied_corr}. A symmetric $4\times4$ correlation matrix has six off-diagonal entries, and these are they: four free and two implied.
+
+With that inventory fixed, the variance identity automatically bounds the two implied entries. The four free entries still require admissible parameter restrictions, $\rho_{zz^*}$ requires its own, and entrywise bounds on every one of them remain insufficient to guarantee positive semidefiniteness of $R_t$. \Cref{tab:corr_roles} sets out which quantity is which.
+
+\begin{table}[htbp]
+\centering
+\caption{Primitive and implied correlation quantities in the structural model and in the reduced Brownian system. Five correlations are primitive parameters, but only four of them are entries of the reduced $4\times4$ matrix $R_t$; $\rho_{zz^*}$ enters the currency-risk quadratic form $C_t$ instead, and reaches $R_t$ only through $v_t$. The two implied entries are the ones \Cref{prop:entrywise} covers. No row is by itself sufficient for positive semidefiniteness of $R_t$.}
+\label{tab:corr_roles}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\newcolumntype{J}[1]{>{\raggedright\arraybackslash}p{#1}}
+\begin{tabular}{lllllJ{2.1cm}J{3.5cm}}
+\toprule
+Symbol & Status & In $R_t$ & In $C_t$ & \makecell[l]{State\\dep.} & Entrywise constraint & Joint constraint \\
+\midrule
+$\rho_{ww^*}$   & primitive & yes & no  & no  & $[-1,1]$, imposed & in PSD of $R_t$; also in \eqref{eq:three_dim_psd} \\
+$\rho_{wy}$     & primitive & yes & no  & no  & $[-1,1]$, imposed & in PSD of $R_t$; also in \eqref{eq:three_dim_psd} \\
+$\rho_{w^*y}$   & primitive & yes & no  & no  & $[-1,1]$, imposed & in PSD of $R_t$; also in \eqref{eq:three_dim_psd} \\
+$\rho_{xy}$     & primitive & yes & no  & no  & $[-1,1]$, imposed & in PSD; fixed by \eqref{eq:induced_rho_xy} if $A_t$ singular \\
+$\rho_{zz^*}$   & primitive & \textbf{no}  & yes & no  & $[-1,1]$, imposed & keeps $C_t\ge0$; enters $R_t$ only via $v_t$ \\
+$\rho_{wx,t}$   & implied   & yes & no  & yes & automatic, \Cref{prop:entrywise} & in PSD of $R_t$ \\
+$\rho_{w^*x,t}$ & implied   & yes & no  & yes & automatic, \Cref{prop:entrywise} & in PSD of $R_t$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The consequence is that the entrywise restriction the paper imposes, through a logistic reparameterisation of the correlations, is not doing any work on the two implied entries: the model structure already implies it there. It is not redundant on the five primitive parameters, where it remains the operative entrywise constraint. What no entrywise restriction implies, on any entry, is the joint condition. When $A_t\succ0$ that condition is the Schur complement
+\begin{equation}\label{eq:schur}
+1-r_t^{\mathsf T}A_t^{-1}r_t\ge0,
+\end{equation}
+and constraining each entry of $r_t$ to $[-1,1]$ is not sufficient for it.
+
+The remaining question is what happens when $A_t$ is singular, where \eqref{eq:schur} is unavailable because $A_t^{-1}$ does not exist. This occurs exactly in the degenerate configuration identified above. The correct replacement for \eqref{eq:schur} has two parts, and it is worth stating in general form because the second part is easy to lose.
+
+\begin{lemma}[Positive semidefiniteness with a singular principal block]\label{lem:singular_schur}
+Let $A\in\R^{m\times m}$ be symmetric and positive semidefinite, $r\in\R^m$ and $c\in\R$. Then
+\[
+B=\begin{pmatrix}A&r\\r^{\mathsf T}&c\end{pmatrix}\succeq0
+\qquad\text{if and only if}\qquad
+r\in\Range(A)
+\quad\text{and}\quad
+c\ \ge\ r^{\mathsf T}A^{+}r,
+\]
+where $A^{+}$ is the Moore--Penrose pseudoinverse. When $A\succ0$ the first condition is vacuous and the second is the Schur complement \eqref{eq:schur}.
+\end{lemma}
+
+\begin{proof}
+Write the quadratic form as $q(x,\tau)=x^{\mathsf T}Ax+2\tau r^{\mathsf T}x+c\tau^2$ for $x\in\R^m$ and $\tau\in\R$.
+
+Suppose first that both conditions hold, and choose $w$ with $r=Aw$. Since $AA^{+}A=A$ we have $r^{\mathsf T}A^{+}r=w^{\mathsf T}AA^{+}Aw=w^{\mathsf T}Aw$, and $r^{\mathsf T}x=w^{\mathsf T}Ax$. Completing the square,
+\[
+q(x,\tau)
+=\bigl(x+\tau w\bigr)^{\mathsf T}A\bigl(x+\tau w\bigr)+\tau^2\bigl(c-w^{\mathsf T}Aw\bigr)
+=\bigl(x+\tau w\bigr)^{\mathsf T}A\bigl(x+\tau w\bigr)+\tau^2\bigl(c-r^{\mathsf T}A^{+}r\bigr),
+\]
+and both terms are nonnegative, so $B\succeq0$.
+
+Conversely suppose $B\succeq0$. For the range condition, let $z\in\Null(A)$ and take $x=sz$, $\tau=1$. Then $q(sz,1)=2s\,r^{\mathsf T}z+c$, which is affine in $s$ and therefore unbounded below unless $r^{\mathsf T}z=0$. Hence $r\perp\Null(A)$, and since $A$ is symmetric, $\Null(A)^{\perp}=\Range(A)$, giving $r\in\Range(A)$. For the magnitude condition, write $r=Aw$ as before and take $x=-w$, $\tau=1$, which gives
+\[
+0\le q(-w,1)=w^{\mathsf T}Aw-2w^{\mathsf T}Aw+c=c-r^{\mathsf T}A^{+}r . \qedhere
+\]
+\end{proof}
+
+The two conditions are logically independent: range membership constrains the \emph{direction} of $r$ relative to $\Null(A)$ and says nothing about its length, while the magnitude condition bounds that length. Neither implies the other.
+
+\begin{proposition}[Compatibility and magnitude in the degenerate configuration]\label{prop:floor_overdetermined}
+Suppose $C_t=\epsilon_t^2=0$ and $Q_t>0$, so that $v_t^2=Q_t$, and suppose $|\rho_{ww^*}|<1$. Then $A_t$ is singular with a one-dimensional kernel, $X_t$ is a deterministic linear combination of $W_t$ and $W_t^*$, and $R_t\succeq0$ holds if and only if \emph{both} of the following are satisfied:
+\begin{enumerate}[label=(\roman*)]
+\item the compatibility relation
+\begin{equation}\label{eq:induced_rho_xy}
+\rho_{xy}=\frac{\phi_t\rho_{wy}-\phi_t^*\rho_{w^*y}}{v_t},
+\end{equation}
+which fixes $\rho_{xy}$ as a function of the other correlations; and
+\item the magnitude condition that the three-dimensional correlation matrix of $(W_t,W_t^*,Y_t)$ be positive semidefinite, equivalently
+\begin{equation}\label{eq:three_dim_psd}
+\rho_{wy}^2-2\rho_{ww^*}\rho_{wy}\rho_{w^*y}+\rho_{w^*y}^2\ \le\ 1-\rho_{ww^*}^2 .
+\end{equation}
+\end{enumerate}
+Condition \eqref{eq:induced_rho_xy} alone is necessary but \emph{not} sufficient: if it holds while \eqref{eq:three_dim_psd} fails, $R_t$ is indefinite, however far each individual entry lies inside $[-1,1]$.
+\end{proposition}
+
+\begin{proof}
+If $C_t=\epsilon_t^2=0$ then equation (28) reduces to $v_t\,dX_t=\phi_t\,dW_t-\phi_t^*\,dW_t^*$, so $X_t$ lies in the span of $(W_t,W_t^*)$ and $A_t$ is singular. Let $u=(\phi_t,-\phi_t^*,-v_t)^{\mathsf T}$. Then $u^{\mathsf T}A_tu$ is the variance of $\phi_tW_t-\phi_t^*W_t^*-v_tX_t$, which vanishes, and since $A_t\succeq0$ this forces $A_tu=0$; the kernel is one dimensional because the leading $2\times2$ block of $A_t$ is nonsingular when $|\rho_{ww^*}|<1$.
+
+\emph{Necessity of \textnormal{(i)}.} Extend $u$ to $\tilde u=(u^{\mathsf T},0)^{\mathsf T}\in\R^4$ and let $e_4$ be the fourth coordinate vector. For $\tau\in\R$,
+\[
+(\tilde u+\tau e_4)^{\mathsf T}R_t(\tilde u+\tau e_4)
+=u^{\mathsf T}A_tu+2\tau\,u^{\mathsf T}r_t+\tau^2
+=2\tau\,u^{\mathsf T}r_t+\tau^2 .
+\]
+If $u^{\mathsf T}r_t\ne0$, choosing $\tau$ of small magnitude and of sign opposite to $u^{\mathsf T}r_t$ makes this negative, so $R_t\not\succeq0$. Writing out $u^{\mathsf T}r_t=\phi_t\rho_{wy}-\phi_t^*\rho_{w^*y}-v_t\rho_{xy}=0$ gives \eqref{eq:induced_rho_xy}. In the language of \Cref{lem:singular_schur}, this is exactly the range condition $r_t\in\Range(A_t)$.
+
+\emph{Reduction under \textnormal{(i)}.} Suppose \eqref{eq:induced_rho_xy} holds and let
+\[
+\Sigma_t=\begin{pmatrix}B&d\\d^{\mathsf T}&1\end{pmatrix},
+\qquad
+B=\begin{pmatrix}1&\rho_{ww^*}\\\rho_{ww^*}&1\end{pmatrix},
+\qquad
+d=\begin{pmatrix}\rho_{wy}\\\rho_{w^*y}\end{pmatrix},
+\]
+be the correlation matrix of $(W_t,W_t^*,Y_t)$, and let
+\[
+T=\begin{pmatrix}
+1&0&0\\
+0&1&0\\
+\phi_t/v_t&-\phi_t^*/v_t&0\\
+0&0&1
+\end{pmatrix}\in\R^{4\times3},
+\]
+the map sending $(W_t,W_t^*,Y_t)$ to $(W_t,W_t^*,X_t,Y_t)$. A direct computation gives $T\Sigma_tT^{\mathsf T}=R_t$: the $(3,3)$ entry is $(\phi_t^2-2\rho_{ww^*}\phi_t\phi_t^*+\phi_t^{*2})/v_t^2=Q_t/v_t^2=1$, the $(1,3)$ and $(2,3)$ entries reproduce \eqref{eq:implied_corr}, and the $(3,4)$ entry is $(\phi_t\rho_{wy}-\phi_t^*\rho_{w^*y})/v_t$, which is $\rho_{xy}$ precisely by \eqref{eq:induced_rho_xy}. Hence $\Sigma_t\succeq0$ implies $R_t=T\Sigma_tT^{\mathsf T}\succeq0$; and conversely $\Sigma_t$ is the principal submatrix of $R_t$ on rows and columns $\{1,2,4\}$, so $R_t\succeq0$ implies $\Sigma_t\succeq0$. Therefore, given \eqref{eq:induced_rho_xy}, $R_t\succeq0$ if and only if $\Sigma_t\succeq0$.
+
+\emph{Explicit form of \textnormal{(ii)}.} Since $|\rho_{ww^*}|<1$, $B\succ0$ and \Cref{lem:singular_schur} reduces to the ordinary Schur complement $1-d^{\mathsf T}B^{-1}d\ge0$. With
+$B^{-1}=(1-\rho_{ww^*}^2)^{-1}\left(\begin{smallmatrix}1&-\rho_{ww^*}\\-\rho_{ww^*}&1\end{smallmatrix}\right)$
+this is
+\[
+\frac{\rho_{wy}^2-2\rho_{ww^*}\rho_{wy}\rho_{w^*y}+\rho_{w^*y}^2}{1-\rho_{ww^*}^2}\ \le\ 1,
+\]
+which is \eqref{eq:three_dim_psd}.
+\end{proof}
+
+\begin{remark}[The perfectly correlated case]\label{rem:perfect_ww}
+If $|\rho_{ww^*}|=1$ the kernel of $A_t$ is two dimensional and $B$ is singular, so \Cref{prop:floor_overdetermined} does not apply as stated. Writing $\rho_{ww^*}=\sigma\in\{-1,+1\}$, condition \eqref{eq:three_dim_psd} does not become vacuous. Its right-hand side is $1-\sigma^2=0$ and its left-hand side is a perfect square, since $\sigma^2=1$ gives
+\[
+\rho_{wy}^2-2\sigma\rho_{wy}\rho_{w^*y}+\rho_{w^*y}^2=\bigl(\rho_{wy}-\sigma\rho_{w^*y}\bigr)^2,
+\]
+so \eqref{eq:three_dim_psd} reads $(\rho_{wy}-\sigma\rho_{w^*y})^2\le0$ and therefore \emph{forces}
+\[
+\rho_{w^*y}=\sigma\rho_{wy}=\rho_{ww^*}\rho_{wy}.
+\]
+That is exactly the range-compatibility relation of \Cref{lem:singular_schur} applied to $B$, so in this configuration \eqref{eq:three_dim_psd} collapses onto the compatibility condition rather than carrying no information.
+
+What it does \emph{not} retain is the separate magnitude restriction. Once compatibility holds the inequality is satisfied with equality, $0\le0$, and the magnitude condition must be obtained from the Moore--Penrose criterion instead: since $B^{+}=\tfrac14\left(\begin{smallmatrix}1&\sigma\\\sigma&1\end{smallmatrix}\right)$, a compatible $d$ gives $d^{\mathsf T}B^{+}d=\tfrac14(\rho_{wy}+\sigma\rho_{w^*y})^2=\rho_{wy}^2$, so the requirement is $|\rho_{wy}|\le1$. This is the only configuration in which the entrywise bound is the operative magnitude constraint, and it arises because $W_t^*=\sigma W_t$ almost surely, so the model has one interest-rate Brownian motion rather than two.
+\end{remark}
+
+That the second condition is not implied by the first is worth seeing concretely. Take $\phi_t=0.03$, $\phi_t^*=0.02$ and $\rho_{ww^*}=0.3$, so that $v_t=\sqrt{Q_t}=0.03066$, and set $\rho_{wy}=\rho_{w^*y}=0.9$. The implied correlations are $\rho_{wx,t}=0.7828$ and $\rho_{w^*x,t}=-0.3588$, and \eqref{eq:induced_rho_xy} gives $\rho_{xy}=0.2935$, so \emph{every} entry of $R_t$ lies well inside $[-1,1]$ and the compatibility relation holds exactly. But the left side of \eqref{eq:three_dim_psd} is $1.134$ against a right side of $0.91$, and the spectrum of $R_t$ is $\{-0.133,\,0,\,1.558,\,2.575\}$. The matrix is indefinite. Compatibility bought the zero eigenvalue that singularity requires; it did nothing about the negative one.
+
+Two things follow. First, in the degenerate configuration the correlation $\rho_{xy}$ is not a free parameter but a function of the others, whereas the application estimates it freely. Second, and this is the part that a compatibility condition alone would miss, fixing $\rho_{xy}$ correctly still leaves \eqref{eq:three_dim_psd} to be satisfied by $\rho_{wy}$, $\rho_{w^*y}$ and $\rho_{ww^*}$, and that is a joint restriction on three free parameters which entrywise bounds do not deliver. It is a genuine gap in the specification: nothing in the model enforces either condition, and no Cholesky, partial-correlation, hyperspherical or Schur-complement parameterisation is stated that would enforce \eqref{eq:schur} more generally.
+
+It is not, however, a defect in the reported estimates, for the reason established in \Cref{app:psd_feasible}: the configuration requires $C_t=0$, and at the reported estimates $C=0.003>0$. To see how far the reported values are from satisfying \eqref{eq:induced_rho_xy}, evaluating the right-hand side at three times the long-run rates gives $-0.0538$ and $-0.0696$ against reported $\rho_{xy}$ of $-0.012$ and $+0.006$; but that comparison is made at a point the reported estimates render algebraically infeasible, and it establishes only that the identity would have to be imposed rather than estimated if the specification were used in a regime where $C_t$ approached zero.
+
+\subsection{Unknown implementation safeguards}\label{app:psd_implementation}
+
+Whether the numerical implementation rejected invalid parameter draws, projected them onto the positive-semidefinite cone, worked with a Cholesky factor, or took some other precaution, is not described in the published paper and cannot be determined from it. We record this as unknown. It is entirely possible that the optimiser never encountered an invalid matrix, either because the safeguards existed or because, as \Cref{app:psd_reported} suggests, the feasible region around the estimates is comfortably interior. Nothing in this appendix should be read as a claim about what the implementation did.
+
+\begin{table}[htbp]
+\centering
+\caption{Feasibility and validity of the four-dimensional Brownian correlation matrix under the complete variance identity $v_t^2=Q_t+C_t+\epsilon_t^2$, at the constant-risk-price estimates of Table 3 of \citet{BrandtSantaClara2002}. Rates are multiples of their long-run means. A candidate point is algebraically feasible when the implied $\epsilon_t^2$ is nonnegative. The final row of each block uses $v_t=\sqrt{Q_t}$, which requires $C_t=0$ and is therefore infeasible at these estimates; it is shown to separate what the algebraic restrictions exclude from what they permit.}
+\label{tab:correlation_audit}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrrrcrr}
+\toprule
+System & State & $Q_t$ & $C_t$ & $\epsilon_t^2$ & $v_t$ & Feas. & $\max|\rho_{ij}|$ & $\lambda_{\min}(R_t)$ \\
+\midrule
+U.S. vs. U.K.
+ & means, $v_t=\bar v$ & 0.0011 & 0.0030 & $0.0065$ & 0.1030 & yes & 0.313 & $+0.6834$ \\
+ & means, $v_t$ min & 0.0011 & 0.0030 & $0.0000$ & 0.0640 & yes & 0.503 & $+0.4875$ \\
+ & rates $\times2$, at min & 0.0022 & 0.0030 & $0.0000$ & 0.0720 & yes & 0.633 & $+0.3540$ \\
+ & rates $\times3$, at min & 0.0033 & 0.0030 & $0.0000$ & 0.0792 & yes & 0.704 & $+0.2799$ \\
+ & rates $\times10$, at min & 0.0109 & 0.0030 & $0.0000$ & 0.1179 & yes & 0.863 & $+0.1149$ \\
+ & rates $\times100$, at min & 0.1090 & 0.0030 & $0.0000$ & 0.3346 & yes & 0.962 & $+0.0128$ \\
+ & rates $\times3$, $v_t=\sqrt{Q_t}$ & 0.0033 & 0.0030 & $-0.0030$ & 0.0572 & \textbf{no} & 0.975 & $-0.0009$ \\
+\midrule
+U.S. vs. Germany
+ & means, $v_t=\bar v$ & 0.0009 & 0.0030 & $0.0076$ & 0.1070 & yes & 0.263 & $+0.6390$ \\
+ & means, $v_t$ min & 0.0009 & 0.0030 & $0.0000$ & 0.0622 & yes & 0.453 & $+0.4762$ \\
+ & rates $\times2$, at min & 0.0017 & 0.0030 & $0.0000$ & 0.0689 & yes & 0.578 & $+0.3596$ \\
+ & rates $\times3$, at min & 0.0026 & 0.0030 & $0.0000$ & 0.0749 & yes & 0.651 & $+0.2907$ \\
+ & rates $\times10$, at min & 0.0087 & 0.0030 & $0.0000$ & 0.1083 & yes & 0.823 & $+0.1252$ \\
+ & rates $\times100$, at min & 0.0872 & 0.0030 & $0.0000$ & 0.3004 & yes & 0.938 & $+0.0130$ \\
+ & rates $\times3$, $v_t=\sqrt{Q_t}$ & 0.0026 & 0.0030 & $-0.0030$ & 0.0512 & \textbf{no} & 0.954 & $-0.0027$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\FloatBarrier
+\section{Minimum incompleteness is an identifying selection rule}\label{app:mincomp}
+
+The exchange-rate dynamics do not separately identify one risk-premium component and the degree of market incompleteness. The paper resolves this by choosing the unidentified quantity, described as chosen ``in a least-squares sense'', to minimise $\sum_t\epsilon_t^2$ subject to $\epsilon_t^2\ge0$ at every date. Under constant pure-currency risk prices the free quantity is the scalar $c=\sigma_z\epsilon_c+\sigma_{z^*}\epsilon_{c^*}$, the combination in which the two pure-currency risk-price products enter the variance identity; under time-varying prices it is the correlation $\rho_{zz^*}$.
+
+Although the criterion is expressed as a sum of squared incompleteness shocks, it is affine in the selected reduced-form parameter, because $\epsilon_t^2$ is itself the residual rather than a squared residual in that parameter. Its solution is therefore a boundary point of the feasible set, the minimum or maximum feasible value of the scalar parameter, rather than an interior least-squares projection. Whether the problem is a \emph{linear programme}, and correspondingly whether ``vertex'' is the right word, depends on which feasible set is meant. Over $\mathcal C_{\text{pub}}$ in \eqref{eq:feasible_published} every constraint is affine, the set is a polyhedron, and both terms apply. Over $\mathcal C_{\text{obs}}$ and $\mathcal C_{\text{glob}}$ the semidefiniteness requirements are not affine, the feasible set need not be polyhedral or even connected, and the problem is an affine-objective constrained optimisation problem whose optimum is a boundary point. We use ``vertex'' and ``linear programme'' only for the first case.
+
+The feasible set matters, and three must be distinguished, not two. Write the free quantity as a scalar $c$ entering linearly, $\epsilon_t^2(c)=A_t-\gamma_tc$ for known loadings $\gamma_t$, and let $\mathcal R$ collect any range restriction on $c$ itself, such as $c\in[-1,1]$ when $c$ is a correlation. Then
+\begin{align}
+\mathcal C_{\text{pub}}&=\left\{c\in\mathcal R:\ \epsilon_t^2(c)\ge0,\ t=1,\dots,N\right\},
+\label{eq:feasible_published}\\
+\mathcal C_{\text{obs}}&=\mathcal C_{\text{pub}}\cap\left\{c:\ R_t(c)\succeq0,\ t=1,\dots,N\right\},
+\label{eq:feasible_observed}\\
+\mathcal C_{\text{glob}}&=\mathcal C_{\text{pub}}\cap\left\{c:\ R(c,x)\succeq0\ \text{for every admissible state }x\in\mathcal X\right\}.
+\label{eq:feasible_global}
+\end{align}
+
+The distinction that matters is not merely one of strength but of \emph{cardinality}. $\mathcal C_{\text{pub}}$ is cut out by $N$ affine inequalities together with an interval, so it is a finite intersection and indeed a polyhedron. $\mathcal C_{\text{obs}}$ adds $N$ further constraints, one per observed or reconstructed sample state; each is continuous in $c$, because the smallest eigenvalue of a symmetric matrix depends continuously on its entries, so this too is a finite family of continuous constraints. $\mathcal C_{\text{glob}}$ is different in kind: it requires positive semidefiniteness at \emph{every} state of a continuous state domain $\mathcal X$, which is an infinite family of constraints indexed by $x$, and it admits no finite representation of the form used below without further argument.
+
+We do not know which set the implementation enforced. \Cref{app:psd_implementation} records that as unknown, so no conclusion below assumes that the reported optimiser respected $\mathcal C_{\text{obs}}$ or $\mathcal C_{\text{glob}}$.
+
+Two questions must therefore be separated, because they need different hypotheses. \emph{Where} the minimiser sits requires only compactness, and so covers all three sets. \emph{Which constraint is active there} is a statement about a representation, and the phrase is empty without one. The proposition is split accordingly.
+
+For the second part we use the representation
+\begin{equation}\label{eq:constraint_representation}
+\mathcal C=\bigl\{c\in[c_{\mathrm L},c_{\mathrm U}]:\ g_j(c)\le0,\ j=1,\dots,J\bigr\},
+\end{equation}
+with $-\infty<c_{\mathrm L}\le c_{\mathrm U}<\infty$, each $g_j:\R\to\R$ continuous, $J$ finite and $\mathcal C\ne\emptyset$. Both $\mathcal C_{\text{pub}}$ and $\mathcal C_{\text{obs}}$ are of this form: the nonnegativity requirements give $g_t(c)=\gamma_tc-A_t$, the range restriction $\mathcal R$ supplies $[c_{\mathrm L},c_{\mathrm U}]$, and each observed-state semidefiniteness requirement gives $g_t(c)=-\lambda_{\min}(R_t(c))$. $\mathcal C_{\text{glob}}$ is \emph{not} of this form, since its constraints are indexed by a continuum. Restricting attention to the nonnegativity constraints alone can identify the wrong active constraint.
+
+\begin{proposition}[Corner solution of the minimum-incompleteness rule]\label{prop:min_incomplete}
+Consider the problem
+\begin{equation}\label{eq:min_incomplete_problem}
+\min_{c\in\mathcal C}\ \sum_{t=1}^N\epsilon_t^2(c),
+\qquad
+\epsilon_t^2(c)=A_t-\gamma_tc,
+\end{equation}
+and suppose $\sum_t\gamma_t\ne0$. No convexity of $\mathcal C$ is assumed.
+
+\textnormal{\textbf{Part A} (location of the minimiser; compactness only).} Let $\mathcal C\subset\R$ be any nonempty compact set. Then the minimum is attained, the minimiser is unique, and it is $\max\mathcal C$ if $\sum_t\gamma_t>0$ and $\min\mathcal C$ if $\sum_t\gamma_t<0$. In either case it is a boundary point of $\mathcal C$. This applies to $\mathcal C_{\text{pub}}$, $\mathcal C_{\text{obs}}$ and $\mathcal C_{\text{glob}}$ alike, whenever the set in question is nonempty and compact.
+
+\textnormal{\textbf{Part B} (identification of an active constraint; finite representation).} Suppose in addition that $\mathcal C$ has the representation \eqref{eq:constraint_representation} with $J$ finite and each $g_j$ continuous. Then $\mathcal C$ is compact, so Part A applies, and at the minimiser $c^*$ at least one of the following holds:
+\begin{equation}\label{eq:active_alternatives}
+c^*=c_{\mathrm L},
+\qquad
+c^*=c_{\mathrm U},
+\qquad
+g_j(c^*)=0\ \text{for at least one }j .
+\end{equation}
+If $\mathcal C$ is a finite union of compact intervals, the minimiser is an endpoint of one connected component. Moreover:
+\begin{enumerate}[label=(\roman*)]
+\item If the active constraint at the optimum is one of the nonnegativity constraints, then $\min_t\epsilon_t^2=0$ exactly.
+\item If instead the active constraint is a range restriction or the positive-semidefinite boundary, then $\min_t\epsilon_t^2>0$ is possible and the incompleteness constraints need not bind at all.
+\item In the constant-risk-price case $\gamma_t\equiv1$ and $c=\sigma_z\epsilon_c+\sigma_{z^*}\epsilon_{c^*}$, the objective is $\sum_tA_t-Nc$, strictly decreasing in $c$. If the feasible set is $\mathcal C_{\text{pub}}$, and within it the largest feasible $c$ is determined by the nonnegativity constraints rather than by the range restriction $\mathcal R$, then
+\begin{equation}\label{eq:min_incomplete_solution}
+c^*=\min_{1\le t\le N}A_t,
+\qquad
+\epsilon_t^2=A_t-\min_sA_s .
+\end{equation}
+All four conditions are needed: the published feasible set, a decreasing objective, the constraints $c\le A_t$ as the operative upper bounds, and no stricter range condition active. Under $\mathcal C_{\text{obs}}$ or $\mathcal C_{\text{glob}}$ the semidefiniteness requirement may cut the interval before $\min_tA_t$ is reached, and then \eqref{eq:min_incomplete_solution} fails.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+\emph{Part A.} The objective equals $\sum_tA_t-c\sum_t\gamma_t$, which is affine in $c$ with slope $-\sum_t\gamma_t\ne0$. An affine function with nonzero slope is strictly monotone, so on a nonempty compact $\mathcal C\subset\R$ it attains its minimum at $\max\mathcal C$ when the slope is negative and at $\min\mathcal C$ when it is positive; both exist by compactness, since a nonempty compact subset of $\R$ contains its supremum and infimum. Strict monotonicity makes the minimiser unique. Neither $\max\mathcal C$ nor $\min\mathcal C$ is interior to $\mathcal C$, so the minimiser is a boundary point. No representation of $\mathcal C$ by constraints is used anywhere in this part, which is why it covers $\mathcal C_{\text{glob}}$.
+
+\emph{Part B.} $\mathcal C$ is compact: it is bounded, lying in $[c_{\mathrm L},c_{\mathrm U}]$, and closed, being the intersection of the closed interval with the preimages $g_j^{-1}((-\infty,0])$ of a closed set under continuous maps. Part A therefore applies.
+
+It remains to prove \eqref{eq:active_alternatives}. Suppose not: then $c^*\in(c_{\mathrm L},c_{\mathrm U})$ and $g_j(c^*)<0$ for every $j$. By continuity of each $g_j$ and finiteness of $J$ there is $\delta>0$ with $g_j(c)<0$ for all $j$ and all $|c-c^*|<\delta$, and shrinking $\delta$ keeps $c$ inside $(c_{\mathrm L},c_{\mathrm U})$; so $(c^*-\delta,c^*+\delta)\subseteq\mathcal C$, contradicting that $c^*$ is an endpoint of $\mathcal C$. Finiteness of $J$ is what makes the common $\delta$ available: a minimum of finitely many positive numbers is positive, whereas an infimum over infinitely many constraints, as in $\mathcal C_{\text{glob}}$, may be zero. That is precisely why Part B is stated for a finite representation and why it does not extend to $\mathcal C_{\text{glob}}$ without a further argument, such as compactness of the index set $\mathcal X$ together with joint continuity in $(c,x)$.
+
+If $\mathcal C$ is a finite union of compact intervals, the minimiser is an endpoint of one component, by the same argument applied to the component containing it. Statements (i) and (ii) follow according to which of the alternatives in \eqref{eq:active_alternatives} occurs. For (iii), $\gamma_t\equiv1$ gives slope $-N<0$, so the optimum is $\max\mathcal C$; if that equals $\min_tA_t$ then \eqref{eq:min_incomplete_solution} follows and the constraint indexed by $\arg\min_tA_t$ is active.
+\end{proof}
+
+The proposition is conditional, and deliberately so. It does not assert that an incompleteness constraint must always bind, because the optimum may instead be stopped by $\mathcal R$ or by semidefiniteness. Whether the conditional case applies to the published estimates is an empirical question about interiority, and the honest answer is that we cannot settle it. What is available is the following, and it falls short of identifying the active constraint in $\mathcal C_{\text{obs}}$, let alone in $\mathcal C_{\text{glob}}$:
+\begin{itemize}
+\item the original paper reports that the nonnegativity constraint binds in the time-varying specifications;
+\item where Table 4 of \citet{BrandtSantaClara2002} reports $\rho_{zz^*}$ directly, the estimates $0.89$ and $0.94$ are interior to $[-1,1]$, so the range restriction is slack \emph{at those points};
+\item \Cref{app:psd} finds the reconstructed correlation matrices positive definite, with minimum eigenvalue bounded away from zero, at every reference state and candidate grid point examined;
+\item the observed state series and the implementation are unavailable.
+\end{itemize}
+The third item is the weak link. Slackness of a constraint at the reported optimum and at a collection of candidate points is not slackness along the whole feasible set, and the active constraint is a property of the set, not of a sample of its points. Accordingly: for the published optimisation problem, the authors report that the nonnegativity constraint binds in the time-varying specifications, and our affine-objective analysis explains why a boundary solution is expected there. We cannot independently determine the active constraint in $\mathcal C_{\text{obs}}$ without the observed state sequence, nor in $\mathcal C_{\text{glob}}$ without both that and an argument covering an infinite constraint family.
+
+Table 4 of \citet{BrandtSantaClara2002} reports the minimum of the inferred excess volatility as $0.0000$ in all six specifications, that is for models A, B and C in both the U.S.--U.K. and the U.S.--Germany systems. This is consistent with case (i), but it should be read carefully, and the three sources of support must be kept apart. A reported $0.0000$ is a rounded value at four decimal places and is not by itself proof of exact binding. \Cref{prop:min_incomplete} proves that the optimum is a boundary point of whichever compact feasible set the optimiser used; for the published affine feasible set $\mathcal C_{\text{pub}}$ that boundary point is a vertex, and in the constant-risk-price case with the stated conditions it gives the exact corner formula \eqref{eq:min_incomplete_solution}. That the optimum sits on a nonnegativity boundary rather than on a range or semidefiniteness boundary is, for the time-varying specifications, what the original authors report rather than something we verify. \Cref{tab:binding_status} sets out the status of the claim $\min_t\epsilon_t^2=0$ in each case, and every statement elsewhere in this paper conforms to it.
+
+\begin{table}[htbp]
+\centering
+\caption{Status of the claim that the incompleteness boundary is attained exactly, by specification and by source. The distinction is not pedantic: only the first row is a theorem of this paper, and only under its stated conditions. Rows two and three are statements by the original authors that we repeat rather than verify, and the last row is open.}
+\label{tab:binding_status}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Specification & Source of the boundary claim & Exact status \\
+\midrule
+Constant prices (model A) & \Cref{prop:min_incomplete}(iii), its conditions & proved conditionally \\
+Time-varying, model B & original authors report binding & reported statement \\
+Time-varying, model C & original authors report binding & reported statement \\
+Table 4 minimum $0.0000$ & rounded published output & corroborative only \\
+$\mathcal C_{\text{obs}}$, $\mathcal C_{\text{glob}}$ & state path, implementation unavailable & unresolved \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The mechanism is acknowledged in part in the original paper, which observes on p.~193 that with constant risk prices the inferred excess volatility is essentially $\epsilon_t=\{v_t^2-\min_sv_s^2\}^{1/2}$, and draws from this the conclusion that a volatile $v_t$ leaves a large average residual. \Cref{prop:min_incomplete} formalises that observation, shows that it is a property of the optimisation rather than of the data, and extends it conditionally to the time-varying specifications, where the same corner structure holds for a different free parameter \emph{whenever the aggregate affine slope $\sum_t\gamma_t$ is nonzero}. That slope depends on the observed state sequence, which we do not reconstruct, so we do not verify the condition; for the published estimates \citet{BrandtSantaClara2002} report that the nonnegativity constraint binds, and we neither reconstruct the aggregate slope nor identify the active constraint independently. The consequence for interpretation is that the dispersion of $v_t^2$, rather than its level, mechanically drives much of the estimated excess volatility: the residual is the observed variance minus its sample minimum after other adjustments, so its average size is a measure of that dispersion and is bounded below by construction.
+
+The rule is transparent, but it is not identification by the likelihood of the original structural model. It selects a member of an observationally equivalent or weakly identified class by imposing the smallest feasible incompleteness. The paper describes it as a ``prior of sorts''. Mathematically, the final estimator combines simulated likelihood, auxiliary least squares from bond yields, a minimum-incompleteness corner rule, and inequality constraints. A further consequence, used in \Cref{app:reality}, is that under case (i) the reconstructed incompleteness state sits exactly on its own degenerate boundary at the minimising date.
+
+\FloatBarrier
+\section{Binding constraints are not covered by interior asymptotics}\label{app:constrained}
+
+The empirical optimisation assigns zero likelihood to parameter values for which any reconstructed $\epsilon_t^2$ is negative, and the original authors report that the constraint binds in the time-varying specifications.
+
+A finite-sample optimum on an active inequality boundary does not by itself determine the asymptotic distribution. Whether the limit is nonstandard depends on the population or pseudo-true problem, not on the realised sample: a constraint can bind in every finite sample drawn and still be slack in the limit, in which case ordinary interior asymptotics apply after all. What the finite-sample binding does show is that the standard unconstrained interior argument is insufficient as stated, and that tangent-cone or mixture limits may arise if the population problem is also on or near a boundary. Boundary maximum-likelihood estimators and likelihood-ratio statistics commonly have such limits rather than the standard interior distributions; see \citet{SelfLiang1987}.
+
+Stacking first-order conditions and reporting ordinary GMM standard errors does not automatically account for:
+\begin{itemize}
+\item a sample-dependent feasible set defined by $N$ inequalities;
+\item changes in the active set;
+\item nondifferentiability of an inner constrained optimisation;
+\item structural parameters selected through minimum incompleteness;
+\item an optimum on or near the boundary.
+\end{itemize}
+We do not claim that the estimator has a nonstandard distribution, nor that the reported standard errors are invalid; establishing either would require the population problem, which we do not have. The claim is narrower: the standard interior asymptotic justification is incomplete, and a separate constrained-estimation analysis is required before conventional symmetric standard errors and Wald tests can be justified.
+
+\FloatBarrier
+\printbibliography
+
+\end{document}

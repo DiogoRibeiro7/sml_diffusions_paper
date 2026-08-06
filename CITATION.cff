@@ -18,8 +18,9 @@ abstract: >-
   the consistency asserted in their Lemma 2 and the central-limit statement of their
   Lemma 3, so the proofs of their parameter-estimator theorems fail. Inconsistency of
   the resulting argmax estimator is not proved, and what such a proof would require is
-  set out explicitly. Issues specific to the exchange-rate application are analysed in
-  appendices.
+  set out explicitly. Issues specific to the exchange-rate application of that paper,
+  which concern its specification rather than the estimator, are treated in a companion
+  note deposited in the same record.
 authors:
   - family-names: Ribeiro
     given-names: Diogo
