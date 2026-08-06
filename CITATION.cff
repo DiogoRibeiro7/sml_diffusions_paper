@@ -52,6 +52,13 @@ identifiers:
       Concept DOI. Represents every version of this work and always resolves to
       the most recent one. Cite this unless you need to pin a specific version.
   - type: doi
+    value: 10.5281/zenodo.21830098
+    description: >-
+      Version DOI for v1.3.0, the current release. It proves collapse on the
+      whole subcritical region under S/M^(K/2) -> 0 alone, derives the scaling
+      law from Aronson-type bounds rather than from assumption (A5), and proves
+      the nearest-atom interchange in the location model.
+  - type: doi
     value: 10.5281/zenodo.21823961
     description: >-
       Version DOI for v1.2.0, superseded by v1.3.0, which closes two problems

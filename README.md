@@ -237,6 +237,7 @@ Cite the **concept DOI**, which represents every version and always resolves to 
 | DOI | Refers to | Status |
 | --- | --- | --- |
 | [`10.5281/zenodo.21719868`](https://doi.org/10.5281/zenodo.21719868) | all versions; resolves to the latest | **cite this** |
+| [`10.5281/zenodo.21830098`](https://doi.org/10.5281/zenodo.21830098) | v1.3.0 | current |
 | [`10.5281/zenodo.21823961`](https://doi.org/10.5281/zenodo.21823961) | v1.2.0 | superseded: weaker collapse theorem, scaling law resting on (A5) |
 | [`10.5281/zenodo.21763715`](https://doi.org/10.5281/zenodo.21763715) | v1.1.0 | superseded: the single-document form, nothing known to be wrong |
 | [`10.5281/zenodo.21760062`](https://doi.org/10.5281/zenodo.21760062) | v1.0.3 | superseded: critical case without the limit law |
