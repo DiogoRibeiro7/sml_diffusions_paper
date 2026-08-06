@@ -226,14 +226,17 @@ Cite the **concept DOI**, which represents every version and always resolves to 
 | DOI | Refers to | Status |
 | --- | --- | --- |
 | [`10.5281/zenodo.21719868`](https://doi.org/10.5281/zenodo.21719868) | all versions; resolves to the latest | **cite this** |
-| [`10.5281/zenodo.21760062`](https://doi.org/10.5281/zenodo.21760062) | v1.0.3 | current |
+| [`10.5281/zenodo.21763715`](https://doi.org/10.5281/zenodo.21763715) | v1.1.0 | superseded: the single-document form, nothing known to be wrong |
+| [`10.5281/zenodo.21760062`](https://doi.org/10.5281/zenodo.21760062) | v1.0.3 | superseded: critical case without the limit law |
 | [`10.5281/zenodo.21729471`](https://doi.org/10.5281/zenodo.21729471) | v1.0.2 | superseded: Proposition E.2 omits `\|ρ_ww*\| ≤ 1` |
 | [`10.5281/zenodo.21728285`](https://doi.org/10.5281/zenodo.21728285) | v1.0.1 | superseded: Remark E.6 wrongly calls a condition vacuous |
 | [`10.5281/zenodo.21719869`](https://doi.org/10.5281/zenodo.21719869) | v1.0.0 | superseded: Proposition C.1 limit stated in the wrong direction |
 
-Pin a version DOI only when you need that exact archived snapshot, for instance when quoting a page
-or theorem number that a later revision could move. Otherwise cite the concept DOI, which always
-resolves to the current version.
+Zenodo issues a version DOI only when a release is published, and the identifier is not predictable,
+so the row for the newest release appears in the first commit after it, not in the release itself.
+The concept DOI is the one to cite and never changes. Pin a version DOI only when you need that
+exact archived snapshot, for instance when quoting a page or theorem number that a later revision
+could move.
 
 **Every superseded version carries a mathematical error the next one corrects**, and the table names
 each. Zenodo records are immutable, so they stay resolvable; listing them with their defects is

@@ -11,6 +11,7 @@ Run with ``pytest`` from the repository root.
 from __future__ import annotations
 
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -797,47 +798,114 @@ def test_zenodo_dois_are_recorded_consistently() -> None:
     """The concept and version DOIs must agree across CITATION.cff and README.
 
     The concept DOI resolves to the newest version and is the one to cite; the
-    version DOI pins v1.0.0.  They differ by one digit, which is exactly the
-    kind of pair that gets transposed, so both are checked in both files.
+    version DOIs pin individual snapshots.  They differ by a few digits, which is
+    exactly the kind of set that gets transposed, so all are checked in both files.
+
+    Only the concept DOI is hardcoded here, because only it never changes.  The
+    version DOIs are read from ``CITATION.cff`` and the structure is checked
+    against it, so cutting a release does not require editing this test --- an
+    earlier form hardcoded the whole set and silently went stale at v1.1.0,
+    asserting a version string that the tagged release had already left behind.
     """
     yaml = pytest.importorskip("yaml")
 
     concept = "10.5281/zenodo.21719868"
-    current = "10.5281/zenodo.21760062"
-    superseded = (
-        "10.5281/zenodo.21729471",
-        "10.5281/zenodo.21728285",
-        "10.5281/zenodo.21719869",
-    )
-    assert len({concept, current, *superseded}) == 5
 
     citation = yaml.safe_load((ROOT / "CITATION.cff").read_text(encoding="utf-8"))
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
     # The top-level doi field must be the concept DOI, not a version DOI.
     assert citation["doi"] == concept
-    assert citation["version"] == "v1.0.3"
 
     recorded = {entry["value"]: entry for entry in citation["identifiers"]}
-    assert set(recorded) == {concept, current, *superseded}
+    assert len(recorded) == len(citation["identifiers"]), "duplicate DOI recorded"
     assert all(entry["type"] == "doi" for entry in recorded.values())
+    assert concept in recorded
     assert "always resolves" in recorded[concept]["description"]
-    # Derived from the recorded version rather than hardcoded, so that bumping
-    # the release does not silently leave this assertion checking the old one.
-    assert citation["version"] in recorded[current]["description"]
-    for value in superseded:
-        assert "superseded" in recorded[value]["description"]
 
-    for value in (concept, current, *superseded):
-        assert value in readme
+    versions = {value: entry for value, entry in recorded.items() if value != concept}
+    assert versions, "no version DOI recorded"
+
+    # Every version entry must open by naming the release it pins, so a mistyped
+    # or missing version number fails here rather than at the deposit form.  The
+    # rest of the description is free to mention other releases -- a superseded
+    # entry usually names the one that replaced it.
+    tag = re.compile(r"\bv\d+\.\d+\.\d+\b")
+    pinned = re.compile(r"Version DOI for (v\d+\.\d+\.\d+)")
+    named = {}
+    for value, entry in versions.items():
+        match = pinned.match(entry["description"])
+        assert match, f"version DOI {value} does not open by naming its release"
+        named[match.group(1)] = value
+    assert len(named) == len(versions), "two DOIs recorded for the same release"
+
+    # The declared version is either already minted, or is the release being cut
+    # and gets its DOI added once Zenodo has issued it.  Anything else is a typo.
+    assert tag.fullmatch(citation["version"]), "version field is not a tag"
+
+    # Every recorded release except the current one is superseded, and the
+    # descriptions say by what, or for the defective ones why.
+    current = citation["version"] if citation["version"] in named else None
+    for release, value in named.items():
+        if release != current:
+            assert "superseded" in versions[value]["description"], (
+                f"{release} is not the current release but is not marked superseded"
+            )
+
+    for value in recorded:
+        assert value in readme, f"{value} is recorded in CITATION.cff but not in README"
+
     # The BibTeX entry must carry the concept DOI so citations follow the work.
     bibtex_start = readme.index("@misc{")
     bibtex_end = readme.index("}\n```", bibtex_start)
     bibtex = readme[bibtex_start:bibtex_end]
     assert concept in bibtex
-    assert current not in bibtex
-    for value in superseded:
+    for value in versions:
         assert value not in bibtex
+
+
+def test_citation_version_is_not_behind_the_newest_tag() -> None:
+    """``CITATION.cff`` must name the newest release, not an earlier one.
+
+    This is the failure the checks above cannot see.  ``CITATION.cff`` stayed at
+    v1.0.3 while v1.1.0 was tagged and published, and nothing inside the file was
+    wrong: it was internally coherent and merely disagreed with git, so the
+    published record carried a version string the release had left behind.  The
+    comparison has to reach outside the file to catch it.
+    """
+    yaml = pytest.importorskip("yaml")
+
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            ["git", "tag", "--list", "v*"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError) as error:
+        pytest.skip(f"git unavailable: {error}")
+    if result.returncode != 0:
+        pytest.skip("not a git checkout")
+
+    tag = re.compile(r"^v\d+\.\d+\.\d+$")
+    tags = [line.strip() for line in result.stdout.splitlines() if tag.match(line.strip())]
+    if not tags:
+        pytest.skip("no release tags yet")
+
+    def order(name: str) -> tuple[int, ...]:
+        return tuple(int(part) for part in name.lstrip("v").split("."))
+
+    citation = yaml.safe_load((ROOT / "CITATION.cff").read_text(encoding="utf-8"))
+    declared = citation["version"]
+    assert tag.match(declared), f"version field {declared!r} is not a release tag"
+
+    newest = max(tags, key=order)
+    assert order(declared) >= order(newest), (
+        f"CITATION.cff declares {declared} but {newest} is already tagged"
+    )
 
 
 def test_zenodo_registers_the_reviewed_article() -> None:

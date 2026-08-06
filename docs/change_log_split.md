@@ -66,9 +66,40 @@ Splitting a document silently breaks every claim that spans the cut. The followi
   now lives.
 - `README.md`, `.zenodo.json`, `CITATION.cff`: describe two documents in one deposit record.
 
+## A stale version string, and the check that missed it
+
+`CITATION.cff` declared `version: v1.0.3` while `v1.1.0` was tagged, released and archived, so the
+published v1.1.0 record carried a version string the release had already left behind. The
+`test_zenodo_dois_are_recorded_consistently` test did not catch it, and could not have: it hardcoded
+the DOI set and the version string, so it asserted exactly the stale values it was meant to guard.
+A test that has to be edited on every release will eventually be edited wrongly, or not at all.
+
+That test now reads the DOI set from `CITATION.cff` and checks its structure — the concept DOI is
+top-level and never changes, every other entry opens by naming the release it pins, no release has
+two DOIs, and everything recorded appears in the README while only the concept DOI appears in the
+BibTeX entry. Nothing but the concept DOI is hardcoded, so cutting a release no longer requires
+touching it.
+
+That is still not enough, because the file was internally coherent when it went stale; the
+disagreement was with git, which no check inside the file can see. A second test,
+`test_citation_version_is_not_behind_the_newest_tag`, reads `git tag` and asserts that the declared
+version is not behind the newest release tag. It was confirmed to fail on the exact historical
+condition before being kept.
+
+The v1.1.0 version DOI, `10.5281/zenodo.21763715`, is now recorded, and v1.0.3 is marked superseded.
+Its description says what it lacks rather than calling it defective, because it is not: v1.0.3 gives
+the critical case without the limit law and states the score result conditionally, both of which
+later versions strengthen. The same applies to v1.1.0, which is superseded only by being the
+single-document form.
+
+Zenodo mints a version DOI when a release is published and the identifier is not predictable, so the
+entry for the release being cut is added in the first commit after it. `CITATION.cff` and the README
+now say so explicitly, rather than leaving the one-release lag to look like an oversight.
+
 ## Verification
 
 Both documents build with zero errors, zero overfull and underfull boxes and no undefined references
-or citations: 50 and 26 pages. 250 tests pass. 33 of 33 generated artefacts reproduce bit-for-bit.
-No forbidden phrase appears in any of the six searched files. Neither document contains an
-unreferenced figure or table.
+or citations: 50 and 26 pages. 251 tests pass, one more than before, the new tag check. 33 of 33
+generated artefacts reproduce bit-for-bit. No forbidden phrase appears in any of the six searched
+files. Neither document contains an unreferenced figure or table. All 38 bibliography DOIs resolve
+against Crossref.

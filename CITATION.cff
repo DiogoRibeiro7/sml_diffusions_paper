@@ -38,9 +38,13 @@ keywords:
   - nonregular inference
 license: CC-BY-4.0
 repository-code: "https://github.com/DiogoRibeiro7/sml_diffusions_paper"
-date-released: 2026-07-31
-version: v1.0.3
+date-released: 2026-08-06
+version: v1.2.0
 doi: 10.5281/zenodo.21719868
+# Zenodo mints a version DOI only when a release is published, and the identifier
+# it issues cannot be predicted, so the entry for the release named above is added
+# in the first commit after that release. Until then this list ends at the previous
+# version. The concept DOI is what the `doi` field carries, and it never changes.
 identifiers:
   - type: doi
     value: 10.5281/zenodo.21719868
@@ -48,11 +52,17 @@ identifiers:
       Concept DOI. Represents every version of this work and always resolves to
       the most recent one. Cite this unless you need to pin a specific version.
   - type: doi
+    value: 10.5281/zenodo.21763715
+    description: >-
+      Version DOI for v1.1.0, superseded by v1.2.0, which splits the manuscript
+      into a theory paper and an application companion. Nothing in v1.1.0 is
+      known to be wrong; it is simply the single-document form.
+  - type: doi
     value: 10.5281/zenodo.21760062
     description: >-
-      Version DOI for v1.0.3, the current release. It adds the missing
-      correlation hypothesis to Proposition E.2 and applies three further
-      corrections from the second pass of external review.
+      Version DOI for v1.0.3, superseded by v1.1.0. Its Proposition 3.1 gives the
+      critical case without the limit law, and its Section 6 states the score
+      result conditionally.
   - type: doi
     value: 10.5281/zenodo.21729471
     description: >-
