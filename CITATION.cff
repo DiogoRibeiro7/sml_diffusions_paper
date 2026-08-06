@@ -52,11 +52,15 @@ identifiers:
       Concept DOI. Represents every version of this work and always resolves to
       the most recent one. Cite this unless you need to pin a specific version.
   - type: doi
+    value: 10.5281/zenodo.21823961
+    description: >-
+      Version DOI for v1.2.0, the current release. It splits the work into a
+      theory paper and an application companion, both deposited in this record.
+  - type: doi
     value: 10.5281/zenodo.21763715
     description: >-
-      Version DOI for v1.1.0, superseded by v1.2.0, which splits the manuscript
-      into a theory paper and an application companion. Nothing in v1.1.0 is
-      known to be wrong; it is simply the single-document form.
+      Version DOI for v1.1.0, superseded by v1.2.0. Nothing in it is known to be
+      wrong; it is simply the single-document form.
   - type: doi
     value: 10.5281/zenodo.21760062
     description: >-
