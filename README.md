@@ -239,6 +239,11 @@ The concept DOI is the one to cite and never changes. Pin a version DOI only whe
 exact archived snapshot, for instance when quoting a page or theorem number that a later revision
 could move.
 
+What the Zenodo record holds is the repository as a single zip, since that is what the GitHub
+integration deposits; both PDFs are inside it under `paper/`. For a direct download of either paper,
+use the [release assets](https://github.com/DiogoRibeiro7/sml_diffusions_paper/releases/latest) —
+GitHub release assets are not ingested by Zenodo, so the two are separate routes to the same files.
+
 **Every superseded version carries a mathematical error the next one corrects**, and the table names
 each. Zenodo records are immutable, so they stay resolvable; listing them with their defects is
 deliberate, so that a reader who meets one can learn its status here rather than rediscover the
