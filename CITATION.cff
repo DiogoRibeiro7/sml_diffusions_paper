@@ -52,6 +52,14 @@ identifiers:
       Concept DOI. Represents every version of this work and always resolves to
       the most recent one. Cite this unless you need to pin a specific version.
   - type: doi
+    value: 10.5281/zenodo.21834941
+    description: >-
+      Version DOI for v1.4.0, the current release. It proves the uniform law of
+      large numbers for the nearest-atom criterion under N >> log S, deduces
+      consistency of the simulated maximiser in the location model along the
+      sequences on which the density collapses, and corrects the rate condition
+      misreported in v1.3.0.
+  - type: doi
     value: 10.5281/zenodo.21830098
     description: >-
       Version DOI for v1.3.0, superseded. Its remark on the uniform-in-theta
