@@ -1778,3 +1778,135 @@ def test_expected_criterion_increases_with_distance_from_the_truth() -> None:
     # And the limit it converges to is monotone in the same way.
     limits = [generate.nearest_neighbour_limit(dimension, offset) for offset in offsets]
     assert all(later > earlier for earlier, later in zip(limits, limits[1:])), limits
+
+
+# ---------------------------------------------------------------------------
+# The score at the truth, and the curvature that stands between it and a rate.
+# ---------------------------------------------------------------------------
+
+
+def test_score_second_moment_at_the_truth_is_exact() -> None:
+    """E||grad X_N(theta_0)||^2 = 4 S^{2/K} G_S(theta_0) / N, exactly.
+
+    The formula is not asymptotic, so simulation should match it at every S, not
+    merely for large S.  The table stores the per-observation quantity, so N = 1.
+
+    The check runs at K = 6.  It is not run at the application's K = 4 because
+    the sampling variance of an estimate of E||grad psi||^2 is governed by
+    E[rho^4], finite only when K sigma^2 > 4; at K = 4 that fails exactly, the
+    estimate has infinite variance, and agreement is noisy at any number of
+    draws.  An earlier version of this test ran at K = 4 and sat on its own
+    tolerance for that reason.
+    """
+    generate = pytest.importorskip("generate_results", reason="generator not importable")
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "score_moment.csv")
+    assert len(frame) >= 3
+
+    dimension = generate.SCORE_DIMENSION
+    assert dimension * 1.0 > 4, "the check must sit inside the integrable region"
+
+    for _, row in frame.iterrows():
+        # The prediction must be reproduced from its definition, not just copied.
+        expected = 4 * row["simulations"] ** (2 / dimension) * row["expected_criterion"]
+        assert row["predicted_moment"] == pytest.approx(expected, rel=1e-12)
+
+        # And simulation must agree with it.
+        assert row["ratio"] == pytest.approx(1.0, abs=0.03), row["simulations"]
+
+
+def test_score_at_the_truth_grows_like_the_dimension_root_of_S() -> None:
+    """The root mean square score must scale like S^{1/K}, not stay bounded.
+
+    This is the content of the proposition: the simulated score at the truth
+    does not settle down as S grows, which is what a score-comparison lemma
+    would need it to do.
+    """
+    generate = pytest.importorskip("generate_results", reason="generator not importable")
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "score_moment.csv").sort_values(
+        "simulations"
+    )
+    dimension = generate.SCORE_DIMENSION
+
+    rms = np.sqrt(frame["predicted_moment"].to_numpy())
+    sizes = frame["simulations"].to_numpy()
+
+    # Growth across the table matches S^{1/K} once the slowly-converging factor
+    # sqrt(G_S) is divided out.
+    normalised = rms / np.sqrt(frame["expected_criterion"].to_numpy())
+    predicted = 2 * sizes ** (1 / dimension)
+    assert np.allclose(normalised, predicted, rtol=1e-9)
+
+    # And the raw score does grow, so it cannot converge to the exact score.
+    # The expected growth is derived from the dimension and the drift in G_S
+    # rather than hardcoded: an earlier version fixed a threshold calibrated for
+    # K = 4 and failed when the check moved to K = 6.
+    criterion = frame["expected_criterion"].to_numpy()
+    predicted_growth = (sizes[-1] / sizes[0]) ** (1 / dimension) * math.sqrt(
+        criterion[-1] / criterion[0]
+    )
+    assert rms[-1] / rms[0] == pytest.approx(predicted_growth, rel=1e-9)
+    assert predicted_growth > 1.5, "the score must visibly grow across the table"
+
+
+def test_criterion_shape_converges_too_slowly_to_settle_the_rate() -> None:
+    """The curvature is far from its limit at every reachable S.
+
+    This is why the estimator-rate prediction cannot be checked numerically, and
+    the manuscript reports it as the reason rather than claiming the rate.
+    """
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "criterion_shape.csv").sort_values(
+        "simulations"
+    )
+
+    fractions = frame["fraction_of_limit"].to_numpy()
+
+    # Monotone approach, but still short of the limit at S = 10^6.
+    assert all(b > a for a, b in zip(fractions, fractions[1:]))
+    reachable = frame[frame["simulations"] <= 10**6]["fraction_of_limit"]
+    assert reachable.max() < 0.9, "shape would be close enough to check the rate"
+
+    # Only far beyond any feasible simulation does it approach the limit.
+    assert fractions[-1] > 0.95
+    assert frame["simulations"].iloc[-1] >= 10**9
+
+    # The limiting shape ratio is the same in every row, being a property of G.
+    assert frame["limit_shape_ratio"].nunique() == 1
+
+
+def test_simulated_maximiser_is_worse_than_the_exact_one() -> None:
+    """What the maximiser table establishes, and what it does not.
+
+    It establishes that the simulated maximiser carries roughly twice the error
+    of the exact MLE at every simulation size shown.  It does NOT establish the
+    growth of that ratio in S: the standard errors are too large, and two runs
+    of the experiment differing only in the random stream returned growth
+    factors of 1.00 and 1.54 against a prediction of 2.00.
+
+    So this test asserts the level and deliberately does not assert the trend.
+    Asserting the trend would encode one random draw as a finding.
+    """
+    frame = pd.read_csv(
+        ROOT / "paper" / "tables" / "simulated_maximiser.csv"
+    ).sort_values("simulations")
+    assert len(frame) >= 3
+    assert (frame["replications"] >= 20).all()
+
+    # The level: worse than the exact MLE, by a clear and roughly constant margin.
+    assert (frame["ratio"] > 1.5).all()
+    assert (frame["ratio"] < 3.0).all()
+
+    # The exact benchmark must sit near its limiting mean, E chi_4 ~ 1.88.
+    assert np.allclose(frame["scaled_exact_error"], 1.88, atol=0.35)
+
+    # The standard errors must be reported, and must be large enough relative to
+    # the spread of the ratio column to justify not reading a trend from it.
+    assert (frame["simulated_standard_error"] > 0).all()
+    relative = (
+        frame["simulated_standard_error"] / frame["scaled_simulated_error"]
+    ).to_numpy()
+    ratios = frame["ratio"].to_numpy()
+    spread = ratios.max() / ratios.min() - 1.0
+    assert spread < 3 * relative.mean(), (
+        "the ratio column now varies by more than its own noise; the appendix "
+        "declines to read a trend here and that reading would need revisiting"
+    )

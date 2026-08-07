@@ -46,8 +46,17 @@ the simulated maximiser is **consistent** along `M = S = n` with `K > 2` — pre
 which the density collapses to zero. Collapse of the density and consistency of the maximiser hold
 simultaneously, in the same model on the same designs, so the counterexample provably does not
 transfer and no argument through pointwise density behaviour alone can make it. What remains open is
-the rate: whether `√N(θ̃ - θ̂)` has a nondegenerate limit, which would refute the *conclusion* of
-Lemma 5 rather than its proof. Appendix A names the three ingredients that would settle it. The
+the rate: whether `√N(θ̃ - θ̂)` diverges, which would refute the *conclusion* of Lemma 5 rather than
+its proof. Half of that is now proved. The criterion's score at the truth has the exact second
+moment `4 S^(2/K) G_S(θ₀) / N`, so it grows like `S^(1/K)` and cannot converge to the exact score —
+the discrepancy is present, exactly, in the score. What is not proved is that it survives division
+by the curvature, and Appendix A measures the obstacle: the finite-`S` criterion is about a third
+less curved than its limit at `S = 10⁴` and does not approach it until `S ≈ 10¹⁰`, so the two
+dependences on `S` nearly cancel across every simulation size anyone can run. The prediction is
+therefore neither confirmed nor refuted by simulation, and is reported as a prediction. What the
+simulation does establish is a level rather than a trend: solving the stationarity condition exactly,
+the simulated maximiser carries roughly twice the error of the exact MLE at every size tested, so
+the loss is real at practical simulation sizes even though its growth in `S` is not resolvable. The
 paper does not claim the published empirical estimates are wrong.
 
 ## The companion note
@@ -88,7 +97,7 @@ paper/                    the two manuscripts and everything they include
   companion.pdf           application companion, compiled
   references.bib          bibliography, 42 entries, its 39 DOIs Crossref-verified
   figures/                5 figures, vector PDF and PNG (generated)
-  tables/                 13 LaTeX tables and 16 CSV files (generated)
+  tables/                 16 LaTeX tables and 19 CSV files (generated)
 code/
   generate_results.py         every figure and table
   check_correlation_matrix.py correlation-matrix and grid-domain diagnostics
@@ -118,8 +127,8 @@ gates keep the manuscript and the code from drifting apart.
 
 | Gate | Command | What it enforces |
 | --- | --- | --- |
-| Tests | `make test` | 264 tests. Every closed form is checked against an independent computation: numerical integration, direct Monte Carlo, or brute force. Tolerances are stated at each assertion. |
-| Reproducibility | `make verify` | 39 artefacts regenerated into a scratch directory and compared with the committed copies. CSV field-wise at `1e-9`; PDF and PNG by SHA-256. Figure output carries no embedded timestamp, so the comparison is exact. |
+| Tests | `make test` | 268 tests. Every closed form is checked against an independent computation: numerical integration, direct Monte Carlo, or brute force. Tolerances are stated at each assertion. |
+| Reproducibility | `make verify` | 45 artefacts regenerated into a scratch directory and compared with the committed copies. CSV field-wise at `1e-9`; PDF and PNG by SHA-256. Figure output carries no embedded timestamp, so the comparison is exact. |
 | Wording | `make phrases` | 54 patterns for claims retracted in an earlier review round. Guards against an overstatement removed from one section reappearing in another later. |
 | Release | `python code/make_release.py` | All of the above, plus a clean LaTeX log, resolved front-matter metadata, no draft label, deposit metadata that parses, and every release document present. |
 

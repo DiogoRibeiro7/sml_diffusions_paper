@@ -1062,6 +1062,200 @@ def make_uniform_scaling_table(rng: np.random.Generator) -> None:
     )
 
 
+
+# ---------------------------------------------------------------------------
+# The criterion's score at the truth, and why the estimator rate resists.
+#
+# The scaled nearest-atom criterion is differentiable wherever the nearest atom
+# is unique, with grad psi_n(theta) = 2 S^{2/K} (theta - b_n*), and the whole
+# configuration is spherically symmetric about theta_0.  So the score there is
+# centred with
+#
+#     E ||grad X_N(theta_0)||^2 = 4 S^{2/K} G_S(theta_0) / N,
+#
+# exactly.  Turning that into a statement about the estimator needs the
+# curvature of G_S, which converges to its limit far more slowly than G_S
+# itself; the shape column below is what makes the asymptotic prediction
+# unreachable by simulation.
+# ---------------------------------------------------------------------------
+
+# The check runs at K = 6, not at the application's K = 4.  The exact formula is
+# dimension-free, but a Monte Carlo check of it is not: the sampling variance of
+# an estimate of E||grad psi||^2 is governed by E[rho^4], which is finite only
+# when K sigma^2 > 4.  At K = 4 that fails on the nose, so the estimate has
+# infinite variance and agreement is noisy at any number of draws.  K = 6 puts
+# the check safely inside the integrable region.
+SCORE_DIMENSION = 6
+SCORE_SIZES = (10**2, 10**3, 10**4)
+SCORE_DRAWS = 6000
+SHAPE_OFFSET = 1.5
+SHAPE_SIZES = (10**2, 10**3, 10**4, 10**6, 10**10)
+
+
+def make_score_moment_table(rng: np.random.Generator) -> None:
+    """Check the exact score second moment against direct simulation."""
+    dimension = SCORE_DIMENSION
+    rows = []
+    for size in SCORE_SIZES:
+        expected_rho = nearest_neighbour_expectation(dimension, 0.0, float(size))
+        predicted = 4 * size ** (2 / dimension) * expected_rho
+
+        squared = np.empty(SCORE_DRAWS)
+        for index in range(SCORE_DRAWS):
+            centre = rng.normal(size=dimension)
+            atoms = centre - rng.normal(size=(size, dimension))
+            distances = np.einsum("sk,sk->s", atoms, atoms)
+            nearest = atoms[int(np.argmin(distances))]
+            gradient = -2 * size ** (2 / dimension) * nearest
+            squared[index] = float(gradient @ gradient)
+
+        simulated = float(np.mean(squared))
+        rows.append(
+            {
+                "simulations": size,
+                "expected_criterion": expected_rho,
+                "predicted_moment": predicted,
+                "simulated_moment": simulated,
+                "ratio": simulated / predicted,
+            }
+        )
+    frame = pd.DataFrame(rows)
+    frame.to_csv(TABLES / "score_moment.csv", index=False)
+    (TABLES / "score_moment.tex").write_text(
+        frame.to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.6g}",
+            escape=False,
+            column_format="rrrrr",
+        ),
+        encoding="utf-8",
+    )
+
+
+def make_criterion_shape_table() -> None:
+    """Tabulate how slowly the criterion's shape approaches its limit.
+
+    Computed at K = 4, the application dimension.  This table is pure
+    quadrature, so the integrability boundary that forces the score check to
+    K = 6 does not apply here.
+    """
+    dimension = 4
+    limit_centre = nearest_neighbour_limit(dimension, 0.0)
+    limit_offset = nearest_neighbour_limit(dimension, SHAPE_OFFSET)
+    rows = []
+    for size in SHAPE_SIZES:
+        centre = nearest_neighbour_expectation(dimension, 0.0, float(size))
+        offset = nearest_neighbour_expectation(dimension, SHAPE_OFFSET, float(size))
+        rows.append(
+            {
+                "simulations": size,
+                "at_centre": centre,
+                "at_offset": offset,
+                "shape_ratio": offset / centre,
+                "limit_shape_ratio": limit_offset / limit_centre,
+                "fraction_of_limit": (offset / centre) / (limit_offset / limit_centre),
+            }
+        )
+    frame = pd.DataFrame(rows)
+    frame.to_csv(TABLES / "criterion_shape.csv", index=False)
+    (TABLES / "criterion_shape.tex").write_text(
+        frame.to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.6g}",
+            escape=False,
+            column_format="rrrrrr",
+        ),
+        encoding="utf-8",
+    )
+
+
+
+# ---------------------------------------------------------------------------
+# The simulated maximiser itself, in the location model.
+#
+# The stationarity condition of the scaled nearest-atom criterion is
+#
+#     grad X_N(theta) = 2 S^{2/K} N^{-1} sum_n (theta - b_n*(theta)) = 0,
+#
+# that is, theta = N^{-1} sum_n b_n*(theta): the maximiser is a fixed point of
+# "replace theta by the average of the nearest atom in each cloud".  So it can
+# be computed exactly, without any general-purpose optimiser and without the
+# multimodality that defeats one.
+#
+# The ratio to the exact MLE's error is the quantity of interest.  The
+# M-estimator linearisation predicts it grows like S^{1/K}; it does not do so
+# over the reachable range, for the reason the criterion-shape table records.
+# ---------------------------------------------------------------------------
+
+MAXIMISER_DIMENSION = 4
+MAXIMISER_OBSERVATIONS = 8_000
+MAXIMISER_SIZES = (16, 81, 256)
+MAXIMISER_REPLICATIONS = 24
+
+
+def _nearest_atoms(clouds: NDArray[np.float64], theta: NDArray[np.float64]):
+    """The nearest atom of each cloud to theta."""
+    offsets = clouds - theta
+    squared = np.einsum("nsk,nsk->ns", offsets, offsets)
+    index = squared.argmin(axis=1)[:, None, None]
+    return np.take_along_axis(clouds, index, axis=1)[:, 0, :]
+
+
+def simulated_maximiser(clouds: NDArray[np.float64], iterations: int = 200):
+    """Solve grad X_N = 0 by iterating the nearest-atom average."""
+    theta = np.zeros(clouds.shape[2])
+    for _ in range(iterations):
+        updated = _nearest_atoms(clouds, theta).mean(axis=0)
+        if np.allclose(updated, theta, atol=1e-13, rtol=0):
+            return updated
+        theta = updated
+    return theta
+
+
+def make_maximiser_table(rng: np.random.Generator) -> None:
+    """Compare the simulated maximiser's error with the exact MLE's."""
+    dimension = MAXIMISER_DIMENSION
+    n_obs = MAXIMISER_OBSERVATIONS
+    rows = []
+    for size in MAXIMISER_SIZES:
+        tilde, hat = [], []
+        for _ in range(MAXIMISER_REPLICATIONS):
+            increments = rng.normal(size=(n_obs, dimension))          # theta_0 = 0
+            clouds = increments[:, None, :] - rng.normal(
+                size=(n_obs, size, dimension)
+            )
+            estimate = simulated_maximiser(clouds)
+            tilde.append(math.sqrt(n_obs) * float(np.linalg.norm(estimate)))
+            hat.append(math.sqrt(n_obs) * float(np.linalg.norm(increments.mean(axis=0))))
+        simulated = float(np.mean(tilde))
+        exact = float(np.mean(hat))
+        rows.append(
+            {
+                "simulations": size,
+                "observations": n_obs,
+                "replications": MAXIMISER_REPLICATIONS,
+                "scaled_simulated_error": simulated,
+                "simulated_standard_error": float(
+                    np.std(tilde, ddof=1) / math.sqrt(MAXIMISER_REPLICATIONS)
+                ),
+                "scaled_exact_error": exact,
+                "ratio": simulated / exact,
+                "power_prediction": size ** (1 / dimension),
+            }
+        )
+    frame = pd.DataFrame(rows)
+    frame.to_csv(TABLES / "simulated_maximiser.csv", index=False)
+    (TABLES / "simulated_maximiser.tex").write_text(
+        frame.to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.6g}",
+            escape=False,
+            column_format="rrrrrrrr",
+        ),
+        encoding="utf-8",
+    )
+
+
 def main(output_root: Path | None = None) -> None:
     """Generate all reproducible manuscript outputs.
 
@@ -1094,6 +1288,9 @@ def main(output_root: Path | None = None) -> None:
     make_nn_convergence_table()
     make_collapse_bound_table(rng)
     make_uniform_scaling_table(rng)
+    make_score_moment_table(rng)
+    make_criterion_shape_table()
+    make_maximiser_table(rng)
 
 
 if __name__ == "__main__":

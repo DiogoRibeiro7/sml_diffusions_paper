@@ -2091,6 +2091,96 @@ This is worth stating plainly, because it cuts against a reading the density res
 
 What remains open is narrower and is precisely the $\sqrt N$ statement. Consistency is settled by \Cref{cor:argmax_consistent}; what is not settled is the \emph{rate}, and there the limit criterion disagrees with the exact one. Its curvature at $\thetao$ differs from the exact maximum-likelihood curvature. Writing the limit \eqref{eq:nn_limit} as $C_K\exp\{\lVert\theta-\thetao\rVert^2/(K-2)\}$, its Hessian at $\thetao$ is $2C_K/(K-2)$ times the identity, so the comparison carries the constant $C_K$ as well as the factor $2/(K-2)$; the exact criterion has Hessian $2I$. The fluctuation of $N^{-1}S^{2/K}D_N$ about its limit is $\Op(N^{-1/2})$ with a covariance not depending on $S$. Then $\sqrt N(\widetilde\theta_{N,M,S}-\widehat\theta_N)$ would converge to a nondegenerate limit rather than to zero, for every admissible $(M_n,S_n)$ including the regime in which Theorem 2 of \citet{BrandtSantaClara2002} operates. That would refute the \emph{conclusion} of Lemma 5, not merely its proof, and would change the standing of this paper's main claim.
 
+The first step of that programme can be taken exactly, and it is the score route recommended in \Cref{rem:score_route} rather than the nearest-neighbour route.
+
+\begin{proposition}[Exact score second moment at the truth]\label{prop:score_at_truth}
+The criterion $X_N$ is differentiable at every $\theta$ at which each cloud has a unique nearest atom, which holds almost surely, with
+\begin{equation}\label{eq:criterion_gradient}
+\nabla\psi_n(\theta)=2S^{2/K}\bigl(\theta-b_{n,s^*(n,\theta)}\bigr),
+\qquad
+s^*(n,\theta)=\operatorname*{arg\,min}_{s\le S}\lVert\theta-b_{n,s}\rVert .
+\end{equation}
+Then $\E\nabla X_N(\thetao)=0$ and
+\begin{equation}\label{eq:score_at_truth}
+\E\bigl\lVert\nabla X_N(\thetao)\bigr\rVert^2
+=\frac{4\,S^{2/K}\,G_S(\thetao)}{N},
+\qquad
+G_S(\thetao)=S^{2/K}\,\E\bigl[\rho_S(\thetao)^2\bigr].
+\end{equation}
+Since $G_S(\thetao)\to G(\thetao)>0$ by \Cref{prop:nn_interchange}, the root mean square score at the truth is asymptotically $2\sqrt{G(\thetao)}\,S^{1/K}N^{-1/2}$, which diverges in $S$ at every fixed $N$.
+\end{proposition}
+
+\begin{proof}
+Formula \eqref{eq:criterion_gradient} is immediate where the nearest atom is unique, and ties occur with probability zero. The joint law of $(\Delta Y_n,\xi_{n,1},\ldots,\xi_{n,S})$ is invariant under rotations about $\thetao$, hence so is the law of $b_{n,s^*}-\thetao$, whose mean is therefore zero; averaging over $n$ gives $\E\nabla X_N(\thetao)=0$. The summands being independent across $n$ and centred,
+\[
+\E\lVert\nabla X_N(\thetao)\rVert^2
+=\frac1N\E\lVert\nabla\psi_n(\thetao)\rVert^2
+=\frac{4S^{4/K}}{N}\E\bigl[\lVert\thetao-b_{n,s^*}\rVert^2\bigr]
+=\frac{4S^{4/K}}{N}\E\bigl[\rho_S(\thetao)^2\bigr],
+\]
+which is \eqref{eq:score_at_truth} by the definition of $G_S$.
+\end{proof}
+
+Equation \eqref{eq:score_at_truth} is exact for every $N$ and $S$, not an asymptotic statement, and it has been checked against direct simulation at $K=6$ and $S$ up to $10^4$, where it agrees to within one per cent.
+
+The dimension in that check is worth a word, because the reason for it recurs below. The formula \eqref{eq:score_at_truth} is dimension-free, but a Monte Carlo check of it is not. The sampling variance of an estimate of $\E\lVert\nabla\psi_n\rVert^2$ is governed by $\E[\rho_S^4]$, which by the calculation behind \eqref{eq:interchange_condition} is finite only when $K\sigma^2>4$. At the application's $K=4$ that fails on the nose, so an estimate of the second moment has infinite variance and its agreement with the exact value is noisy at any number of draws; we observed discrepancies of several per cent at $S=10^4$ with $4{,}000$ draws, which is the heavy tail and not an error in the formula. Taking $K=6$ puts the check inside the integrable region. The same boundary is the reason the functional central limit theorem named above is delicate at $K=4$.
+
+Its content is a comparison. The exact log-likelihood criterion in this model is $N^{-1}\sum_n\lVert\theta-\Delta Y_n\rVert^2$, whose gradient at $\thetao$ has root mean square $2\sqrt{K/N}$ and whose curvature is $2$, so the displacement it implies is of order $N^{-1/2}$. The simulated criterion has gradient of order $S^{1/K}N^{-1/2}$ against a limiting curvature $V=2G(\thetao)/(K\sigma^2-2)$ that does not depend on $S$. The ratio of implied displacements is therefore of order $S^{1/K}$, which diverges. That is a statement about the \emph{score}, which is the object Lemma 4 of \citet{BrandtSantaClara2002} concerns, and it is proved rather than conjectured.
+
+\begin{remark}[Why the estimator rate resists numerical attack]\label{rem:rate_numerics}
+It is tempting to conclude from \Cref{prop:score_at_truth} that $\sqrt N\lVert\widetilde\theta-\thetao\rVert\asymp S^{1/K}$, so that the estimator is consistent but not root-$N$ consistent and the conclusion of Lemma 5 fails. That is what the $M$-estimator linearisation predicts, and we record it as a prediction rather than a result, because the step from the score to the estimator needs the curvature of $G_S$ near $\thetao$ and not merely its limit.
+
+The distinction is not academic here, and the reason is worth stating because it explains why this question has resisted. The finite-$S$ criterion converges to its limit slowly in level and more slowly still in shape. At $K=4$ the ratio $G_S(\thetao+1.5e)/G_S(\thetao)$, a scale-free measure of how curved the criterion is, takes the values $1.65$, $1.87$, $2.09$ and $2.51$ at $S=10^2,10^3,10^4$ and $10^6$, against a limit of $3.08$ that it does not approach until $S\approx10^{10}$. The finite-$S$ criterion is therefore much flatter than its limit at every simulation size anyone can run, so the curvature that would convert the score into a displacement is itself far from its asymptotic value, and the two dependences on $S$ very nearly cancel over the reachable range.
+
+\Cref{tab:criterion_shape} gives the shape ratios in full, with the fraction of the limit attained.
+
+\begin{table}[htbp]
+\centering
+\caption{How slowly the finite-$S$ criterion approaches the shape of its limit, at $K=4$. The shape ratio is $G_S(\thetao+1.5e)/G_S(\thetao)$ for a unit vector $e$, a scale-free measure of curvature that is free of the overall level. It reaches only two thirds of its limiting value at $S=10^4$ and is still short of it at $S=10^6$. Since the step from the score \eqref{eq:score_at_truth} to the estimator divides by this curvature, and the score grows like $S^{1/K}$, the two dependences very nearly cancel across every simulation size that can be run.}
+\label{tab:criterion_shape}
+\begin{tabular}{rrrrr}
+\toprule
+$S$ & $G_S(\thetao)$ & $G_S(\thetao+1.5e)$ & shape ratio & fraction of limit \\
+\midrule
+$10^2$ & 7.854 & 12.959 & 1.650 & 0.536 \\
+$10^3$ & 8.499 & 15.862 & 1.866 & 0.606 \\
+$10^4$ & 9.068 & 18.974 & 2.092 & 0.679 \\
+$10^6$ & 9.733 & 24.454 & 2.512 & 0.816 \\
+$10^{10}$ & 10.012 & 29.751 & 2.971 & 0.965 \\
+\midrule
+limit & 10.027 & 30.884 & 3.080 & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\FloatBarrier
+
+The maximiser itself can be computed exactly, without any general-purpose optimiser and without the multimodality that defeats one, because the stationarity condition $\nabla X_N(\theta)=0$ reads $\theta=N^{-1}\sum_nb_{n,s^*(n,\theta)}$: the estimator is a fixed point of ``replace $\theta$ by the average of the nearest atom in each cloud''. \Cref{tab:simulated_maximiser} reports the comparison with the exact maximum likelihood estimator.
+
+One reading is solid and one is not, and it is worth separating them. What the table does establish is that the simulated maximiser is materially worse than the exact one throughout: the ratio $\sqrt N\lVert\widetilde\theta-\thetao\rVert/\sqrt N\lVert\widehat\theta_N-\thetao\rVert$ sits near $2$ at every $S$, so the loss is real at simulation sizes anyone would use, and not a small one.
+
+What the table does \emph{not} establish is the growth of that ratio in $S$, which is the quantity the prediction is about. The standard errors are eight to nine per cent of the level, so a growth factor carries an error near fourteen per cent, and the measurement is not sharp enough to separate the predicted $S^{1/K}$ from no growth at all. We tried and can report the failure precisely: two independent runs of this experiment, differing only in the random stream, returned growth factors of $1.00$ and $1.54$ against a prediction of $2.00$. Twenty-four replications do not resolve it, and the number needed to do so is large enough that the exercise is not worth its cost, because \Cref{tab:criterion_shape} already supplies the reason the growth is suppressed here without any simulation at all.
+
+\begin{table}[htbp]
+\centering
+\caption{The simulated maximiser against the exact one in the location model, at $K=4$, $N=8{,}000$ observations and $24$ replications. Both errors are scaled by $\sqrt N$, so the exact column is the usual $\Op(1)$ benchmark with limiting mean $\E\chi_4\approx1.88$. The estimator solves $\nabla X_N=0$ exactly, as a fixed point of the nearest-atom average. The ratio is near $2$ throughout: the simulated maximiser is materially worse than the exact one at every simulation size shown. Its growth in $S$ is not resolved at this replication count, and the standard errors say why.}
+\label{tab:simulated_maximiser}
+\begin{tabular}{rrrrrr}
+\toprule
+$S$ & $\sqrt N\lVert\widetilde\theta-\thetao\rVert$ & s.e. & $\sqrt N\lVert\widehat\theta_N-\thetao\rVert$ & ratio & $S^{1/K}$ \\
+\midrule
+16 & 3.635 & 0.248 & 1.778 & 2.045 & 2.000 \\
+81 & 4.023 & 0.323 & 1.890 & 2.128 & 3.000 \\
+256 & 3.793 & 0.341 & 1.847 & 2.053 & 4.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\FloatBarrier
+
+So the $\sqrt N$ question remains open, and \Cref{prop:score_at_truth} sharpens rather than settles it. What is now established is that the discrepancy is present in the score, exactly and at order $S^{1/K}$; what is not established is that it survives division by the curvature. A proof would have to control $\nabla^2G_S$ near $\thetao$ uniformly in $S$, which the numbers above suggest is the substantive difficulty, not a technicality.
+\end{remark}
+
 Three things stand between \Cref{prop:uniform_lln} and that conclusion, and none is supplied here. First, a rate for $\E X_N-G$: \Cref{prop:nn_interchange} gives convergence but not speed, and the quadrature of \Cref{tab:nn_convergence} shows it is slow, so the curvature comparison needs $\E X_N-G=o(N^{-1})$ uniformly near $\thetao$ and that is not established. Second, a functional central limit theorem for $\sqrt N(X_N-\E X_N)$ near the minimiser, where the summands are not differentiable in $\theta$ and, for $K\sigma^2\le4$, not square integrable either. Third, the sandwich slack must be negligible against the \emph{variation} rather than the level, which by \Cref{rem:h2_cannot} means $M\gg NS^{2/K}\log S$ rather than \eqref{eq:sandwich_condition}. The second of these is the substantive one.
 
 \begin{remark}[Why \Cref{prop:nearest_atom} cannot deliver this]\label{rem:h2_cannot}
