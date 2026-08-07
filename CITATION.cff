@@ -38,8 +38,8 @@ keywords:
   - nonregular inference
 license: CC-BY-4.0
 repository-code: "https://github.com/DiogoRibeiro7/sml_diffusions_paper"
-date-released: 2026-08-06
-version: v1.3.0
+date-released: 2026-08-07
+version: v1.4.0
 doi: 10.5281/zenodo.21719868
 # Zenodo mints a version DOI only when a release is published, and the identifier
 # it issues cannot be predicted, so the entry for the release named above is added
@@ -54,10 +54,14 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.21830098
     description: >-
-      Version DOI for v1.3.0, the current release. It proves collapse on the
-      whole subcritical region under S/M^(K/2) -> 0 alone, derives the scaling
-      law from Aronson-type bounds rather than from assumption (A5), and proves
-      the nearest-atom interchange in the location model.
+      Version DOI for v1.3.0, superseded. Its remark on the uniform-in-theta
+      step asserts that the step plausibly requires N >> S^(2/K) and that this
+      points the opposite way to the published rate conditions. Both are wrong:
+      the chaining bound was taken over the metric diameter of the index set
+      rather than over the envelope of the function class, and the correct
+      condition, N >> log S, is compatible with those conditions. No result in
+      v1.3.0 depends on the claim, which described an open step rather than
+      serving as a hypothesis.
   - type: doi
     value: 10.5281/zenodo.21823961
     description: >-
