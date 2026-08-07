@@ -1669,3 +1669,112 @@ def test_aronson_bracket_is_strictly_positive_and_finite() -> None:
             * constant
         )
         assert 0 < lower <= upper < math.inf
+
+
+# ---------------------------------------------------------------------------
+# The uniform-in-theta step.
+# ---------------------------------------------------------------------------
+
+
+def test_uniform_deviation_follows_the_logarithm_not_the_power() -> None:
+    """Which chaining route governs the uniform deviation.
+
+    An earlier version of the appendix claimed the uniform statement needed
+    N >> S^{2/K}, from chaining over the metric diameter of the index set.  The
+    correct route chains over the envelope of the truncated class and costs only
+    sqrt(log S).  The ratio of uniform to pointwise deviation discriminates: it
+    grows like S^{1/K} under the first reading and like sqrt((2/K) log S) under
+    the second.
+    """
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "uniform_scaling.csv")
+    assert len(frame) >= 3
+
+    observed = frame["ratio"].iloc[-1] / frame["ratio"].iloc[0]
+    power = frame["power_prediction"].iloc[-1] / frame["power_prediction"].iloc[0]
+    logarithmic = frame["log_prediction"].iloc[-1] / frame["log_prediction"].iloc[0]
+
+    # The two predictions must actually be far apart, or the test proves nothing.
+    assert power / logarithmic > 1.6, "the predictions are too close to discriminate"
+
+    # The observed growth sits with the logarithm, not the power.
+    assert abs(observed - logarithmic) < abs(observed - power)
+    assert observed < 0.5 * (logarithmic + power), "growth is not clearly sub-power"
+
+
+def test_uniform_scaling_ratio_exceeds_one() -> None:
+    """The uniform deviation must dominate the pointwise one, by construction."""
+    frame = pd.read_csv(ROOT / "paper" / "tables" / "uniform_scaling.csv")
+    assert (frame["ratio"] > 1.0).all()
+    assert (frame["sup_deviation"] >= frame["pointwise_deviation"]).all()
+
+
+def test_uniform_condition_is_compatible_with_the_published_rates() -> None:
+    """N >> log S must not conflict with the published N << S^{1/4}.
+
+    The earlier erroneous claim was that the requirement pointed the opposite way
+    to the published conditions.  It does not: any N = S^a with 0 < a < 1/4
+    eventually satisfies both, since a power beats a logarithm.  "Eventually" is
+    the honest word -- at S = 10^6 even S^{1/5} has not yet overtaken log S -- so
+    the test checks the asymptotic regime and confirms the margin widens.
+    """
+    margins = []
+    for exponent in range(7, 25):
+        simulations = 10.0**exponent
+        observations = simulations**0.2  # N = S^{1/5}, comfortably below S^{1/4}
+        assert observations < simulations**0.25, "violates the published N << S^{1/4}"
+        assert observations > math.log(simulations), "violates N >> log S"
+        margins.append(observations / math.log(simulations))
+
+    # The two conditions separate further as S grows, so there is no tension.
+    assert all(later > earlier for earlier, later in zip(margins, margins[1:]))
+
+
+def test_argmax_consistency_conditions_hold_on_the_collapsing_diagonal() -> None:
+    """Along M = S = n with K > 2 the corollary's conditions must hold.
+
+    That is the point of the corollary: the design where the density collapses is
+    also a design where the maximiser is consistent.  Both facts are checked here
+    from their defining inequalities.
+    """
+    sizes = (10**3, 10**5, 10**7)
+    for dimension in (3, 4, 6):
+        effectives, sandwiches = [], []
+        for n in sizes:
+            # R = S / M^{K/2} = n^{1 - K/2}, which vanishes for every K > 2 but
+            # does so slowest at K = 3, so no fixed threshold serves all three.
+            effective = n ** (1 - dimension / 2)
+            assert effective < 1.0, "should be inside the collapse region"
+            effectives.append(effective)
+
+            # Sandwich condition M >> S^{2/K} log S.
+            sandwich = n / (n ** (2 / dimension) * math.log(n))
+            assert sandwich > 1.0, f"sandwich fails at K={dimension}, n={n}"
+            sandwiches.append(sandwich)
+
+        # The density collapses further and the sandwich gets more comfortable,
+        # simultaneously, which is the content of the corollary.
+        assert all(b < a for a, b in zip(effectives, effectives[1:]))
+        assert all(b > a for a, b in zip(sandwiches, sandwiches[1:]))
+        assert effectives[-1] < 1e-3
+
+
+def test_expected_criterion_increases_with_distance_from_the_truth() -> None:
+    """Monotonicity, which the uniform proof uses via Polya's argument.
+
+    E X_N depends on theta only through r = ||theta - theta_0|| and must be
+    nondecreasing in r, because a noncentral chi-squared distribution function is
+    nonincreasing in its noncentrality.  Checked against the same quadrature that
+    produces the convergence table.
+    """
+    generate = pytest.importorskip("generate_results", reason="generator not importable")
+    dimension, size = 4, 1.0e5
+    offsets = (0.0, 0.4, 0.8, 1.2, 1.6)
+    values = [
+        generate.nearest_neighbour_expectation(dimension, offset, size)
+        for offset in offsets
+    ]
+    assert all(later > earlier for earlier, later in zip(values, values[1:])), values
+
+    # And the limit it converges to is monotone in the same way.
+    limits = [generate.nearest_neighbour_limit(dimension, offset) for offset in offsets]
+    assert all(later > earlier for earlier, later in zip(limits, limits[1:])), limits

@@ -278,6 +278,7 @@ def main() -> int:
         "change_log_final.md",
         "change_log_split.md",
         "change_log_open_problems.md",
+        "change_log_uniform_step.md",
         "mathematical_claims_matrix.md",
         "literature_novelty_matrix.md",
         "application_feasibility_matrix.md",

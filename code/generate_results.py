@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 from scipy import integrate
+from scipy.spatial import cKDTree
 from scipy.special import gamma as gamma_function
 from scipy.special import logsumexp
 from scipy.stats import chi, chi2, ncx2, norm
@@ -987,6 +988,80 @@ def make_collapse_bound_table(rng: np.random.Generator) -> None:
     )
 
 
+
+# ---------------------------------------------------------------------------
+# How the uniform deviation of the nearest-atom criterion grows with S.
+#
+# The uniform-in-theta step turns on whether
+#
+#     sup_theta |X_N - E X_N|   scales like  S^{1/K}/sqrt(N)  or  sqrt(log S)/sqrt(N),
+#
+# the first implying a rate condition N >> S^{2/K} and the second only
+# N >> log S.  The ratio of the sup deviation to the pointwise deviation cancels
+# the 1/sqrt(N) and the scale of the summand, so it grows like S^{1/K} under the
+# first reading and like sqrt((2/K) log S) under the second.
+#
+# Centring is the pooled mean across replications.  Exact centring by quadrature
+# is available but needs millions of noncentral chi-squared evaluations per
+# design; pooling shrinks the sup and pointwise deviations by the same factor,
+# leaving the ratio unaffected.
+# ---------------------------------------------------------------------------
+
+UNIFORM_DIMENSION = 5
+UNIFORM_GRID = np.linspace(0.0, 1.5, 21)
+UNIFORM_SIZES = (10**2, 10**3, 10**4)
+UNIFORM_OBSERVATIONS = 150
+UNIFORM_REPLICATIONS = 10
+
+
+def _uniform_criterion(size: int, rng: np.random.Generator) -> NDArray[np.float64]:
+    """One draw of the scaled nearest-atom criterion on the theta grid."""
+    dimension = UNIFORM_DIMENSION
+    thetas = np.zeros((len(UNIFORM_GRID), dimension))
+    thetas[:, 0] = UNIFORM_GRID
+    total = np.zeros(len(UNIFORM_GRID))
+    for _ in range(UNIFORM_OBSERVATIONS):
+        centre = rng.normal(size=dimension)
+        atoms = centre - rng.normal(size=(size, dimension))
+        distances, _ = cKDTree(atoms).query(thetas, k=1)
+        total += distances**2
+    return size ** (2 / dimension) * total / UNIFORM_OBSERVATIONS
+
+
+def make_uniform_scaling_table(rng: np.random.Generator) -> None:
+    """Tabulate the sup and pointwise deviations against the two predictions."""
+    dimension = UNIFORM_DIMENSION
+    rows = []
+    for size in UNIFORM_SIZES:
+        draws = np.array(
+            [_uniform_criterion(size, rng) for _ in range(UNIFORM_REPLICATIONS)]
+        )
+        deviations = draws - draws.mean(axis=0)
+        sup_deviation = float(np.mean(np.max(np.abs(deviations), axis=1)))
+        point_deviation = float(np.mean(np.abs(deviations[:, 0])))
+        rows.append(
+            {
+                "simulations": size,
+                "sup_deviation": sup_deviation,
+                "pointwise_deviation": point_deviation,
+                "ratio": sup_deviation / point_deviation,
+                "power_prediction": size ** (1 / dimension),
+                "log_prediction": math.sqrt(2 * math.log(size) / dimension),
+            }
+        )
+    frame = pd.DataFrame(rows)
+    frame.to_csv(TABLES / "uniform_scaling.csv", index=False)
+    (TABLES / "uniform_scaling.tex").write_text(
+        frame.to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.6g}",
+            escape=False,
+            column_format="rrrrrr",
+        ),
+        encoding="utf-8",
+    )
+
+
 def main(output_root: Path | None = None) -> None:
     """Generate all reproducible manuscript outputs.
 
@@ -1018,6 +1093,7 @@ def main(output_root: Path | None = None) -> None:
     make_cir_negativity_table()
     make_nn_convergence_table()
     make_collapse_bound_table(rng)
+    make_uniform_scaling_table(rng)
 
 
 if __name__ == "__main__":
