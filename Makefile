@@ -6,7 +6,7 @@ PAPER_DIR := paper
 # later pass with a misleading "Missing \begin{document}".
 LATEXMK := latexmk -pdf -interaction=nonstopmode -halt-on-error
 
-.PHONY: all figures pdf theory companion paper verify test check clean
+.PHONY: all figures pdf theory companion paper verify test check numbers phrases clean
 
 all: figures pdf
 
@@ -39,7 +39,11 @@ test:
 phrases:
 	python code/check_forbidden_phrases.py
 
-check: test verify phrases
+# Fail if a manuscript table carries a number that no generator produces.
+numbers:
+	python code/check_table_numbers.py
+
+check: test verify phrases numbers
 
 # -c removes auxiliary files but keeps the PDFs, which are tracked.
 clean:

@@ -635,6 +635,14 @@ def make_design_table() -> None:
                 "M": m_steps,
                 "S": simulations,
                 "effective_size_K4": simulations / m_steps**2,
+                # The antithetic reading of the same design.  With P = S pairs
+                # the evaluation count is 2P, and N_eff = 2P/(1 + rho_A), so the
+                # effective size doubles as the pair correlation falls to zero.
+                # These three columns are quoted in the manuscript table and so
+                # must be generated rather than computed by hand.
+                "evaluations": 2 * simulations,
+                "effective_size_rho_one": simulations / m_steps**2,
+                "effective_size_rho_zero": 2 * simulations / m_steps**2,
                 "sqrt_S_over_M": math.sqrt(simulations) / m_steps,
                 "N_over_S_quarter": n_obs / simulations**0.25,
             }
@@ -1142,10 +1150,15 @@ def make_criterion_shape_table() -> None:
     dimension = 4
     limit_centre = nearest_neighbour_limit(dimension, 0.0)
     limit_offset = nearest_neighbour_limit(dimension, SHAPE_OFFSET)
+    limit_curvature = 2 * limit_centre / (dimension - 2)
     rows = []
     for size in SHAPE_SIZES:
         centre = nearest_neighbour_expectation(dimension, 0.0, float(size))
         offset = nearest_neighbour_expectation(dimension, SHAPE_OFFSET, float(size))
+        # The curvature itself, by the identity grad^2 G_S(theta_0) = (a_1 - a_0) I.
+        curvature = central_chi_coefficient(
+            dimension, 1, float(size)
+        ) - central_chi_coefficient(dimension, 0, float(size))
         rows.append(
             {
                 "simulations": size,
@@ -1154,6 +1167,9 @@ def make_criterion_shape_table() -> None:
                 "shape_ratio": offset / centre,
                 "limit_shape_ratio": limit_offset / limit_centre,
                 "fraction_of_limit": (offset / centre) / (limit_offset / limit_centre),
+                "curvature": curvature,
+                "limit_curvature": limit_curvature,
+                "curvature_fraction": curvature / limit_curvature,
             }
         )
     frame = pd.DataFrame(rows)
@@ -1282,20 +1298,22 @@ def make_maximiser_table(rng: np.random.Generator) -> None:
             hat.append(math.sqrt(n_obs) * float(np.linalg.norm(increments.mean(axis=0))))
         simulated = float(np.mean(tilde))
         exact = float(np.mean(hat))
+        standard_error = float(
+            np.std(tilde, ddof=1) / math.sqrt(MAXIMISER_REPLICATIONS)
+        )
         rows.append(
             {
                 "simulations": size,
                 "observations": n_obs,
                 "replications": MAXIMISER_REPLICATIONS,
                 "scaled_simulated_error": simulated,
-                "simulated_standard_error": float(
-                    np.std(tilde, ddof=1) / math.sqrt(MAXIMISER_REPLICATIONS)
-                ),
+                "simulated_standard_error": standard_error,
                 "scaled_exact_error": exact,
                 "ratio": simulated / exact,
                 "power_prediction": size ** (1 / dimension),
                 "curvature": curvature,
                 "predicted_error": predicted,
+                "z_score": (predicted - simulated) / standard_error,
             }
         )
     frame = pd.DataFrame(rows)

@@ -127,6 +127,22 @@ def check_forbidden_phrases() -> list[str]:
     ]
 
 
+def check_table_numbers() -> list[str]:
+    """Return a problem for each manuscript table number not traceable to code.
+
+    The reproducibility gate only sees numbers that pass through the generator;
+    a value typed straight into LaTeX is invisible to it.  That blind spot let
+    a hand-computed column sit in a released table for a full version.
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import check_table_numbers as checker
+
+    return [
+        f"{document}: table number {literal} is not the rounding of any generated value"
+        for document, _caption, literal in checker.scan()
+    ]
+
+
 def check_deposit_metadata() -> list[str]:
     """Return a problem for every archiving file that is missing or unusable.
 
@@ -238,6 +254,7 @@ def main() -> int:
     problems = check_log_is_clean()
     problems += check_deposit_metadata()
     problems += check_forbidden_phrases()
+    problems += check_table_numbers()
     if not args.allow_draft:
         problems += check_no_draft_labels()
         problems += check_metadata_resolved()

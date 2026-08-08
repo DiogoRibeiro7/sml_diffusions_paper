@@ -101,3 +101,50 @@ where the previous round predicted the risk was concentrated.
 Both documents build with zero errors, zero overfull and underfull boxes and no undefined references
 or citations: 63 and 26 pages. All generated artefacts reproduce bit-for-bit. No forbidden phrase
 appears in any searched file.
+
+## Second pass, after the referee round
+
+A self-directed pass over the same material, looking for the error classes the
+referee had just demonstrated I make. It found four more, all mine.
+
+**An orphaned paragraph.** The rewrite that demoted the uniform law left a "three
+things stand between prop:uniform_lln and that conclusion" paragraph stranded
+outside the remark that had closed above it, duplicating the replacement text and
+citing the uniform law as proved. Removed and its substance folded in, now as
+four things: the empirical-tail condition is prior to the other three.
+
+**Three stale claims** that consistency is settled, surviving the demotion,
+including one inside the remark on why the sandwich cannot deliver the rate.
+
+**The contribution list** still asserted `S/M^3 -> infinity` as a necessary
+condition and called a density-derivative second moment a "score" moment. That is
+the same conflation the referee caught in Section 6, one section earlier, and
+neither of us had noticed it there.
+
+**Hand-typed table numbers.** The criterion-shape table's curvature column and
+three columns of the design table were computed in scratch scripts and typed into
+LaTeX. Every value was correct, and the generators now reproduce them, but they
+sat outside the reproducibility gate.
+
+### A gate for the blind spot
+
+The reproducibility check compares generated artefacts with committed copies, so
+it only sees numbers that pass through the generator. A number typed into a table
+is invisible to it. That is the same blind spot that let an RNG-mismatched score
+table through earlier.
+
+`code/check_table_numbers.py` now extracts every numeral from every tabular
+environment in both manuscripts and requires each to be the correct rounding of
+some value in some generated CSV, matching numerically with a tolerance set by
+the quoted precision. It is wired into `make check` and the release gate.
+
+Making it honest took five iterations, and each was the guard being wrong rather
+than the manuscript: thousands separators split `10{,}000` into `000`; scientific
+notation compared a mantissa against a full value; the tolerance ignored the
+exponent, holding `1.427e-2` to `5e-7` instead of `5e-6`; bare `10^{-2}` powers
+were read as data; and symbolic superscripts such as `S^{-4/5}` contributed `-4`.
+
+It reports every number in 18 tables as traceable. That result was verified not to
+be vacuous by planting a wrong digit in a generated value, confirming the guard
+fails, and restoring it. A gate that passes because it inspects nothing is worse
+than no gate, and this repository now has four whose failure mode is silence.
