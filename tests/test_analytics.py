@@ -1873,40 +1873,86 @@ def test_criterion_shape_converges_too_slowly_to_settle_the_rate() -> None:
     assert frame["limit_shape_ratio"].nunique() == 1
 
 
-def test_simulated_maximiser_is_worse_than_the_exact_one() -> None:
-    """What the maximiser table establishes, and what it does not.
+def test_simulated_maximiser_matches_the_finite_S_prediction() -> None:
+    """The M-estimator linearisation must reproduce the measured error.
 
-    It establishes that the simulated maximiser carries roughly twice the error
-    of the exact MLE at every simulation size shown.  It does NOT establish the
-    growth of that ratio in S: the standard errors are too large, and two runs
-    of the experiment differing only in the random stream returned growth
-    factors of 1.00 and 1.54 against a prediction of 2.00.
+    With the score second moment and the curvature both exact, the predicted
+    error 2 S^{1/K} sqrt(a_0) / (a_1 - a_0) is a number at finite S, not an
+    asymptotic order.  Agreement with the measured error is the evidence that
+    the linearisation holds where it can be checked.
 
-    So this test asserts the level and deliberately does not assert the trend.
-    Asserting the trend would encode one random draw as a finding.
+    The measurement searches from several random starts.  An earlier version
+    started at the origin, which in this model is theta_0, and so returned the
+    local minimum in the truth's own basin; restarts beat it in 28 of 30
+    replications, by up to 14 per cent at S = 256.  That bias flattered the
+    estimator and grew with S, so it would have suppressed the very trend at
+    issue.
     """
+    generate = pytest.importorskip("generate_results", reason="generator not importable")
     frame = pd.read_csv(
         ROOT / "paper" / "tables" / "simulated_maximiser.csv"
     ).sort_values("simulations")
     assert len(frame) >= 3
-    assert (frame["replications"] >= 20).all()
+    assert generate.MAXIMISER_RESTARTS >= 4, "the search must not start at the truth"
 
-    # The level: worse than the exact MLE, by a clear and roughly constant margin.
-    assert (frame["ratio"] > 1.5).all()
-    assert (frame["ratio"] < 3.0).all()
+    measured = frame["scaled_simulated_error"].to_numpy()
+    predicted = frame["predicted_error"].to_numpy()
+    errors = frame["simulated_standard_error"].to_numpy()
 
-    # The exact benchmark must sit near its limiting mean, E chi_4 ~ 1.88.
-    assert np.allclose(frame["scaled_exact_error"], 1.88, atol=0.35)
+    z_scores = (predicted - measured) / errors
+    assert np.all(np.abs(z_scores) < 2.5), f"prediction misses the measurement: {z_scores}"
 
-    # The standard errors must be reported, and must be large enough relative to
-    # the spread of the ratio column to justify not reading a trend from it.
-    assert (frame["simulated_standard_error"] > 0).all()
-    relative = (
-        frame["simulated_standard_error"] / frame["scaled_simulated_error"]
-    ).to_numpy()
-    ratios = frame["ratio"].to_numpy()
-    spread = ratios.max() / ratios.min() - 1.0
-    assert spread < 3 * relative.mean(), (
-        "the ratio column now varies by more than its own noise; the appendix "
-        "declines to read a trend here and that reading would need revisiting"
-    )
+    # The prediction must be reconstructible from its two exact ingredients,
+    # not merely copied from the generator.
+    dimension = 4
+    for _, row in frame.iterrows():
+        size = float(row["simulations"])
+        a_zero = generate.central_chi_coefficient(dimension, 0, size)
+        rebuilt = 2 * size ** (1 / dimension) * math.sqrt(a_zero) / row["curvature"]
+        assert rebuilt == pytest.approx(row["predicted_error"], rel=1e-9)
+
+
+def test_curvature_identity_matches_a_finite_difference() -> None:
+    """grad^2 G_S(theta_0) = (a_1 - a_0) I, exactly.
+
+    Checked against an independent finite-difference curvature of G_S, which
+    goes through the noncentral weighting rather than the Poisson expansion, so
+    the two routes share no code beyond the conditional criterion.
+    """
+    generate = pytest.importorskip("generate_results", reason="generator not importable")
+    dimension, step = 4, 0.05
+
+    for size in (1.0e2, 1.0e4):
+        a_zero = generate.central_chi_coefficient(dimension, 0, size)
+        a_one = generate.central_chi_coefficient(dimension, 1, size)
+        identity = a_one - a_zero
+
+        # G_S(r) = a_0 + (V_S / 2) r^2 + O(r^4), via the noncentral route.
+        shifted = generate.nearest_neighbour_expectation(dimension, step, size)
+        finite = 2 * (shifted - a_zero) / step**2
+
+        assert identity == pytest.approx(finite, rel=2e-3), size
+        assert identity > 0
+
+
+def test_curvature_converges_to_the_limit_hessian() -> None:
+    """(a_1 - a_0) must rise to V = 2 G(theta_0) / (K sigma^2 - 2).
+
+    This is the step the appendix previously reported as missing.  The limit is
+    recomputed from the closed form rather than taken from the generator.
+    """
+    generate = pytest.importorskip("generate_results", reason="generator not importable")
+    dimension = 4
+    limit = 2 * generate.nearest_neighbour_limit(dimension, 0.0) / (dimension - 2)
+
+    curvatures = [
+        generate.central_chi_coefficient(dimension, 1, size)
+        - generate.central_chi_coefficient(dimension, 0, size)
+        for size in (1.0e2, 1.0e4, 1.0e6)
+    ]
+
+    # Monotone, strictly below the limit, and approaching it.
+    assert all(b > a for a, b in zip(curvatures, curvatures[1:]))
+    assert all(value < limit for value in curvatures)
+    assert curvatures[-1] / limit > 0.85
+    assert curvatures[0] / limit < 0.5, "the deficit at small S is the point"

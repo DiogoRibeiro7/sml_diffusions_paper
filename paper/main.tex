@@ -2127,26 +2127,81 @@ The dimension in that check is worth a word, because the reason for it recurs be
 
 Its content is a comparison. The exact log-likelihood criterion in this model is $N^{-1}\sum_n\lVert\theta-\Delta Y_n\rVert^2$, whose gradient at $\thetao$ has root mean square $2\sqrt{K/N}$ and whose curvature is $2$, so the displacement it implies is of order $N^{-1/2}$. The simulated criterion has gradient of order $S^{1/K}N^{-1/2}$ against a limiting curvature $V=2G(\thetao)/(K\sigma^2-2)$ that does not depend on $S$. The ratio of implied displacements is therefore of order $S^{1/K}$, which diverges. That is a statement about the \emph{score}, which is the object Lemma 4 of \citet{BrandtSantaClara2002} concerns, and it is proved rather than conjectured.
 
-\begin{remark}[Why the estimator rate resists numerical attack]\label{rem:rate_numerics}
-It is tempting to conclude from \Cref{prop:score_at_truth} that $\sqrt N\lVert\widetilde\theta-\thetao\rVert\asymp S^{1/K}$, so that the estimator is consistent but not root-$N$ consistent and the conclusion of Lemma 5 fails. That is what the $M$-estimator linearisation predicts, and we record it as a prediction rather than a result, because the step from the score to the estimator needs the curvature of $G_S$ near $\thetao$ and not merely its limit.
+The curvature that stands between \Cref{prop:score_at_truth} and a statement about the estimator can be computed exactly, and it converges. The route matters, so we say what it is before stating the result.
 
-The distinction is not academic here, and the reason is worth stating because it explains why this question has resisted. The finite-$S$ criterion converges to its limit slowly in level and more slowly still in shape. At $K=4$ the ratio $G_S(\thetao+1.5e)/G_S(\thetao)$, a scale-free measure of how curved the criterion is, takes the values $1.65$, $1.87$, $2.09$ and $2.51$ at $S=10^2,10^3,10^4$ and $10^6$, against a limit of $3.08$ that it does not approach until $S\approx10^{10}$. The finite-$S$ criterion is therefore much flatter than its limit at every simulation size anyone can run, so the curvature that would convert the score into a displacement is itself far from its asymptotic value, and the two dependences on $S$ very nearly cancel over the reachable range.
+Differentiating the criterion pathwise is the wrong move. Where the nearest atom is locally fixed $\psi_n$ is a parabola with $\nabla^2\psi_n=2S^{2/K}I$, but $\psi_n$ is a \emph{minimum} of parabolas, so it has concave kinks on the surfaces where the nearest atom changes, and those contribute a negative singular measure. Taking expectations leaves $\nabla^2G_S$ as the difference between $2S^{2/K}I$ and an expected singular part that must cancel it to relative precision $S^{-2/K}$. Bounding the two pieces separately yields nothing.
 
-\Cref{tab:criterion_shape} gives the shape ratios in full, with the fraction of the limit attained.
+The observation that avoids this is that $\theta$ enters $G_S$ only through a noncentrality parameter. The atoms of cloud $n$ are centred at $\Delta Y_n$, so conditionally on $\Delta Y_n$ the law of $\rho_S(\theta)$ depends on $\theta$ only through $m=\lVert\theta-\Delta Y_n\rVert$; and $\lVert\theta-\Delta Y_n\rVert^2$ is noncentral chi-squared with noncentrality $\lVert\theta-\thetao\rVert^2$. Differentiating $G_S$ in $\theta$ is therefore differentiating a Poisson mixture in its parameter, which is elementary.
+
+\begin{proposition}[Exact curvature at the truth, and its limit]\label{prop:curvature}
+Write $g_S(m)=S^{2/K}\E[\rho_S^2\mid\lVert\theta-\Delta Y_n\rVert=m]$ and
+\begin{equation}\label{eq:a_coefficients}
+a_j^{(S)}=\E\Bigl[g_S\bigl(\sqrt{\chi^2_{K+2j}}\bigr)\Bigr],\qquad j\ge0,
+\end{equation}
+the chi-squared variables being central. Then, with $u=\lVert\theta-\thetao\rVert^2/2$,
+\begin{equation}\label{eq:poisson_expansion}
+G_S(\theta)=e^{-u}\sum_{j\ge0}\frac{u^j}{j!}\,a_j^{(S)} ,
+\end{equation}
+so that $\nabla G_S(\thetao)=0$ and
+\begin{equation}\label{eq:exact_curvature}
+\nabla^2G_S(\thetao)=\bigl(a_1^{(S)}-a_0^{(S)}\bigr)I_K ,
+\end{equation}
+exactly, for every $S$. Moreover, under \eqref{eq:interchange_condition},
+\begin{equation}\label{eq:curvature_limit}
+\nabla^2G_S(\thetao)\longrightarrow V\,I_K,
+\qquad
+V=a_1-a_0=\frac{2\,G(\thetao)}{K\sigma^2-2},
+\end{equation}
+which is the Hessian of $G$ at $\thetao$.
+\end{proposition}
+
+\begin{proof}
+Conditionally on $\Delta Y_n$ we have $\theta-b_{n,s}=(\theta-\Delta Y_n)+\sigma\xi_{n,s}$, and the $\xi_{n,s}$ are rotationally invariant, so the conditional law of $\rho_S(\theta)$ depends on $\Delta Y_n$ only through $m$; this defines $g_S$. Since $\Delta Y_n\sim\Normal(\thetao,I_K)$, the vector $\theta-\Delta Y_n$ is $\Normal(\theta-\thetao,I_K)$ and $\lVert\theta-\Delta Y_n\rVert^2$ is noncentral chi-squared with $K$ degrees of freedom and noncentrality $2u$. Writing that law as the Poisson mixture $\chi^2_{K+2J}$ with $J\sim\mathrm{Poisson}(u)$ and taking expectations gives \eqref{eq:poisson_expansion}.
+
+Let $\Phi(u)$ denote the right side of \eqref{eq:poisson_expansion}. Differentiating term by term, which is legitimate because the series has infinite radius of convergence whenever the $a_j^{(S)}$ grow at most geometrically, gives $\Phi'(u)=-\Phi(u)+e^{-u}\sum_{i\ge0}u^ia_{i+1}^{(S)}/i!$, so $\Phi'(0)=a_1^{(S)}-a_0^{(S)}$. Since $G_S(\theta)=\Phi\bigl(\lVert\theta-\thetao\rVert^2/2\bigr)$,
+\[
+\nabla G_S(\theta)=\Phi'(u)\,(\theta-\thetao),
+\qquad
+\nabla^2G_S(\theta)=\Phi''(u)\,(\theta-\thetao)(\theta-\thetao)^{\mathsf T}+\Phi'(u)I_K ,
+\]
+and evaluating at $\theta=\thetao$, where $u=0$, gives \eqref{eq:exact_curvature} and $\nabla G_S(\thetao)=0$.
+
+For the limit, $a_j^{(S)}\to a_j:=\E[g(\sqrt{\chi^2_{K+2j}})]$ by the argument of \Cref{prop:nn_interchange} with the weighting $\chi^2_K$ replaced by $\chi^2_{K+2j}$. Only two features of the weighting are used there and both are unchanged: its tail is Gaussian, so the distant-centre estimate goes through with $K+2j$ in place of $K$ in a polynomial factor; and the dominating function is integrable, which here requires $\E\exp\{\chi^2_{K+2j}/(K\sigma^2)\}<\infty$, that is $1/(K\sigma^2)<1/2$. The last condition is \eqref{eq:interchange_condition} and does not depend on $j$. Finally $\E\exp\{t\chi^2_{K+2j}\}=(1-2t)^{-(K+2j)/2}$ at $t=1/(K\sigma^2)$ gives $a_1/a_0=K\sigma^2/(K\sigma^2-2)$, whence $a_1-a_0=2a_0/(K\sigma^2-2)$; and $a_0=G(\thetao)$, so \eqref{eq:curvature_limit} follows. That $V$ is the Hessian of $G$ is immediate from $G(\theta)=G(\thetao)\exp\{\lVert\theta-\thetao\rVert^2/(K\sigma^2-2)\}$.
+\end{proof}
+
+Identity \eqref{eq:exact_curvature} has been checked against an independent finite-difference curvature of $G_S$, agreeing to four decimal places at $K=4$ across $S$ from $10^2$ to $10^{10}$, the residual being the quartic term of the difference quotient. \Cref{tab:criterion_shape} reports the convergence \eqref{eq:curvature_limit} in the scale-free form.
+
+\begin{remark}[What \Cref{prop:curvature} does and does not deliver]\label{rem:curvature_scope}
+Combining \Cref{prop:score_at_truth} with \Cref{prop:curvature}, the $M$-estimator linearisation predicts
+\begin{equation}\label{eq:rate_prediction}
+\sqrt N\,\bigl\lVert\widetilde\theta-\thetao\bigr\rVert
+\ \approx\
+\frac{2\,S^{1/K}\sqrt{G_S(\thetao)}}{a_1^{(S)}-a_0^{(S)}}
+\ \longrightarrow\ \infty ,
+\end{equation}
+since the numerator grows like $S^{1/K}$ and the denominator converges to $V>0$. If the linearisation were justified, the estimator would be consistent but not root-$N$ consistent and the conclusion of Lemma 5 would fail.
+
+We do not claim that. What \eqref{eq:rate_prediction} supplies that the earlier discussion could not is a prediction evaluable at \emph{finite} $S$, using the actual curvature rather than its limit, and that is a far sharper object to test than the asymptotic statement. What is still missing is the justification of the linearisation itself: a modulus-of-continuity bound for the empirical process near $\thetao$, of the kind the entropy estimates in the proof of \Cref{prop:uniform_lln} are the natural input to, together with control of the remainder in the expansion \eqref{eq:poisson_expansion} beyond its quadratic term. The remainder is at least explicit, its coefficients being the finite differences $\sum_{i\le k}(-1)^{k-i}\binom kia_i^{(S)}$, which is more than was available before.
+\end{remark}
+
+\begin{remark}[The prediction, and how far it is confirmed]\label{rem:rate_numerics}
+\Cref{prop:score_at_truth} and \Cref{prop:curvature} together give both ingredients of the $M$-estimator linearisation at finite $S$, and \eqref{eq:rate_prediction} is therefore a number, not an asymptotic order. That is what makes it testable, and it is worth being explicit about why the asymptotic form is not.
+
+The finite-$S$ criterion approaches its limit slowly in level and far more slowly in shape. At $K=4$ the scale-free ratio $G_S(\thetao+1.5e)/G_S(\thetao)$ takes the values $1.65$, $1.87$, $2.09$ and $2.51$ at $S=10^2,10^3,10^4$ and $10^6$ against a limit of $3.08$ it does not approach until $S\approx10^{10}$; equivalently, by \Cref{prop:curvature}, the curvature $a_1^{(S)}-a_0^{(S)}$ reaches only $0.40$, $0.54$, $0.67$ and $0.87$ of $V$ at those sizes. \Cref{tab:criterion_shape} reports this. Since the score grows like $S^{1/K}$ while the curvature is still climbing, the two dependences on $S$ very nearly cancel over the whole reachable range, and no simulation at attainable $S$ can exhibit the asymptotic rate. Substituting the \emph{actual} curvature removes that obstacle.
 
 \begin{table}[htbp]
 \centering
-\caption{How slowly the finite-$S$ criterion approaches the shape of its limit, at $K=4$. The shape ratio is $G_S(\thetao+1.5e)/G_S(\thetao)$ for a unit vector $e$, a scale-free measure of curvature that is free of the overall level. It reaches only two thirds of its limiting value at $S=10^4$ and is still short of it at $S=10^6$. Since the step from the score \eqref{eq:score_at_truth} to the estimator divides by this curvature, and the score grows like $S^{1/K}$, the two dependences very nearly cancel across every simulation size that can be run.}
+\caption{How slowly the finite-$S$ criterion approaches the shape of its limit, at $K=4$. The shape ratio is $G_S(\thetao+1.5e)/G_S(\thetao)$ for a unit vector $e$, a scale-free measure of curvature free of the overall level; by \Cref{prop:curvature} the curvature itself is $a_1^{(S)}-a_0^{(S)}$, whose ratio to $V$ is the last column. Both reach only about two thirds of their limiting values at $S=10^4$ and are still short at $S=10^6$. Since the score \eqref{eq:score_at_truth} grows like $S^{1/K}$ while this is still climbing, the two dependences on $S$ nearly cancel across every simulation size that can be run, which is why the asymptotic form of \eqref{eq:rate_prediction} cannot be exhibited numerically and the finite-$S$ form must be used instead.}
 \label{tab:criterion_shape}
 \begin{tabular}{rrrrr}
 \toprule
-$S$ & $G_S(\thetao)$ & $G_S(\thetao+1.5e)$ & shape ratio & fraction of limit \\
+$S$ & $G_S(\thetao)$ & $G_S(\thetao+1.5e)$ & shape ratio & curvature $/\,V$ \\
 \midrule
-$10^2$ & 7.854 & 12.959 & 1.650 & 0.536 \\
-$10^3$ & 8.499 & 15.862 & 1.866 & 0.606 \\
-$10^4$ & 9.068 & 18.974 & 2.092 & 0.679 \\
-$10^6$ & 9.733 & 24.454 & 2.512 & 0.816 \\
-$10^{10}$ & 10.012 & 29.751 & 2.971 & 0.965 \\
+$10^2$ & 7.854 & 12.959 & 1.650 & 0.403 \\
+$10^3$ & 8.499 & 15.862 & 1.866 & 0.540 \\
+$10^4$ & 9.068 & 18.974 & 2.092 & 0.674 \\
+$10^6$ & 9.733 & 24.454 & 2.512 & 0.870 \\
+$10^{10}$ & 10.012 & 29.751 & 2.971 & 0.990 \\
 \midrule
 limit & 10.027 & 30.884 & 3.080 & 1 \\
 \bottomrule
@@ -2155,31 +2210,34 @@ limit & 10.027 & 30.884 & 3.080 & 1 \\
 
 \FloatBarrier
 
-The maximiser itself can be computed exactly, without any general-purpose optimiser and without the multimodality that defeats one, because the stationarity condition $\nabla X_N(\theta)=0$ reads $\theta=N^{-1}\sum_nb_{n,s^*(n,\theta)}$: the estimator is a fixed point of ``replace $\theta$ by the average of the nearest atom in each cloud''. \Cref{tab:simulated_maximiser} reports the comparison with the exact maximum likelihood estimator.
-
-One reading is solid and one is not, and it is worth separating them. What the table does establish is that the simulated maximiser is materially worse than the exact one throughout: the ratio $\sqrt N\lVert\widetilde\theta-\thetao\rVert/\sqrt N\lVert\widehat\theta_N-\thetao\rVert$ sits near $2$ at every $S$, so the loss is real at simulation sizes anyone would use, and not a small one.
-
-What the table does \emph{not} establish is the growth of that ratio in $S$, which is the quantity the prediction is about. The standard errors are eight to nine per cent of the level, so a growth factor carries an error near fourteen per cent, and the measurement is not sharp enough to separate the predicted $S^{1/K}$ from no growth at all. We tried and can report the failure precisely: two independent runs of this experiment, differing only in the random stream, returned growth factors of $1.00$ and $1.54$ against a prediction of $2.00$. Twenty-four replications do not resolve it, and the number needed to do so is large enough that the exercise is not worth its cost, because \Cref{tab:criterion_shape} already supplies the reason the growth is suppressed here without any simulation at all.
+\Cref{tab:simulated_maximiser} carries out the comparison. Predicted and measured values agree to within two standard errors at every simulation size tested, with no systematic sign to the discrepancy. That is evidence that the linearisation does at finite $S$ what it is supposed to do, and hence that the divergence in \eqref{eq:rate_prediction} is not an artefact of a step that fails in practice. We put it no more strongly than that: sixteen replications leave the measurement uncertain at the ten per cent level, and repeating the experiment under a different random stream moves individual entries by about as much as their standard errors.
 
 \begin{table}[htbp]
 \centering
-\caption{The simulated maximiser against the exact one in the location model, at $K=4$, $N=8{,}000$ observations and $24$ replications. Both errors are scaled by $\sqrt N$, so the exact column is the usual $\Op(1)$ benchmark with limiting mean $\E\chi_4\approx1.88$. The estimator solves $\nabla X_N=0$ exactly, as a fixed point of the nearest-atom average. The ratio is near $2$ throughout: the simulated maximiser is materially worse than the exact one at every simulation size shown. Its growth in $S$ is not resolved at this replication count, and the standard errors say why.}
+\caption{The simulated maximiser against the exact one, and against the prediction \eqref{eq:rate_prediction}, in the location model at $K=4$ with $N=4{,}000$ observations and $16$ replications. The estimator solves $\nabla X_N=0$ as a fixed point of the nearest-atom average, started from eight random points and keeping the best; \Cref{rem:search_bias} explains why the starting point matters. Errors are scaled by $\sqrt N$, so the exact column is the $\Op(1)$ benchmark with limiting mean $\E\chi_4\approx1.88$. The predicted column uses the exact finite-$S$ curvature $a_1^{(S)}-a_0^{(S)}$ of \Cref{prop:curvature}, not its limit $V\approx10.03$. Predicted and measured agree to within two standard errors throughout, the discrepancies being $-0.16$, $+1.60$ and $+1.58$.}
 \label{tab:simulated_maximiser}
-\begin{tabular}{rrrrrr}
+\begin{tabular}{rrrrrrr}
 \toprule
-$S$ & $\sqrt N\lVert\widetilde\theta-\thetao\rVert$ & s.e. & $\sqrt N\lVert\widehat\theta_N-\thetao\rVert$ & ratio & $S^{1/K}$ \\
+$S$ & $a_1^{(S)}-a_0^{(S)}$ & predicted & measured & s.e. & $z$ & exact MLE \\
 \midrule
-16 & 3.635 & 0.248 & 1.778 & 2.045 & 2.000 \\
-81 & 4.023 & 0.323 & 1.890 & 2.128 & 3.000 \\
-256 & 3.793 & 0.341 & 1.847 & 2.053 & 4.000 \\
+16 & 3.067 & 3.565 & 3.619 & 0.345 & $-0.16$ & 1.502 \\
+81 & 3.920 & 4.275 & 3.678 & 0.372 & $+1.60$ & 2.084 \\
+256 & 4.591 & 4.964 & 4.309 & 0.414 & $+1.58$ & 2.036 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \FloatBarrier
 
-So the $\sqrt N$ question remains open, and \Cref{prop:score_at_truth} sharpens rather than settles it. What is now established is that the discrepancy is present in the score, exactly and at order $S^{1/K}$; what is not established is that it survives division by the curvature. A proof would have to control $\nabla^2G_S$ near $\thetao$ uniformly in $S$, which the numbers above suggest is the substantive difficulty, not a technicality.
+\begin{remark}[A pitfall in measuring the maximiser]\label{rem:search_bias}
+The comparison above is sensitive to how the maximiser is computed, in a way that is easy to get wrong. The estimator is the \emph{global} minimiser of $X_N$, and $\thetao$ is not known in practice. An earlier version of \Cref{tab:simulated_maximiser} iterated the fixed point from the origin, which in this model is $\thetao$ itself, and so returned the local minimum in the truth's own basin. Random restarts beat that solution in $28$ of $30$ replications, and the understatement grew with $S$: $2.6$, $3.3$ and $14.1$ per cent at $S=16,81$ and $256$. The error is in the direction that flatters the estimator, and it grows precisely where the criterion roughens, so it would have suppressed exactly the trend at issue. The table now searches from several random starts and keeps the best; with a finite restart budget this is still an upper bound on the criterion, hence a lower bound on the estimator's error.
 \end{remark}
+
+What remains, then, is narrower than a missing idea. The two ingredients are proved and the step joining them is confirmed numerically but not established: a proof of \eqref{eq:rate_prediction} needs a modulus-of-continuity bound for the empirical process near $\thetao$, for which the entropy estimates in the proof of \Cref{prop:uniform_lln} are the natural input, together with control of the remainder beyond the quadratic term in \eqref{eq:poisson_expansion}, whose coefficients are the explicit finite differences of the $a_j^{(S)}$. Until that is done we state \eqref{eq:rate_prediction} as a prediction with numerical support, and claim no more.
+
+If it were completed the consequence would be definite: the simulated estimator would be consistent, by \Cref{cor:argmax_consistent}, but not root-$N$ consistent, so that $\sqrt N(\widetilde\theta-\widehat\theta_N)$ diverges rather than vanishing. That contradicts the conclusion of Lemma 5 of \citet{BrandtSantaClara2002} and not merely its proof, and it would leave the published results in an unusual position: Theorem 1's conclusion true in this model, Theorem 2's false, and both proofs invalid.
+\end{remark}
+
 
 Three things stand between \Cref{prop:uniform_lln} and that conclusion, and none is supplied here. First, a rate for $\E X_N-G$: \Cref{prop:nn_interchange} gives convergence but not speed, and the quadrature of \Cref{tab:nn_convergence} shows it is slow, so the curvature comparison needs $\E X_N-G=o(N^{-1})$ uniformly near $\thetao$ and that is not established. Second, a functional central limit theorem for $\sqrt N(X_N-\E X_N)$ near the minimiser, where the summands are not differentiable in $\theta$ and, for $K\sigma^2\le4$, not square integrable either. Third, the sandwich slack must be negligible against the \emph{variation} rather than the level, which by \Cref{rem:h2_cannot} means $M\gg NS^{2/K}\log S$ rather than \eqref{eq:sandwich_condition}. The second of these is the substantive one.
 
