@@ -249,6 +249,7 @@ Cite the **concept DOI**, which represents every version and always resolves to 
 | DOI | Refers to | Status |
 | --- | --- | --- |
 | [`10.5281/zenodo.21719868`](https://doi.org/10.5281/zenodo.21719868) | all versions; resolves to the latest | **cite this** |
+| [`10.5281/zenodo.21848464`](https://doi.org/10.5281/zenodo.21848464) | v1.5.0 | current |
 | [`10.5281/zenodo.21834941`](https://doi.org/10.5281/zenodo.21834941) | v1.4.0 | superseded: argmax rate reported as open, before the score and curvature results |
 | [`10.5281/zenodo.21830098`](https://doi.org/10.5281/zenodo.21830098) | v1.3.0 | superseded: wrongly reports a rate condition `N ≫ S^(2/K)` for the uniform step |
 | [`10.5281/zenodo.21823961`](https://doi.org/10.5281/zenodo.21823961) | v1.2.0 | superseded: weaker collapse theorem, scaling law resting on (A5) |

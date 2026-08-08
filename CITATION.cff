@@ -58,6 +58,14 @@ identifiers:
       Concept DOI. Represents every version of this work and always resolves to
       the most recent one. Cite this unless you need to pin a specific version.
   - type: doi
+    value: 10.5281/zenodo.21848464
+    description: >-
+      Version DOI for v1.5.0, the current release. It obtains the criterion's
+      score at the truth and the curvature there, both exactly, and shows the
+      curvature converges to the Hessian of the limiting criterion. Together
+      they predict that the simulated maximiser is not root-N consistent; the
+      step joining them is confirmed numerically but not established.
+  - type: doi
     value: 10.5281/zenodo.21834941
     description: >-
       Version DOI for v1.4.0, superseded by v1.5.0, which adds the exact score
