@@ -46,8 +46,8 @@ keywords:
   - nonregular inference
 license: CC-BY-4.0
 repository-code: "https://github.com/DiogoRibeiro7/sml_diffusions_paper"
-date-released: 2026-08-08
-version: v1.6.0
+date-released: 2026-08-09
+version: v1.6.1
 doi: 10.5281/zenodo.21719868
 # Zenodo mints a version DOI only when a release is published, and the identifier
 # it issues cannot be predicted, so the entry for the release named above is added
@@ -62,13 +62,13 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.21850110
     description: >-
-      Version DOI for v1.6.0, the current release. It corrects v1.4.0 and
-      v1.5.0: the uniform law of large numbers and the location-model
-      consistency corollary become conditional on an empirical-tail hypothesis
-      that is stated and not verified, the score and curvature results are
-      attributed to the nearest-atom proxy criterion rather than to the
-      simulated score, and the score-level corollary of Section 6 is downgraded
-      pending control of its random denominator.
+      Version DOI for v1.6.0, superseded by defect. Its corrections are sound
+      but incompletely applied: having labelled the location-model consistency
+      corollary conditional, it still asserts in three places that consistency
+      is settled, and carries an orphaned paragraph citing the uniform law as
+      available. Its contribution list also still states the score-level rate
+      as a necessary condition after the corollary establishing it was
+      downgraded. A reader could take either side of the contradiction.
   - type: doi
     value: 10.5281/zenodo.21848464
     description: >-
