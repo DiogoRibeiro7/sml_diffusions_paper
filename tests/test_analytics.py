@@ -1730,11 +1730,14 @@ def test_uniform_condition_is_compatible_with_the_published_rates() -> None:
 
 
 def test_argmax_consistency_conditions_hold_on_the_collapsing_diagonal() -> None:
-    """Along M = S = n with K > 2 the corollary's conditions must hold.
+    """Along M = S = n with K > 2 the corollary's rate conditions must hold.
 
-    That is the point of the corollary: the design where the density collapses is
-    also a design where the maximiser is consistent.  Both facts are checked here
-    from their defining inequalities.
+    This checks the two rate conditions of the consistency corollary, not the
+    corollary itself: the corollary is conditional on an empirical-tail
+    hypothesis that is stated and not verified, so consistency along this
+    diagonal is not established.  What is checked is that the design where the
+    density collapses is also a design where those rate conditions hold, which
+    is what makes the conditional statement worth having.
     """
     sizes = (10**3, 10**5, 10**7)
     for dimension in (3, 4, 6):

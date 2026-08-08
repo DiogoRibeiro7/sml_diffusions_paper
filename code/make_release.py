@@ -281,6 +281,7 @@ def main() -> int:
         "change_log_uniform_step.md",
         "change_log_score_route.md",
         "change_log_curvature.md",
+        "change_log_referee_round.md",
         "mathematical_claims_matrix.md",
         "literature_novelty_matrix.md",
         "application_feasibility_matrix.md",
