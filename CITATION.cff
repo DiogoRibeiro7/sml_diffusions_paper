@@ -17,13 +17,15 @@ abstract: >-
   to zero for every K > 2 although the true density is strictly positive. This refutes
   the consistency asserted in their Lemma 2 and the central-limit statement of their
   Lemma 3, so the proofs of their parameter-estimator theorems fail. Inconsistency of
-  the resulting argmax estimator is not proved, and in a Gaussian location model the
-  opposite is proved: the simulated maximiser is consistent along the very sequences
-  on which the density collapses, so the counterexample does not transfer. The rate is
-  a separate matter. The criterion's score at the truth and the curvature there are
-  both obtained exactly, and they predict that the estimator is not root-N consistent,
-  which would contradict the conclusion of the published Lemma 5 rather than its proof;
-  the step joining them is confirmed numerically but not established, and is set out
+  the resulting argmax estimator is not proved. In a Gaussian location model a
+  conditional argument gives the opposite, that the simulated maximiser is consistent
+  along the very sequences on which the density collapses, so that the counterexample
+  would not transfer; it rests on a uniform-integrability condition for the empirical
+  tails which is stated but not verified. The rate is a separate matter. For the
+  nearest-atom proxy criterion the score at the truth and the curvature there are both
+  obtained exactly, and they predict that the estimator is not root-N consistent, which
+  would contradict the conclusion of the published Lemma 5 rather than its proof; the
+  step joining them is confirmed numerically but not established, and is set out
   explicitly. Issues specific to the exchange-rate application of that paper,
   which concern its specification rather than the estimator, are treated in a companion
   note deposited in the same record.
@@ -45,7 +47,7 @@ keywords:
 license: CC-BY-4.0
 repository-code: "https://github.com/DiogoRibeiro7/sml_diffusions_paper"
 date-released: 2026-08-08
-version: v1.5.0
+version: v1.6.0
 doi: 10.5281/zenodo.21719868
 # Zenodo mints a version DOI only when a release is published, and the identifier
 # it issues cannot be predicted, so the entry for the release named above is added
@@ -60,22 +62,24 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.21848464
     description: >-
-      Version DOI for v1.5.0, the current release. It obtains the criterion's
-      score at the truth and the curvature there, both exactly, and shows the
-      curvature converges to the Hessian of the limiting criterion. Together
-      they predict that the simulated maximiser is not root-N consistent; the
-      step joining them is confirmed numerically but not established.
+      Version DOI for v1.5.0, superseded by defect. Its uniform law of large
+      numbers for the nearest-atom criterion is labelled proved, but the proof
+      controls the supremum over theta of an expected empirical tail where it
+      needs the expectation of the supremum, so the location-model consistency
+      corollary that depends on it is not established either. v1.5.0 also
+      describes the score and curvature results as concerning the simulated
+      score, when they concern the nearest-atom proxy criterion, whose relation
+      to the log likelihood is through criterion values rather than
+      derivatives. The exact score moment and the curvature identity themselves
+      are unaffected and were confirmed by external review.
   - type: doi
     value: 10.5281/zenodo.21834941
     description: >-
-      Version DOI for v1.4.0, superseded by v1.5.0, which adds the exact score
-      second moment at the truth and the exact curvature of the criterion there.
-      Nothing in v1.4.0 is known to be wrong; its treatment of the argmax rate
-      is weaker, that step being reported as open. v1.4.0 proves the uniform law
-      of large numbers for the nearest-atom criterion under N >> log S, deduces
-      consistency of the simulated maximiser in the location model along the
-      sequences on which the density collapses, and corrects the rate condition
-      misreported in v1.3.0.
+      Version DOI for v1.4.0, superseded by defect. It introduces the uniform
+      law of large numbers whose proof v1.6.0 corrects, and states the
+      location-model consistency corollary as proved; both are conditional on an
+      empirical-tail hypothesis that v1.4.0 does not verify. Its correction of
+      the rate condition misreported in v1.3.0 stands.
   - type: doi
     value: 10.5281/zenodo.21830098
     description: >-

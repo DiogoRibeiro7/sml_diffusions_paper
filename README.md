@@ -46,8 +46,10 @@ the simulated maximiser is **consistent** along `M = S = n` with `K > 2` — pre
 which the density collapses to zero. Collapse of the density and consistency of the maximiser hold
 simultaneously, in the same model on the same designs, so the counterexample provably does not
 transfer and no argument through pointwise density behaviour alone can make it. What remains open is
-the rate: whether `√N(θ̃ - θ̂)` diverges, which would refute the *conclusion* of Lemma 5 rather than
-its proof. Half of that is now proved. The criterion's score at the truth has the exact second
+the rate. The consistency argument itself is conditional: it rests on a uniform law whose proof was
+found incomplete under external review, and which now carries an unverified empirical-tail
+hypothesis. Separately, whether `√N(θ̃ - θ̂)` diverges would refute the *conclusion* of Lemma 5
+rather than its proof, and half of that is proved. The criterion's score at the truth has the exact second
 moment `4 S^(2/K) G_S(θ₀) / N`, so it grows like `S^(1/K)` and cannot converge to the exact score —
 the discrepancy is present, exactly, in the score. What is not proved is that it survives division
 by the curvature, and Appendix A measures the obstacle: the finite-`S` criterion is about a third
@@ -249,8 +251,8 @@ Cite the **concept DOI**, which represents every version and always resolves to 
 | DOI | Refers to | Status |
 | --- | --- | --- |
 | [`10.5281/zenodo.21719868`](https://doi.org/10.5281/zenodo.21719868) | all versions; resolves to the latest | **cite this** |
-| [`10.5281/zenodo.21848464`](https://doi.org/10.5281/zenodo.21848464) | v1.5.0 | current |
-| [`10.5281/zenodo.21834941`](https://doi.org/10.5281/zenodo.21834941) | v1.4.0 | superseded: argmax rate reported as open, before the score and curvature results |
+| [`10.5281/zenodo.21848464`](https://doi.org/10.5281/zenodo.21848464) | v1.5.0 | superseded: uniform law labelled proved; its proof is incomplete |
+| [`10.5281/zenodo.21834941`](https://doi.org/10.5281/zenodo.21834941) | v1.4.0 | superseded: introduces the uniform law whose proof is incomplete |
 | [`10.5281/zenodo.21830098`](https://doi.org/10.5281/zenodo.21830098) | v1.3.0 | superseded: wrongly reports a rate condition `N ≫ S^(2/K)` for the uniform step |
 | [`10.5281/zenodo.21823961`](https://doi.org/10.5281/zenodo.21823961) | v1.2.0 | superseded: weaker collapse theorem, scaling law resting on (A5) |
 | [`10.5281/zenodo.21763715`](https://doi.org/10.5281/zenodo.21763715) | v1.1.0 | superseded: the single-document form, nothing known to be wrong |
