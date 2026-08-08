@@ -60,6 +60,14 @@ identifiers:
       Concept DOI. Represents every version of this work and always resolves to
       the most recent one. Cite this unless you need to pin a specific version.
   - type: doi
+    value: 10.5281/zenodo.21855599
+    description: >-
+      Version DOI for v1.6.1, the current release. It completes the corrections
+      begun in v1.6.0, removing three residual assertions that consistency is
+      settled and an orphaned paragraph citing the uniform law as available, and
+      adds a check requiring every number in a manuscript table to be the
+      correct rounding of a generated value.
+  - type: doi
     value: 10.5281/zenodo.21850110
     description: >-
       Version DOI for v1.6.0, superseded by defect. Its corrections are sound
