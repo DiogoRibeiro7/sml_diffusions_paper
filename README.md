@@ -251,6 +251,7 @@ Cite the **concept DOI**, which represents every version and always resolves to 
 | DOI | Refers to | Status |
 | --- | --- | --- |
 | [`10.5281/zenodo.21719868`](https://doi.org/10.5281/zenodo.21719868) | all versions; resolves to the latest | **cite this** |
+| [`10.5281/zenodo.21850110`](https://doi.org/10.5281/zenodo.21850110) | v1.6.0 | current |
 | [`10.5281/zenodo.21848464`](https://doi.org/10.5281/zenodo.21848464) | v1.5.0 | superseded: uniform law labelled proved; its proof is incomplete |
 | [`10.5281/zenodo.21834941`](https://doi.org/10.5281/zenodo.21834941) | v1.4.0 | superseded: introduces the uniform law whose proof is incomplete |
 | [`10.5281/zenodo.21830098`](https://doi.org/10.5281/zenodo.21830098) | v1.3.0 | superseded: wrongly reports a rate condition `N ≫ S^(2/K)` for the uniform step |

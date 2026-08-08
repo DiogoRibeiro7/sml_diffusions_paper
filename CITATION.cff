@@ -60,6 +60,16 @@ identifiers:
       Concept DOI. Represents every version of this work and always resolves to
       the most recent one. Cite this unless you need to pin a specific version.
   - type: doi
+    value: 10.5281/zenodo.21850110
+    description: >-
+      Version DOI for v1.6.0, the current release. It corrects v1.4.0 and
+      v1.5.0: the uniform law of large numbers and the location-model
+      consistency corollary become conditional on an empirical-tail hypothesis
+      that is stated and not verified, the score and curvature results are
+      attributed to the nearest-atom proxy criterion rather than to the
+      simulated score, and the score-level corollary of Section 6 is downgraded
+      pending control of its random denominator.
+  - type: doi
     value: 10.5281/zenodo.21848464
     description: >-
       Version DOI for v1.5.0, superseded by defect. Its uniform law of large
