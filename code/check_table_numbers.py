@@ -17,6 +17,16 @@ rounding in either direction is accepted while a wrong digit is not.
 Tables whose numbers are quoted from the literature or reported by the original
 authors are exempt by caption, each with a stated reason, so that adding an
 exemption is a deliberate act rather than a silent one.
+
+What this does and does not guarantee.  A wrong digit is caught only if the
+wrong value fails to land within rounding distance of some *other* generated
+value, and with several hundred values in the pool that is not certain.  The
+detection rate was measured by drawing random wrong values and counting how many
+the gate accepts: 79 per cent of two-decimal errors are caught, 96 per cent of
+three-decimal, and 99.8 per cent of four-decimal.  So the gate
+is a filter, not a proof, and it is weakest exactly where numbers are quoted
+loosely.  ``test_number_gate_detection_rate`` measures this and fails if it
+degrades, so the claim stays honest as the pool of generated values grows.
 """
 
 from __future__ import annotations
@@ -71,8 +81,11 @@ def generated_values() -> list[float]:
                         values.append(float(cell.strip()))
                     except (ValueError, AttributeError):
                         continue
-    # Percentages are quoted as such in several captions.
-    values.extend(value * 100 for value in list(values))
+    # A blanket percentage variant was removed: multiplying every value by 100
+    # doubled the pool and raised the false-acceptance rate by about a quarter,
+    # to catch a handful of captions that quote proportions as percentages.
+    # Those are handled by PERCENTAGE_FORMS instead.
+    values.extend(value * 100 for value in list(values) if 0.0 < value < 1.0)
     return values
 
 
@@ -133,20 +146,104 @@ def scan() -> list[tuple[str, str, str]]:
     return problems
 
 
+
+# ---------------------------------------------------------------------------
+# Prose.
+#
+# The table scan above closed one blind spot and immediately exposed the next:
+# a wrong covering-radius figure reached the manuscript in a sentence rather
+# than a cell, where the table scan could not see it.  Prose carries fewer
+# numbers than tables but they are quoted more loosely, so the rule here is
+# narrower: only decimals with two or more places are checked, integers in
+# prose being almost always structural (dimensions, counts, years, sizes).
+# ---------------------------------------------------------------------------
+
+PROSE_DECIMAL = re.compile(r"(?<![\w.])(-?\d+\.\d{2,})(?![\w.])")
+
+# Contexts whose digits are identifiers rather than measurements.
+IDENTIFIERS = (
+    re.compile(r"10\.\d{4,}/[^\s},]+"),          # DOIs
+    re.compile(r"\bv\d+\.\d+\.\d+\b"),  # version tags
+    re.compile(r"\\cite[a-zA-Z]*\{[^{}]*\}"),  # citation keys
+    re.compile(r"\\(?:label|ref|Cref|eqref)\{[^{}]*\}"),
+    re.compile(r"\\begin\{verbatim\}.*?\\end\{verbatim\}", re.S),
+    re.compile(r"\\texttt\{[^{}]*\}"),
+)
+
+
+def scan_prose() -> list[tuple[str, str, str]]:
+    """Return (document, context, literal) for each unexplained prose decimal."""
+    values = generated_values()
+    problems: list[tuple[str, str, str]] = []
+
+    for name in DOCUMENTS:
+        path = PAPER / name
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+
+        # Tables are the other scan's business.
+        text = TABLE_BLOCK.sub(" ", text)
+        for pattern in IDENTIFIERS:
+            text = pattern.sub(" ", text)
+        text = SCIENTIFIC.sub(lambda m: f"{m.group(1)}e{m.group(2)}", text)
+        text = SCRIPTS.sub(" ", text)
+
+        for match in PROSE_DECIMAL.finditer(text):
+            literal = match.group(1)
+            if matches(literal, values):
+                continue
+            start = max(0, match.start() - 60)
+            context = " ".join(text[start : match.start()].split())[-55:]
+            problems.append((name, context, literal))
+
+    return problems
+
+def load_baseline() -> set[str]:
+    """The prose numbers already known to be ungenerated, as document:literal."""
+    path = ROOT / "code" / "prose_number_baseline.txt"
+    if not path.exists():
+        return set()
+    return {
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
+    }
+
+
 def main() -> int:
+    """Report every manuscript number that no generator accounts for."""
     problems = scan()
+    baseline = load_baseline()
+    all_prose = scan_prose()
+    prose = [
+        item for item in all_prose if f"{item[0]}:{item[2]}" not in baseline
+    ]
+    carried = len(all_prose) - len(prose)
     tables = sum(
         len(TABLE_BLOCK.findall((PAPER / name).read_text(encoding="utf-8")))
         for name in DOCUMENTS
         if (PAPER / name).exists()
     )
-    if problems:
-        for document, caption, literal in problems:
-            print(f"  {document}: {literal} is not the rounding of any generated value")
-            print(f"      table: {caption.strip()}")
-        print(f"\n{len(problems)} unexplained number(s) across {tables} tables")
+    for document, caption, literal in problems:
+        print(f"  {document}: table number {literal} is not a generated value")
+        print(f"      table: {caption.strip()}")
+    for document, context, literal in prose:
+        print(f"  {document}: prose number {literal} is not a generated value")
+        print(f"      after: ...{context}")
+
+    total = len(problems) + len(prose)
+    if total:
+        print(f"\n{total} new unexplained number(s): {len(problems)} in tables, "
+              f"{len(prose)} in prose")
+        if prose:
+            print("  If these are legitimate, add them to code/prose_number_baseline.txt")
+            print("  with a reason; better, produce them from a generator.")
         return 1
-    print(f"every number in {tables} manuscript tables traces to generated data")
+    print(
+        f"every number in {tables} manuscript tables traces to generated data; "
+        f"no new prose numbers ({carried} carried in the baseline)"
+    )
     return 0
 
 

@@ -132,6 +132,7 @@ gates keep the manuscript and the code from drifting apart.
 | Tests | `make test` | 270 tests. Every closed form is checked against an independent computation: numerical integration, direct Monte Carlo, or brute force. Tolerances are stated at each assertion. |
 | Reproducibility | `make verify` | 45 artefacts regenerated into a scratch directory and compared with the committed copies. CSV field-wise at `1e-9`; PDF and PNG by SHA-256. Figure output carries no embedded timestamp, so the comparison is exact. |
 | Wording | `make phrases` | 54 patterns for claims retracted in an earlier review round. Guards against an overstatement removed from one section reappearing in another later. |
+| Numbers | `make numbers` | Every number in a manuscript table, and every prose decimal of two or more places, must be the correct rounding of a generated value. Detection is measured, not assumed: 79 per cent of two-decimal errors, 96 per cent of three, 99.8 per cent of four. Prose numbers predating the check are frozen in a baseline, so new ones fail while old debt is paid down. |
 | Release | `python code/make_release.py` | All of the above, plus a clean LaTeX log, resolved front-matter metadata, no draft label, deposit metadata that parses, and every release document present. |
 
 `make check` runs the first three. The release gate refuses to build if any fails; `--allow-draft`

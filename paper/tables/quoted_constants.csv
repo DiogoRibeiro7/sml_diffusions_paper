@@ -1,0 +1,11 @@
+quantity,dimension,value,note
+uniform_law_exponent,3,7.666666666666666,"p in N >> (log S)^p, at sigma^2 -> 1"
+tail_rate_alpha,3,0.16666666666666669,"alpha = 1/2 - 1/(K sigma^2), at sigma^2 -> 1"
+uniform_law_exponent,4,4.0,"p in N >> (log S)^p, at sigma^2 -> 1"
+tail_rate_alpha,4,0.25,"alpha = 1/2 - 1/(K sigma^2), at sigma^2 -> 1"
+uniform_law_exponent,5,2.8666666666666667,"p in N >> (log S)^p, at sigma^2 -> 1"
+tail_rate_alpha,5,0.3,"alpha = 1/2 - 1/(K sigma^2), at sigma^2 -> 1"
+uniform_law_exponent,6,2.333333333333333,"p in N >> (log S)^p, at sigma^2 -> 1"
+tail_rate_alpha,6,0.33333333333333337,"alpha = 1/2 - 1/(K sigma^2), at sigma^2 -> 1"
+uniform_law_exponent,8,1.8333333333333333,"p in N >> (log S)^p, at sigma^2 -> 1"
+tail_rate_alpha,8,0.375,"alpha = 1/2 - 1/(K sigma^2), at sigma^2 -> 1"

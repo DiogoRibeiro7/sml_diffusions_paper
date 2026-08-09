@@ -1959,3 +1959,36 @@ def test_curvature_converges_to_the_limit_hessian() -> None:
     assert all(value < limit for value in curvatures)
     assert curvatures[-1] / limit > 0.85
     assert curvatures[0] / limit < 0.5, "the deficit at small S is the point"
+
+
+def test_number_gate_detection_rate() -> None:
+    """The number gate must actually detect wrong digits, and keep detecting them.
+
+    A gate that accepts everything passes silently, which is worse than none.
+    The rate is measured by drawing random wrong values and counting how many the
+    matcher accepts.  It is not 100 per cent and cannot be: a wrong value that
+    happens to land within rounding distance of some other generated value is
+    indistinguishable from a right one.  The floors below are set well under the
+    measured rates, so this fails on a real degradation rather than on noise --
+    for instance if the pool of generated values grew large enough to swallow
+    arbitrary numbers.
+    """
+    gate = pytest.importorskip(
+        "check_table_numbers", reason="number gate not importable"
+    )
+    values = gate.generated_values()
+    assert len(values) > 100, "pool too small for the measurement to mean anything"
+
+    rng = np.random.default_rng(4_091)
+    floors = {2: 0.70, 3: 0.90, 4: 0.97}
+    for decimals, floor in floors.items():
+        trials = 3000
+        caught = sum(
+            not gate.matches(f"{value:.{decimals}f}", values)
+            for value in rng.uniform(0.0, 10.0, size=trials)
+        )
+        rate = caught / trials
+        assert rate >= floor, (
+            f"{decimals}-decimal detection fell to {rate:.1%}, below the {floor:.0%} "
+            "floor; the gate is weaker than its documentation claims"
+        )

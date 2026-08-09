@@ -1396,6 +1396,58 @@ def make_covering_table(rng: np.random.Generator) -> None:
     )
 
 
+
+# ---------------------------------------------------------------------------
+# Closed-form constants quoted in the prose.
+#
+# These are not simulation outputs, so the reproducibility check has nothing to
+# say about them, and until the prose scan was written nothing did.  An
+# arithmetic slip in a hand-computed exponent is exactly the kind of error that
+# survives every other gate here, so they are computed rather than typed.
+# ---------------------------------------------------------------------------
+
+UNIFORM_LAW_DIMENSIONS = (3, 4, 5, 6, 8)
+
+
+def uniform_law_exponent(dimension: int, variance: float = 1.0) -> float:
+    """The exponent p of the polylogarithmic rate condition N >> (log S)^p."""
+    return 1 + 4 / dimension + 16 / (dimension * (dimension * variance - 2))
+
+
+def make_constants_table() -> None:
+    """Tabulate the closed-form constants the manuscript quotes."""
+    rows = []
+    for dimension in UNIFORM_LAW_DIMENSIONS:
+        alpha = 0.5 - 1 / dimension
+        rows.append(
+            {
+                "quantity": "uniform_law_exponent",
+                "dimension": dimension,
+                "value": uniform_law_exponent(dimension),
+                "note": "p in N >> (log S)^p, at sigma^2 -> 1",
+            }
+        )
+        rows.append(
+            {
+                "quantity": "tail_rate_alpha",
+                "dimension": dimension,
+                "value": alpha,
+                "note": "alpha = 1/2 - 1/(K sigma^2), at sigma^2 -> 1",
+            }
+        )
+    frame = pd.DataFrame(rows)
+    frame.to_csv(TABLES / "quoted_constants.csv", index=False)
+    (TABLES / "quoted_constants.tex").write_text(
+        frame.to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.6g}",
+            escape=False,
+            column_format="lrrl",
+        ),
+        encoding="utf-8",
+    )
+
+
 def main(output_root: Path | None = None) -> None:
     """Generate all reproducible manuscript outputs.
 
@@ -1432,6 +1484,7 @@ def main(output_root: Path | None = None) -> None:
     make_criterion_shape_table()
     make_maximiser_table(rng)
     make_covering_table(rng)
+    make_constants_table()
 
 
 if __name__ == "__main__":

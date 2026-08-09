@@ -1,0 +1,38 @@
+# Prose numbers not yet produced by any generator.
+#
+# These are closed-form constants and values quoted from the original paper
+# that predate the prose scan.  They are frozen here so that the gate blocks
+# NEW unexplained numbers without requiring the existing ones to be
+# regenerated first.  The list is technical debt: every entry removed is a
+# number brought under code, and entries should only ever be deleted.
+#
+# One entry per line, as document:literal.
+
+companion.tex:-0.010
+companion.tex:-0.012
+companion.tex:-0.021
+companion.tex:-0.0538
+companion.tex:-0.0696
+companion.tex:-0.133
+companion.tex:-0.3588
+companion.tex:0.005
+companion.tex:0.024
+companion.tex:0.0295
+companion.tex:0.03066
+companion.tex:0.0330
+companion.tex:0.101
+companion.tex:0.2935
+companion.tex:0.320
+companion.tex:0.338
+companion.tex:0.7828
+companion.tex:1.134
+companion.tex:1.558
+companion.tex:1.59
+companion.tex:2.575
+companion.tex:3.17
+main.tex:-0.012
+main.tex:-0.479
+main.tex:0.063
+main.tex:1.35
+main.tex:27.70
+main.tex:44.48
