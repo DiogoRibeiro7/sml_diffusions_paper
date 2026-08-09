@@ -148,3 +148,66 @@ It reports every number in 18 tables as traceable. That result was verified not 
 be vacuous by planting a wrong digit in a generated value, confirming the guard
 fails, and restoring it. A gate that passes because it inspects nothing is worse
 than no gate, and this repository now has four whose failure mode is silence.
+
+## Third pass: closing the two open threads
+
+Both threads left open after the referee round are now addressed, one completely
+and one only above four dimensions.
+
+### The step-size quantifier: closed
+
+`lem:sigma_uniform`. The interchange, and with it the coefficients of the
+curvature identity, converge uniformly over `sigma^2` in a compact `[sigma_0^2, 1]`
+whenever `K sigma_0^2 > 2`. Only two features of `sigma^2` enter those proofs:
+the Gaussian tail constants of the distant-centre estimate, and the integrability
+of the dominating function, `E exp(m^2/(K sigma^2)) = (1 - 2/(K sigma^2))^{-K/2}`.
+Both are continuous on a compact interval bounded away from `2/K`, hence bounded
+there. Since `sigma_n^2 = 1 - h_n -> 1` and `2/K < 1` for `K > 2`, a fixed
+`sigma_0^2` in `(2/K, 1)` contains the tail of any admissible sequence.
+
+### The empirical tail: closed for `K >= 5`, open at `K = 4`
+
+`lem:covering` bounds the envelope. Covering the parameter set by balls of radius
+`r/2` and applying a union bound over the grid gives
+
+    P(sup_theta rho_S > r | DeltaY) <= (1 + 2D/r)^K exp(-S f_min omega_K (r/2)^K),
+
+whence `E[Psi_S^2 | DeltaY] <= C ((1 + log S)/f_min)^{4/K}`. Averaging over the
+centre needs `E[f_min^{-4/K}] < infinity`, and since
+`f_min >= c exp(-(||DeltaY - theta*|| + D)^2 / (2 sigma^2))` that holds exactly
+when `2/(K sigma^2) < 1/2`, that is when `K sigma^2 > 4`.
+
+In that range the envelope is square integrable, the bracketing maximal
+inequality applies to the whole class with no truncation, and
+`prop:uniform_lln_high` gives the uniform law unconditionally under
+`N >> (log S)^{1 + 4/K}`. The consistency corollary is therefore unconditional
+for `K >= 5`.
+
+**It is not unconditional at `K = 4`.** Since `sigma^2 = 1 - h < 1`, the quantity
+`K sigma^2` is strictly below 4 there. The envelope has infinite second moment,
+truncation reintroduces a threshold growing like a power of `S`, and the
+resulting rate condition is `N >> S^c` for some positive `c` — which conflicts
+with the published `N / S^{1/4} -> 0`. The obvious repair does not merely fail;
+it fails in the direction that would make the result useless for the dimension
+the application uses. That is why the empirical-tail hypothesis is retained
+rather than replaced.
+
+### The covering measurement, and two errors in making it
+
+The extra logarithm matters, so it was measured: at `K = 4` the covering radius
+divided by `S^{-1/K}` rises monotonically by `1.084` across two decades, against
+`1.136` for a full logarithmic correction, while the radius divided by
+`((log S)/S)^{1/K}` is flat to within five per cent.
+
+Two mistakes were made getting there. The first measurement used 60,000 probes,
+so at the largest `S` the probe spacing approached the covering radius itself and
+the supremum was under-resolved, biasing the result against the very trend being
+measured; the probe count is now 400,000 and the resolution ratio is recorded in
+the table. The second used three replications and produced a non-monotone column;
+it is now eight.
+
+And the numbers first written into the manuscript came from a scratch run rather
+than the pipeline, differing in the third digit. That is the same error the
+table-number gate was built to catch — but these numbers appear in prose rather
+than in a tabular environment, and the gate reads only tables. The limitation is
+worth stating: the gate narrows the blind spot, it does not remove it.

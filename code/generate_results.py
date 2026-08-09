@@ -1329,6 +1329,73 @@ def make_maximiser_table(rng: np.random.Generator) -> None:
     )
 
 
+
+# ---------------------------------------------------------------------------
+# The covering radius of the atom cloud over the parameter set.
+#
+# The envelope of the criterion class is S^{2/K} times the squared covering
+# radius, and a covering radius exceeds a nearest-neighbour distance by a
+# logarithmic factor.  That is what makes the envelope grow like (log S)^{2/K}
+# and so fail to be uniformly integrable, which is why the naive route to the
+# empirical-tail condition does not work.
+#
+# The probe count must be large enough that the supremum is resolved: with too
+# few probes the spacing approaches the covering radius itself and the measured
+# maximum is biased downward, which flattens the very trend being measured.
+# ---------------------------------------------------------------------------
+
+COVERING_DIMENSION = 4
+COVERING_HALF_WIDTH = 0.4
+COVERING_PROBES = 400_000
+COVERING_SIZES = (10**3, 10**4, 10**5)
+COVERING_REPLICATIONS = 8
+
+
+def make_covering_table(rng: np.random.Generator) -> None:
+    """Tabulate the covering radius against its two candidate scalings."""
+    dimension = COVERING_DIMENSION
+    half = COVERING_HALF_WIDTH
+    spacing = 2 * half / COVERING_PROBES ** (1 / dimension)
+    rows = []
+    for size in COVERING_SIZES:
+        radii = []
+        for _ in range(COVERING_REPLICATIONS):
+            atoms = rng.normal(size=(size, dimension))
+            probes = rng.uniform(-half, half, size=(COVERING_PROBES, dimension))
+            distances, _ = cKDTree(atoms).query(probes, k=1)
+            radii.append(float(distances.max()))
+        radius = float(np.mean(radii))
+        rows.append(
+            {
+                "simulations": size,
+                "covering_radius": radius,
+                "probe_spacing": spacing,
+                "resolution": radius / spacing,
+                "over_plain_rate": radius / size ** (-1 / dimension),
+                "over_log_rate": radius / (math.log(size) / size) ** (1 / dimension),
+            }
+        )
+    frame = pd.DataFrame(rows)
+    # The drift of each column across the table is what distinguishes the two
+    # scalings, so record it rather than leaving it to be computed by hand.
+    frame["plain_drift"] = frame["over_plain_rate"] / frame["over_plain_rate"].iloc[0]
+    frame["log_drift"] = frame["over_log_rate"] / frame["over_log_rate"].iloc[0]
+    predicted = (
+        math.log(COVERING_SIZES[-1]) / math.log(COVERING_SIZES[0])
+    ) ** (1 / dimension)
+    frame["predicted_plain_drift"] = predicted
+    frame.to_csv(TABLES / "covering_radius.csv", index=False)
+    (TABLES / "covering_radius.tex").write_text(
+        frame.to_latex(
+            index=False,
+            float_format=lambda value: f"{value:.6g}",
+            escape=False,
+            column_format="rrrrrrrrr",
+        ),
+        encoding="utf-8",
+    )
+
+
 def main(output_root: Path | None = None) -> None:
     """Generate all reproducible manuscript outputs.
 
@@ -1364,6 +1431,7 @@ def main(output_root: Path | None = None) -> None:
     make_score_moment_table(rng)
     make_criterion_shape_table()
     make_maximiser_table(rng)
+    make_covering_table(rng)
 
 
 if __name__ == "__main__":
