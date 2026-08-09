@@ -63,6 +63,16 @@ identifiers:
       Concept DOI. Represents every version of this work and always resolves to
       the most recent one. Cite this unless you need to pin a specific version.
   - type: doi
+    value: 10.5281/zenodo.21857286
+    description: >-
+      Version DOI for v1.7.0, the current release. It proves the uniform law of
+      large numbers, and with it consistency of the simulated maximiser in the
+      location model, unconditionally when K sigma^2 > 4, that is in five
+      dimensions and above; and it establishes uniformity of the interchange in
+      the step size. At K = 3 and K = 4 the result remains conditional, the
+      natural repair there yielding a rate condition incompatible with the
+      published one.
+  - type: doi
     value: 10.5281/zenodo.21855599
     description: >-
       Version DOI for v1.6.1, superseded by v1.7.0, which proves the uniform
