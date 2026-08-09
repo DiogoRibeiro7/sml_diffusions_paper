@@ -251,7 +251,7 @@ Cite the **concept DOI**, which represents every version and always resolves to 
 | DOI | Refers to | Status |
 | --- | --- | --- |
 | [`10.5281/zenodo.21719868`](https://doi.org/10.5281/zenodo.21719868) | all versions; resolves to the latest | **cite this** |
-| [`10.5281/zenodo.21855599`](https://doi.org/10.5281/zenodo.21855599) | v1.6.1 | current |
+| [`10.5281/zenodo.21855599`](https://doi.org/10.5281/zenodo.21855599) | v1.6.1 | superseded: estimator-level results conditional in every dimension |
 | [`10.5281/zenodo.21850110`](https://doi.org/10.5281/zenodo.21850110) | v1.6.0 | superseded: corrections incompletely applied; contradicts itself on consistency |
 | [`10.5281/zenodo.21848464`](https://doi.org/10.5281/zenodo.21848464) | v1.5.0 | superseded: uniform law labelled proved; its proof is incomplete |
 | [`10.5281/zenodo.21834941`](https://doi.org/10.5281/zenodo.21834941) | v1.4.0 | superseded: introduces the uniform law whose proof is incomplete |

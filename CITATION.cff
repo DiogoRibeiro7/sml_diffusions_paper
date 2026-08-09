@@ -17,11 +17,14 @@ abstract: >-
   to zero for every K > 2 although the true density is strictly positive. This refutes
   the consistency asserted in their Lemma 2 and the central-limit statement of their
   Lemma 3, so the proofs of their parameter-estimator theorems fail. Inconsistency of
-  the resulting argmax estimator is not proved. In a Gaussian location model a
-  conditional argument gives the opposite, that the simulated maximiser is consistent
-  along the very sequences on which the density collapses, so that the counterexample
-  would not transfer; it rests on a uniform-integrability condition for the empirical
-  tails which is stated but not verified. The rate is a separate matter. For the
+  the resulting argmax estimator is not proved. In a Gaussian location model the
+  opposite holds: the simulated maximiser is consistent along the very sequences on
+  which the density collapses, so the counterexample does not transfer. That is proved
+  outright in five dimensions and above, where a covering estimate for the criterion's
+  envelope makes it square integrable; in three and four dimensions, the latter being
+  the dimension of the application, it rests on a uniform-integrability condition for
+  the empirical tails which is stated but not verified, and the natural repair there
+  yields a rate condition incompatible with the published one. The rate is a separate matter. For the
   nearest-atom proxy criterion the score at the truth and the curvature there are both
   obtained exactly, and they predict that the estimator is not root-N consistent, which
   would contradict the conclusion of the published Lemma 5 rather than its proof; the
@@ -47,7 +50,7 @@ keywords:
 license: CC-BY-4.0
 repository-code: "https://github.com/DiogoRibeiro7/sml_diffusions_paper"
 date-released: 2026-08-09
-version: v1.6.1
+version: v1.7.0
 doi: 10.5281/zenodo.21719868
 # Zenodo mints a version DOI only when a release is published, and the identifier
 # it issues cannot be predicted, so the entry for the release named above is added
@@ -62,11 +65,11 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.21855599
     description: >-
-      Version DOI for v1.6.1, the current release. It completes the corrections
-      begun in v1.6.0, removing three residual assertions that consistency is
-      settled and an orphaned paragraph citing the uniform law as available, and
-      adds a check requiring every number in a manuscript table to be the
-      correct rounding of a generated value.
+      Version DOI for v1.6.1, superseded by v1.7.0, which proves the uniform
+      law of large numbers unconditionally in five dimensions and above and
+      establishes uniformity of the interchange in the step size. Nothing in
+      v1.6.1 is known to be wrong; its estimator-level results are conditional
+      in every dimension where v1.7.0 makes them unconditional above four.
   - type: doi
     value: 10.5281/zenodo.21850110
     description: >-
