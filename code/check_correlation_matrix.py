@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import argparse
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import numpy as np
@@ -55,11 +55,11 @@ class SystemParameters:
         Long-run interest-rate means, used as the reference state.
     mean_volatility:
         Sample mean of the observed exchange-rate volatility.
-    currency_quadratic:
-        The constant currency-risk quadratic form
-        ``C = psi^2 + psi*^2 - 2 rho_zz* psi psi*`` under constant risk prices.
-        Table 3 reports ``psi^2 - rho_zz* psi psi*`` and
-        ``psi*^2 - rho_zz* psi psi*`` separately, and ``C`` is their sum.
+    psi_component, psi_star_component:
+        The two halves of the currency-risk quadratic form as Table 3 reports
+        them, ``psi^2 - rho_zz* psi psi*`` and ``psi*^2 - rho_zz* psi psi*``.
+        The manuscript quotes both individually, so they are declared rather
+        than folded into their sum.
     """
 
     name: str
@@ -72,7 +72,17 @@ class SystemParameters:
     theta: float
     theta_star: float
     mean_volatility: float
-    currency_quadratic: float
+    psi_component: float
+    psi_star_component: float
+
+    @property
+    def currency_quadratic(self) -> float:
+        """Return ``C = psi^2 + psi*^2 - 2 rho_zz* psi psi*``.
+
+        Under constant risk prices this is the sum of the two components Table 3
+        reports separately.
+        """
+        return self.psi_component + self.psi_star_component
 
 
 # Table 3 of Brandt and Santa-Clara (2002); mean volatilities from their
@@ -88,7 +98,8 @@ US_UK = SystemParameters(
     theta=0.053,
     theta_star=0.074,
     mean_volatility=0.103,
-    currency_quadratic=0.024 + (-0.021),
+    psi_component=0.024,
+    psi_star_component=-0.021,
 )
 
 US_DE = SystemParameters(
@@ -102,7 +113,8 @@ US_DE = SystemParameters(
     theta=0.058,
     theta_star=0.064,
     mean_volatility=0.107,
-    currency_quadratic=(-0.010) + 0.013,
+    psi_component=-0.010,
+    psi_star_component=0.013,
 )
 
 
@@ -383,6 +395,12 @@ def run_state_audit() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# The incompleteness states swept by the feasibility search.  Declared here
+# rather than inline because the companion describes the sweep in prose, and a
+# grid quoted in the text should be the grid that ran.
+SEARCH_EPSILON_SQUARED = (0.0, 0.005, 0.02, 0.10)
+
+
 def search_for_infeasible_psd_violation(
     max_rate_multiple: float = 100.0,
     grid: int = 201,
@@ -407,7 +425,7 @@ def search_for_infeasible_psd_violation(
                 base = minimum_feasible_volatility(parameters, rate, rate_star)
                 if base <= 0.0:
                     continue
-                for epsilon_squared in (0.0, 0.005, 0.02, 0.10):
+                for epsilon_squared in SEARCH_EPSILON_SQUARED:
                     volatility = math.sqrt(base**2 + epsilon_squared)
                     eigenvalue = float(
                         np.linalg.eigvalsh(
@@ -427,6 +445,12 @@ def search_for_infeasible_psd_violation(
                 "epsilon_squared": worst_state[2],
                 "volatility": worst_state[3],
                 "violation_found": bool(worst < 0.0),
+                # The swept grid itself, so the prose description of the search
+                # is checked against the search.
+                **{
+                    f"epsilon_grid_{index}": value
+                    for index, value in enumerate(SEARCH_EPSILON_SQUARED)
+                },
             }
         )
     return pd.DataFrame(rows)
@@ -455,18 +479,15 @@ def run_perturbation_audit(
         entrywise_failures = 0
         worst_eigenvalue = math.inf
         for _ in range(draws):
-            perturbed = SystemParameters(
-                name=parameters.name,
-                phi=parameters.phi,
-                phi_star=parameters.phi_star,
+            # ``replace`` rather than a field-by-field copy: only the four
+            # correlations carrying standard errors are perturbed, and the rest
+            # must follow the declaration even as fields are added to it.
+            perturbed = replace(
+                parameters,
                 rho_ww_star=parameters.rho_ww_star + rng.normal(scale=se_ww),
                 rho_wy=parameters.rho_wy + rng.normal(scale=se_wy),
                 rho_w_star_y=parameters.rho_w_star_y + rng.normal(scale=se_wsy),
                 rho_xy=parameters.rho_xy + rng.normal(scale=se_xy),
-                theta=parameters.theta,
-                theta_star=parameters.theta_star,
-                mean_volatility=parameters.mean_volatility,
-                currency_quadratic=parameters.currency_quadratic,
             )
             matrix = build_matrix(
                 perturbed,
@@ -707,7 +728,7 @@ GRID_DESIGNS: tuple[tuple[str, int, int, float, float, tuple[float, ...], bool],
 
 
 def run_grid_sensitivity(
-    parameters: Parameters = US_UK,
+    parameters: SystemParameters = US_UK,
     model: str = "C",
     designs: tuple[tuple[str, int, int, float, float, tuple[float, ...], bool], ...] = GRID_DESIGNS,
 ) -> pd.DataFrame:

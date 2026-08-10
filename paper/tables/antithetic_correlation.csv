@@ -1,0 +1,9 @@
+quantity,dimension,step,separation,value
+antithetic_correlation,4,0.1,0.0,1.0
+antithetic_correlation,4,0.1,0.5,0.06359955936981279
+antithetic_correlation,4,0.1,1.5,-0.012591426698818322
+antithetic_correlation,1,0.1,0.5,-0.47909133882465155
+relative_second_moment,4,0.1,0.0,27.700831024930746
+relative_standard_deviation_percent,4,0.1,0.0,7.3076440834144
+relative_second_moment,4,0.1,1.0,44.484758468142076
+relative_standard_deviation_percent,4,0.1,1.0,9.325744846192402

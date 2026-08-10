@@ -1546,8 +1546,7 @@ At $\rho_A=+1$ this equals $\sigma^2/P$, the variance of only $P$ independent ev
 \end{proposition}
 
 \begin{definition}[Variance-equivalent evaluation count]\label{def:neff}
-For an antithetic design of $P$ pairs and $
-eval=2P$ evaluations with pair correlation $\rho_A\in(-1,1]$, the \emph{variance-equivalent number of independent evaluations} is the number $N_{\mathrm{eff}}$ of independent draws whose average would have the same variance:
+For an antithetic design of $P$ pairs and $\neval=2P$ evaluations with pair correlation $\rho_A\in(-1,1]$, the \emph{variance-equivalent number of independent evaluations} is the number $N_{\mathrm{eff}}$ of independent draws whose average would have the same variance:
 \begin{equation}\label{eq:neff}
 N_{\mathrm{eff}}(\rho_A)=\frac{\neval}{1+\rho_A}=\frac{2P}{1+\rho_A} .
 \end{equation}
@@ -1563,13 +1562,9 @@ The first says how far the raw evaluation count $\neval$ misstates the effective
 
 The interpretation in the four cases is as follows.
 \begin{itemize}
-\item $\rho_A=+1$: $N_{\mathrm{eff}}=P=\neval/2$. The $
-eval$ density evaluations have the variance of only $P$ independent evaluations, so counting $
-eval$ as independent overstates the variance-equivalent count by a factor of two.
-\item $\rho_A=0$: $N_{\mathrm{eff}}=\neval$. The antithetic evaluations perform exactly like $
-eval$ independent ones.
-\item $-1<\rho_A<0$: $N_{\mathrm{eff}}>\neval$. Pairing delivers variance reduction beyond what $
-eval$ independent evaluations would give, which is the case antithetic sampling is designed for.
+\item $\rho_A=+1$: $N_{\mathrm{eff}}=P=\neval/2$. The $\neval$ density evaluations have the variance of only $P$ independent evaluations, so counting $\neval$ as independent overstates the variance-equivalent count by a factor of two.
+\item $\rho_A=0$: $N_{\mathrm{eff}}=\neval$. The antithetic evaluations perform exactly like $\neval$ independent ones.
+\item $-1<\rho_A<0$: $N_{\mathrm{eff}}>\neval$. Pairing delivers variance reduction beyond what $\neval$ independent evaluations would give, which is the case antithetic sampling is designed for.
 \item $\rho_A\to-1$: $N_{\mathrm{eff}}$ diverges, because the idealised pair average has variance tending to zero. This is a statement about a variance-equivalence convention, not a literal count of independent observations; no finite design produces infinitely many of those.
 \end{itemize}
 In short, $\neval$ overstates the effective count by the factor $1+\rho_A$ when $\rho_A>0$, equals it when $\rho_A=0$, and understates it when $\rho_A<0$.
@@ -1578,7 +1573,7 @@ In short, $\neval$ overstates the effective count by the factor $1+\rho_A$ when 
 Reflecting every innovation maps the preterminal state $Z=x+\sqrt{1-h}\,\xi$ to $Z^-=x-\sqrt{1-h}\,\xi$, so $Z^--x=-(Z-x)$. The summand depends on $Z$ only through $\lVert y-Z\rVert^2$, and at $y=x$ this is $\lVert x-Z\rVert^2=\lVert Z-x\rVert^2$, which is invariant under $Z-x\mapsto-(Z-x)$. Hence $G^{-}=G^{+}$ pointwise, giving \eqref{eq:antithetic_identical} and $\rho_A=+1$. For \eqref{eq:antithetic_variance}, $\Var(G_i^{+}+G_i^{-})=2\sigma^2(1+\rho_A)$, so $\Var(A_i)=\tfrac14\cdot2\sigma^2(1+\rho_A)=\sigma^2(1+\rho_A)/2$; the pairs are independent across $i$, so the average of $P$ of them divides this by $P$.
 \end{proof}
 
-\Cref{prop:antithetic} is the case $\rho_A=+1$, where the $\neval$ evaluations buy exactly what $P$ would have bought. Numerically, at $h=1/10$ and $K=4$, $\rho_A$ is $+1$ at $\lVert y-x\rVert=0$, $+0.063$ at $\lVert y-x\rVert=0.5$ and $-0.012$ at $\lVert y-x\rVert=1.5$; at $K=1$ and $\lVert y-x\rVert=0.5$ it is $-0.479$. These values are illustrative of the mechanism at particular endpoints, not summaries of the estimator's behaviour over a sample.
+\Cref{prop:antithetic} is the case $\rho_A=+1$, where the $\neval$ evaluations buy exactly what $P$ would have bought. Numerically, at $h=1/10$ and $K=4$, $\rho_A$ is $+1$ at $\lVert y-x\rVert=0$, $+0.064$ at $\lVert y-x\rVert=0.5$ and $-0.013$ at $\lVert y-x\rVert=1.5$; at $K=1$ and $\lVert y-x\rVert=0.5$ it is $-0.479$. These values are illustrative of the mechanism at particular endpoints, not summaries of the estimator's behaviour over a sample.
 
 That last point needs emphasis, because it is what stops $N_{\mathrm{eff}}$ from being a single number for a given design. The pair correlation $\rho_A$ depends on the endpoint $y$, the initial state $x$, the state dimension $K$, the discretisation level $h$, the diffusion coefficients and the parameter value. Every transition in the likelihood therefore carries its own $\rho_A$, and a single variance-equivalent count for a $544$-term log likelihood does not exist without evaluating the pair covariance transition by transition. What can be said without that evaluation is that $\rho_A\le1$ always, so $N_{\mathrm{eff}}\ge E/2=P$, and the coincident-endpoint case attains the bound.
 

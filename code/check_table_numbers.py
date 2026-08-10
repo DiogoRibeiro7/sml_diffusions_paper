@@ -21,12 +21,36 @@ exemption is a deliberate act rather than a silent one.
 What this does and does not guarantee.  A wrong digit is caught only if the
 wrong value fails to land within rounding distance of some *other* generated
 value, and with several hundred values in the pool that is not certain.  The
-detection rate was measured by drawing random wrong values and counting how many
-the gate accepts: 79 per cent of two-decimal errors are caught, 96 per cent of
-three-decimal, and 99.8 per cent of four-decimal.  So the gate
-is a filter, not a proof, and it is weakest exactly where numbers are quoted
-loosely.  ``test_number_gate_detection_rate`` measures this and fails if it
-degrades, so the claim stays honest as the pool of generated values grows.
+detection rate therefore has to be measured, and it depends on what kind of
+wrong number is assumed:
+
+    decimals   arbitrary   near-miss
+       2          82%         63%
+       3          97%         86%
+       4         99.6%        98%
+
+The first column draws values uniformly on [0, 10].  The second perturbs an
+actual generated value by between 5 and 200 per cent, and is the one to believe:
+real errors are near-misses of real quantities -- a stale value from a scratch
+run, a transcription slip, a figure recomputed under changed settings -- and
+those land exactly where the pool of generated values is densest.  Two decimals
+is where the gate is weak, catching under two errors in three.
+
+Note the direction of the trade.  Generating more numbers strengthens the gate
+where it matters, because each value quoted in the manuscript then has a named
+source; but it also enlarges the pool every *other* number is checked against,
+and near-miss detection at two decimals fell from 68 to 63 per cent as the pool
+grew from 817 values to 931.  Coverage and discrimination pull against each
+other, and only coverage is worth having: a number with a generator behind it is
+verified, whereas a number that merely matches the pool is only unrefuted.
+
+So this is a filter, not a proof, and it is weakest exactly where numbers are
+quoted loosely.  ``test_number_gate_detection_rate`` measures both columns and
+fails if either degrades, so the table above stays honest as the pool grows.
+Matching *something* is weak evidence: two wrong antithetic correlations and two
+ungenerated properties of the critical limit law all passed this check by
+landing on unrelated quantities from the exchange-rate tables, and were caught
+only by deriving them.
 """
 
 from __future__ import annotations
@@ -81,11 +105,11 @@ def generated_values() -> list[float]:
                         values.append(float(cell.strip()))
                     except (ValueError, AttributeError):
                         continue
-    # A blanket percentage variant was removed: multiplying every value by 100
-    # doubled the pool and raised the false-acceptance rate by about a quarter,
-    # to catch a handful of captions that quote proportions as percentages.
-    # Those are handled by PERCENTAGE_FORMS instead.
-    values.extend(value * 100 for value in list(values) if 0.0 < value < 1.0)
+    # No percentage variant.  Admitting every value times 100, to catch the few
+    # places that quote a proportion as a percentage, grew the pool from 817 to
+    # 1,132 and cost 5 points of two-decimal detection while making no number in
+    # either manuscript pass that fails without it.  A caption that wants a
+    # percentage should have the generator emit one.
     return values
 
 
@@ -146,7 +170,6 @@ def scan() -> list[tuple[str, str, str]]:
     return problems
 
 
-
 # ---------------------------------------------------------------------------
 # Prose.
 #
@@ -168,6 +191,12 @@ IDENTIFIERS = (
     re.compile(r"\\(?:label|ref|Cref|eqref)\{[^{}]*\}"),
     re.compile(r"\\begin\{verbatim\}.*?\\end\{verbatim\}", re.S),
     re.compile(r"\\texttt\{[^{}]*\}"),
+    # Layout, not data: float fractions and graphic widths.  These were being
+    # checked against the pool and passing only by coincidence, which is a
+    # spurious failure waiting to happen.
+    re.compile(r"\\(?:re)?newcommand\{\\[a-zA-Z]+\}\{[^{}]*\}"),
+    re.compile(r"\\setlength\{[^{}]*\}\{[^{}]*\}"),
+    re.compile(r"\\includegraphics\[[^\]]*\]"),
 )
 
 
@@ -199,8 +228,9 @@ def scan_prose() -> list[tuple[str, str, str]]:
 
     return problems
 
+
 def load_baseline() -> set[str]:
-    """The prose numbers already known to be ungenerated, as document:literal."""
+    """Read the prose numbers already known to be ungenerated, as document:literal."""
     path = ROOT / "code" / "prose_number_baseline.txt"
     if not path.exists():
         return set()

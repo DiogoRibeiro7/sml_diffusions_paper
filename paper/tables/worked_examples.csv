@@ -1,0 +1,45 @@
+quantity,system,value,note
+phi,U.S. vs. U.K.,-0.138,reported in Table 3 of Brandt and Santa-Clara (2002)
+phi_star,U.S. vs. U.K.,0.027,reported in Table 3 of Brandt and Santa-Clara (2002)
+rho_ww_star,U.S. vs. U.K.,0.057,reported in Table 3 of Brandt and Santa-Clara (2002)
+rho_wy,U.S. vs. U.K.,0.048,reported in Table 3 of Brandt and Santa-Clara (2002)
+rho_w_star_y,U.S. vs. U.K.,0.034,reported in Table 3 of Brandt and Santa-Clara (2002)
+rho_xy,U.S. vs. U.K.,-0.012,reported in Table 3 of Brandt and Santa-Clara (2002)
+theta,U.S. vs. U.K.,0.053,reported in Table 3 of Brandt and Santa-Clara (2002)
+theta_star,U.S. vs. U.K.,0.074,reported in Table 3 of Brandt and Santa-Clara (2002)
+mean_volatility,U.S. vs. U.K.,0.103,reported in Table 3 of Brandt and Santa-Clara (2002)
+psi_component,U.S. vs. U.K.,0.024,reported in Table 3 of Brandt and Santa-Clara (2002)
+psi_star_component,U.S. vs. U.K.,-0.021,reported in Table 3 of Brandt and Santa-Clara (2002)
+currency_quadratic,U.S. vs. U.K.,0.002999999999999999,reported in Table 3 of Brandt and Santa-Clara (2002)
+sqrt_Q_at_long_run_means,U.S. vs. U.K.,0.03301331877324757,"the degenerate volatility, attained only if C_t = 0"
+minimum_feasible_volatility,U.S. vs. U.K.,0.06395216350072966,"sqrt(Q_t + C_t), the smallest volatility the identity permits"
+induced_rho_xy_at_multiple,U.S. vs. U.K.,-0.0537565559779971,right-hand side of the compatibility relation at 3x
+phi,U.S. vs. Germany,-0.125,reported in Table 3 of Brandt and Santa-Clara (2002)
+phi_star,U.S. vs. Germany,-0.036,reported in Table 3 of Brandt and Santa-Clara (2002)
+rho_ww_star,U.S. vs. Germany,0.213,reported in Table 3 of Brandt and Santa-Clara (2002)
+rho_wy,U.S. vs. Germany,0.058,reported in Table 3 of Brandt and Santa-Clara (2002)
+rho_w_star_y,U.S. vs. Germany,-0.034,reported in Table 3 of Brandt and Santa-Clara (2002)
+rho_xy,U.S. vs. Germany,0.006,reported in Table 3 of Brandt and Santa-Clara (2002)
+theta,U.S. vs. Germany,0.058,reported in Table 3 of Brandt and Santa-Clara (2002)
+theta_star,U.S. vs. Germany,0.064,reported in Table 3 of Brandt and Santa-Clara (2002)
+mean_volatility,U.S. vs. Germany,0.107,reported in Table 3 of Brandt and Santa-Clara (2002)
+psi_component,U.S. vs. Germany,-0.01,reported in Table 3 of Brandt and Santa-Clara (2002)
+psi_star_component,U.S. vs. Germany,0.013,reported in Table 3 of Brandt and Santa-Clara (2002)
+currency_quadratic,U.S. vs. Germany,0.002999999999999999,reported in Table 3 of Brandt and Santa-Clara (2002)
+sqrt_Q_at_long_run_means,U.S. vs. Germany,0.02953639286792602,"the degenerate volatility, attained only if C_t = 0"
+minimum_feasible_volatility,U.S. vs. Germany,0.06222859876012371,"sqrt(Q_t + C_t), the smallest volatility the identity permits"
+induced_rho_xy_at_multiple,U.S. vs. Germany,-0.06959825634770939,right-hand side of the compatibility relation at 3x
+counterexample_volatility,counterexample,0.030659419433511782,v_t = sqrt(Q_t)
+counterexample_rho_wx,counterexample,0.7827936876641307,
+counterexample_rho_w_star_x,counterexample,-0.35878044017939326,
+counterexample_rho_xy,counterexample,0.29354763287404895,forced by (i)
+three_dim_psd_left,counterexample,1.1340000000000001,
+three_dim_psd_right,counterexample,0.91,
+counterexample_eigenvalue_0,counterexample,-0.13304090334609697,spectrum of R_t; the matrix is indefinite
+counterexample_eigenvalue_1,counterexample,1.0393268301609104e-16,spectrum of R_t; the matrix is indefinite
+counterexample_eigenvalue_2,counterexample,1.5582854112601177,spectrum of R_t; the matrix is indefinite
+counterexample_eigenvalue_3,counterexample,2.5747554920859788,spectrum of R_t; the matrix is indefinite
+phi_minus_one,union bound,0.15865525393145707,the limit of the worst case
+union_bound_10_steps,union bound,1.5865525393145707,clips to one; quoted to show how far above it the bound sits
+union_bound_20_steps,union bound,3.1731050786291415,clips to one; quoted to show how far above it the bound sits
+union_bound_520_steps,union bound,82.50073204435768,clips to one; quoted to show how far above it the bound sits

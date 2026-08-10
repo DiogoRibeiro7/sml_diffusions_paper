@@ -1,38 +1,25 @@
 # Prose numbers not yet produced by any generator.
 #
-# These are closed-form constants and values quoted from the original paper
-# that predate the prose scan.  They are frozen here so that the gate blocks
-# NEW unexplained numbers without requiring the existing ones to be
-# regenerated first.  The list is technical debt: every entry removed is a
-# number brought under code, and entries should only ever be deleted.
+# This list is empty, and should stay that way.
+#
+# It began with 28 entries: closed-form constants, values quoted from the
+# original paper, and worked examples that had been computed once in a scratch
+# script and typed into the text.  All 28 are now produced by a generator and
+# checked against the manuscript, so a number in prose is no more privileged
+# than a number in a table.
+#
+# Paying the debt down was worth more than the bookkeeping suggested.  Deriving
+# each value in order to generate it turned up two wrong ones: an antithetic
+# pair correlation quoted as +0.063 where the exact value is 0.0636, and its
+# companion quoted as -0.012 where the exact value is -0.0126.  Both had passed
+# the gate, because each landed within rounding distance of an unrelated
+# quantity in the exchange-rate tables.  Two more -- the median and lower tail
+# of the critical limit law -- were correct but had no generator at all, and
+# passed the same way.
+#
+# The lesson is that matching *something* in the pool is weak evidence.  What
+# makes a number trustworthy is that a named generator produces it.  So an entry
+# here should be a last resort, and every entry added needs a reason on the line
+# above it.  Entries should only ever be deleted.
 #
 # One entry per line, as document:literal.
-
-companion.tex:-0.010
-companion.tex:-0.012
-companion.tex:-0.021
-companion.tex:-0.0538
-companion.tex:-0.0696
-companion.tex:-0.133
-companion.tex:-0.3588
-companion.tex:0.005
-companion.tex:0.024
-companion.tex:0.0295
-companion.tex:0.03066
-companion.tex:0.0330
-companion.tex:0.101
-companion.tex:0.2935
-companion.tex:0.320
-companion.tex:0.338
-companion.tex:0.7828
-companion.tex:1.134
-companion.tex:1.558
-companion.tex:1.59
-companion.tex:2.575
-companion.tex:3.17
-main.tex:-0.012
-main.tex:-0.479
-main.tex:0.063
-main.tex:1.35
-main.tex:27.70
-main.tex:44.48

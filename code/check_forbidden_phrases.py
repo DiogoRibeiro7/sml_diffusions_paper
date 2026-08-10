@@ -278,16 +278,87 @@ def scan() -> list[tuple[str, int, str, str]]:
     return hits
 
 
+# ---------------------------------------------------------------------------
+# Macros destroyed by shell escape interpretation.
+#
+# Editing the manuscripts through a shell heredoc has repeatedly replaced a
+# backslash escape with the character it denotes: `\neval` became a literal
+# newline followed by `eval`, `\beta` a backspace followed by `eta`.  LaTeX
+# accepts the wreckage without complaint -- it reads `$ eval$` as math-mode
+# italic -- so the build stays clean, no reference goes undefined, and the
+# damage reaches the typeset page.  Five occurrences in one paragraph survived
+# a release that way.  Nothing else in the repository looks for this, because
+# every other check reads either the log or the numbers.
+# ---------------------------------------------------------------------------
+
+TEX_FILES = ("paper/main.tex", "paper/companion.tex")
+
+# The escapes a shell or Python string literal would interpret, mapped to the
+# character that replaces them.  A macro whose name begins with one of these
+# letters is at risk; `\a` is omitted only because no macro here starts with it.
+ESCAPES = {"n": "\n", "t": "\t", "r": "\r", "b": "\x08", "f": "\x0c", "v": "\x0b"}
+
+MACRO_DEFINITION = re.compile(
+    r"\\(?:newcommand\*?|DeclareMathOperator\*?|def)\s*\{?\\([a-zA-Z]+)"
+)
+
+
+def mangled_in_text(text: str) -> list[tuple[int, str]]:
+    """Return every (line number, description) where an escape ate a macro."""
+    hits: list[tuple[int, str]] = []
+
+    # Any control character other than a newline is damage on its own.
+    for index, character in enumerate(text):
+        if character in set(ESCAPES.values()) - {"\n"}:
+            line = text.count("\n", 0, index) + 1
+            letter = next(k for k, v in ESCAPES.items() if v == character)
+            hits.append((line, f"control character for the escape \\{letter}"))
+
+    # A newline standing in for a macro that begins with one.
+    for macro in sorted(set(MACRO_DEFINITION.findall(text))):
+        replacement = ESCAPES.get(macro[0])
+        if replacement is None:
+            continue
+        for match in re.finditer(
+            re.escape(replacement) + re.escape(macro[1:]) + r"(?![a-zA-Z])", text
+        ):
+            line = text.count("\n", 0, match.start()) + 1
+            hits.append((line, f"macro {macro} eaten by its own escape"))
+    return hits
+
+
+def scan_mangled_macros() -> list[tuple[str, int, str]]:
+    """Return every (file, line number, description) where a macro was eaten."""
+    hits: list[tuple[str, int, str]] = []
+    for relative in TEX_FILES:
+        path = ROOT / relative
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        hits.extend(
+            (relative, line, description)
+            for line, description in mangled_in_text(text)
+        )
+    return hits
+
+
 def main() -> int:
-    """Report any reappearance of a retracted phrase."""
+    """Report any reappearance of a retracted phrase, or any eaten macro."""
     hits = scan()
     for relative, number, text, reason in hits:
         print(f"  {relative}:{number}: {text!r}")
         print(f"      {reason}")
-    if hits:
-        print(f"\n{len(hits)} forbidden phrase(s) found")
+    mangled = scan_mangled_macros()
+    for relative, number, description in mangled:
+        print(f"  {relative}:{number}: {description}")
+        print("      a shell escape replaced the backslash; LaTeX will not complain")
+    if hits or mangled:
+        print(
+            f"\n{len(hits)} forbidden phrase(s) and {len(mangled)} mangled macro(s) found"
+        )
         return 1
     print(f"no forbidden phrases in {len(SEARCHED)} files, {len(FORBIDDEN)} patterns")
+    print(f"no escape-mangled macros in {len(TEX_FILES)} manuscripts")
     return 0
 
 

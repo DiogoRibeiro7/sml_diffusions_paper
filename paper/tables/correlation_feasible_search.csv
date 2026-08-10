@@ -1,3 +1,3 @@
-system,max_rate_multiple,worst_min_eigenvalue,rate_multiple,rate_star_multiple,epsilon_squared,volatility,violation_found
-U.S. vs. U.K.,100.0,0.012757046439665465,100.0,100.0,0.0,0.3346459646288986,False
-U.S. vs. Germany,100.0,0.012981511098179972,100.0,100.0,0.0,0.30039948462813165,False
+system,max_rate_multiple,worst_min_eigenvalue,rate_multiple,rate_star_multiple,epsilon_squared,volatility,violation_found,epsilon_grid_0,epsilon_grid_1,epsilon_grid_2,epsilon_grid_3
+U.S. vs. U.K.,100.0,0.012757046439665465,100.0,100.0,0.0,0.3346459646288986,False,0.0,0.005,0.02,0.1
+U.S. vs. Germany,100.0,0.012981511098179972,100.0,100.0,0.0,0.30039948462813165,False,0.0,0.005,0.02,0.1

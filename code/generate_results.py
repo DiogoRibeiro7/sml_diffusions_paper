@@ -416,6 +416,11 @@ def make_boundary_maximum_table() -> None:
             rows.append(
                 {
                     "system": label,
+                    # The reported estimates drive every column to their right,
+                    # and the manuscript quotes them in prose; carrying them here
+                    # keeps that quotation tied to the values actually used.
+                    "alpha": alpha,
+                    "beta": beta,
                     "h": h,
                     "argmax_state": argmax,
                     "argmax_epsilon": math.sqrt(argmax),
@@ -425,7 +430,7 @@ def make_boundary_maximum_table() -> None:
     frame = pd.DataFrame(rows)
     frame.to_csv(TABLES / "boundary_maximum.csv", index=False)
     (TABLES / "boundary_maximum.tex").write_text(
-        frame.to_latex(
+        frame.drop(columns=["alpha", "beta"]).to_latex(
             index=False,
             float_format=lambda value: f"{value:.6g}",
             escape=False,
@@ -1069,6 +1074,26 @@ def make_uniform_scaling_table(rng: np.random.Generator) -> None:
         encoding="utf-8",
     )
 
+    # The discriminating statistic is not any single row but the growth across
+    # the whole range, and that is what the text quotes.  A ratio of two cells is
+    # invisible to the number gate, which reads values and not arithmetic, so the
+    # three growth factors are emitted as values in their own right.
+    growth = pd.DataFrame(
+        [
+            {
+                "quantity": column,
+                "first": frame[column].iloc[0],
+                "last": frame[column].iloc[-1],
+                "growth": frame[column].iloc[-1] / frame[column].iloc[0],
+                "decades": math.log10(
+                    frame["simulations"].iloc[-1] / frame["simulations"].iloc[0]
+                ),
+            }
+            for column in ("ratio", "log_prediction", "power_prediction")
+        ]
+    )
+    growth.to_csv(TABLES / "uniform_scaling_growth.csv", index=False)
+
 
 
 # ---------------------------------------------------------------------------
@@ -1409,9 +1434,284 @@ def make_covering_table(rng: np.random.Generator) -> None:
 UNIFORM_LAW_DIMENSIONS = (3, 4, 5, 6, 8)
 
 
+# ---------------------------------------------------------------------------
+# The critical limit law at K = 2.
+#
+# The estimator converges there to L = sum_i exp(-t_i) over a unit-rate Poisson
+# process, with mean one and variance one half exactly.  Its median and lower
+# tail are what make the point that a mean of one is no comfort, and both were
+# quoted in prose without any generator behind them; they passed the number gate
+# only by landing on unrelated correlations from the application tables, which
+# is exactly the false-acceptance mode the gate documents.
+#
+# The arrival times are cumulative sums of standard exponentials.  The summand
+# decays so fast that a fixed number of terms is exact to machine precision:
+# with 200 terms the neglected tail is of order exp(-150).  The exact mean and
+# variance are recorded alongside the simulated ones as a check on the draw.
+# ---------------------------------------------------------------------------
+
+CRITICAL_DRAWS = 1_000_000
+CRITICAL_TERMS = 200
+CRITICAL_THRESHOLD = 0.5
+
+
+def simulate_critical_limit(rng: np.random.Generator) -> NDArray[np.float64]:
+    """Draw from the critical limit law ``L = sum_i exp(-t_i)``."""
+    gaps = rng.exponential(size=(CRITICAL_DRAWS, CRITICAL_TERMS))
+    return np.exp(-np.cumsum(gaps, axis=1)).sum(axis=1)
+
+
+def make_critical_limit_table(rng: np.random.Generator) -> None:
+    """Tabulate the median and lower tail of the critical limit law."""
+    sample = simulate_critical_limit(rng)
+    rows = [
+        {"quantity": "median", "value": float(np.median(sample)), "exact": ""},
+        {
+            "quantity": "probability_below_half",
+            "value": float((sample < CRITICAL_THRESHOLD).mean()),
+            "exact": "",
+        },
+        {"quantity": "mean", "value": float(sample.mean()), "exact": 1.0},
+        {"quantity": "variance", "value": float(sample.var()), "exact": 0.5},
+    ]
+    frame = pd.DataFrame(rows)
+    # The two exact moments are known, so a drifting simulation is caught here
+    # rather than in the manuscript.
+    assert abs(frame.loc[2, "value"] - 1.0) < 0.01
+    assert abs(frame.loc[3, "value"] - 0.5) < 0.01
+    frame.to_csv(TABLES / "critical_limit.csv", index=False)
+
+
+# ---------------------------------------------------------------------------
+# The antithetic pair correlation, and the relative second moment.
+#
+# Both are exactly computable, and both were quoted in prose from a scratch
+# calculation before this existed.  With Z^{+-} = x +- sqrt(1-h) xi and the
+# summand G = (2 pi h)^{-K/2} exp(-||y - Z||^2 / 2h), every moment needed is
+# Gaussian: for a > 0 and d = y - x,
+#
+#     E exp(-a ||d - sigma xi||^2)
+#         = (1 + 2 a sigma^2)^{-K/2} exp(-a ||d||^2 / (1 + 2 a sigma^2)),
+#
+# while reflection gives ||d - sigma xi||^2 + ||d + sigma xi||^2
+# = 2 ||d||^2 + 2 sigma^2 ||xi||^2, so the cross moment closes as well.  At
+# d = 0 the two reflected evaluations coincide and the correlation is exactly
+# +1, which is Proposition 6.1; the table records how fast that degeneracy
+# decays as the endpoints separate.
+# ---------------------------------------------------------------------------
+
+ANTITHETIC_STEP = 0.1
+ANTITHETIC_CASES = ((4, 0.0), (4, 0.5), (4, 1.5), (1, 0.5))
+SECOND_MOMENT_CASES = ((4, 0.0), (4, 1.0))
+INDEPENDENT_UNITS = 5000
+
+
+def antithetic_correlation(dimension: int, step: float, separation: float) -> float:
+    """Return Corr(G+, G-) for the reflected pair at endpoint separation r."""
+    variance = 1.0 - step
+    mean = (1 + variance / step) ** (-dimension / 2) * math.exp(
+        -(separation**2) / (2 * (step + variance))
+    )
+    second = (1 + 2 * variance / step) ** (-dimension / 2) * math.exp(
+        -(separation**2) / (step + 2 * variance)
+    )
+    cross = (1 + 2 * variance / step) ** (-dimension / 2) * math.exp(
+        -(separation**2) / step
+    )
+    return (cross - mean**2) / (second - mean**2)
+
+
+def relative_second_moment(dimension: int, step: float, separation: float) -> float:
+    """Return ``E[G_h^2] / p(y|x)^2`` at unit time, exactly.
+
+    Equals ``(h(2-h))^{-K/2}`` at a coincident endpoint and grows with the
+    separation through the factor ``exp(r^2 (1-h) / (2-h))``.
+    """
+    return (step * (2 - step)) ** (-dimension / 2) * math.exp(
+        separation**2 * (1 - step) / (2 - step)
+    )
+
+
+def make_antithetic_table() -> None:
+    """Tabulate the pair correlations and relative second moments quoted in text."""
+    rows = [
+        {
+            "quantity": "antithetic_correlation",
+            "dimension": dimension,
+            "step": ANTITHETIC_STEP,
+            "separation": separation,
+            "value": antithetic_correlation(dimension, ANTITHETIC_STEP, separation),
+        }
+        for dimension, separation in ANTITHETIC_CASES
+    ]
+    for dimension, separation in SECOND_MOMENT_CASES:
+        ratio = relative_second_moment(dimension, ANTITHETIC_STEP, separation)
+        rows.append(
+            {
+                "quantity": "relative_second_moment",
+                "dimension": dimension,
+                "step": ANTITHETIC_STEP,
+                "separation": separation,
+                "value": ratio,
+            }
+        )
+        # The relative standard deviation of an average of independent units,
+        # which is how the text reads the ratio.
+        rows.append(
+            {
+                "quantity": "relative_standard_deviation_percent",
+                "dimension": dimension,
+                "step": ANTITHETIC_STEP,
+                "separation": separation,
+                "value": 100.0 * math.sqrt((ratio - 1.0) / INDEPENDENT_UNITS),
+            }
+        )
+    frame = pd.DataFrame(rows)
+    frame.to_csv(TABLES / "antithetic_correlation.csv", index=False)
+
+
 def uniform_law_exponent(dimension: int, variance: float = 1.0) -> float:
     """The exponent p of the polylogarithmic rate condition N >> (log S)^p."""
     return 1 + 4 / dimension + 16 / (dimension * (dimension * variance - 2))
+
+
+# ---------------------------------------------------------------------------
+# The companion's worked examples.
+#
+# Three kinds of number appear in the companion's prose.  The first are values
+# reported by the original authors, which no computation can produce; they are
+# emitted from the single declaration in ``check_correlation_matrix`` so that
+# the prose and the audit cannot quote different figures.  The second are
+# quantities derived from those estimates.  The third belong to the explicit
+# counterexample separating the two conditions of the singularity proposition,
+# whose inputs are chosen rather than estimated.
+# ---------------------------------------------------------------------------
+
+# The counterexample: interest-rate risk prices given directly as phi_t, not as
+# phi sqrt(r_t), with both free correlations pushed to 0.9.
+COUNTEREXAMPLE = {
+    "phi_t": 0.03,
+    "phi_star_t": 0.02,
+    "rho_ww_star": 0.3,
+    "rho_wy": 0.9,
+    "rho_w_star_y": 0.9,
+}
+# Multiples of the long-run mean rates at which the induced correlation is read.
+RATE_MULTIPLE = 3.0
+# Step counts for the union bound over a year of weekly data.
+UNION_STEPS = (10, 20, 520)
+
+
+def make_worked_examples_table() -> None:
+    """Tabulate every companion prose number that a computation can produce."""
+    import check_correlation_matrix as ccm
+
+    rows: list[dict[str, object]] = []
+
+    def record(quantity: str, system: str, value: float, note: str = "") -> None:
+        rows.append(
+            {"quantity": quantity, "system": system, "value": value, "note": note}
+        )
+
+    # (a) The reported estimates themselves, from the single declaration.
+    for parameters in (ccm.US_UK, ccm.US_DE):
+        for field in (
+            "phi",
+            "phi_star",
+            "rho_ww_star",
+            "rho_wy",
+            "rho_w_star_y",
+            "rho_xy",
+            "theta",
+            "theta_star",
+            "mean_volatility",
+            "psi_component",
+            "psi_star_component",
+            "currency_quadratic",
+        ):
+            record(
+                field,
+                parameters.name,
+                float(getattr(parameters, field)),
+                "reported in Table 3 of Brandt and Santa-Clara (2002)",
+            )
+
+        # (b) Quantities derived from them, at the reference states.
+        rate, rate_star = parameters.theta, parameters.theta_star
+        record(
+            "sqrt_Q_at_long_run_means",
+            parameters.name,
+            math.sqrt(ccm.interest_rate_quadratic(parameters, rate, rate_star)),
+            "the degenerate volatility, attained only if C_t = 0",
+        )
+        record(
+            "minimum_feasible_volatility",
+            parameters.name,
+            ccm.minimum_feasible_volatility(parameters, rate, rate_star),
+            "sqrt(Q_t + C_t), the smallest volatility the identity permits",
+        )
+        record(
+            "induced_rho_xy_at_multiple",
+            parameters.name,
+            ccm.induced_xy_correlation(
+                parameters, RATE_MULTIPLE * rate, RATE_MULTIPLE * rate_star
+            ),
+            f"right-hand side of the compatibility relation at {RATE_MULTIPLE:g}x",
+        )
+
+    # (c) The counterexample: compatibility holds exactly, positive
+    # semidefiniteness fails anyway.
+    phi_t = COUNTEREXAMPLE["phi_t"]
+    phi_star_t = COUNTEREXAMPLE["phi_star_t"]
+    rho = COUNTEREXAMPLE["rho_ww_star"]
+    rho_wy = COUNTEREXAMPLE["rho_wy"]
+    rho_w_star_y = COUNTEREXAMPLE["rho_w_star_y"]
+
+    quadratic = phi_t**2 + phi_star_t**2 - 2.0 * rho * phi_t * phi_star_t
+    volatility = math.sqrt(quadratic)
+    rho_wx = (phi_t - rho * phi_star_t) / volatility
+    rho_w_star_x = (rho * phi_t - phi_star_t) / volatility
+    rho_xy = (phi_t * rho_wy - phi_star_t * rho_w_star_y) / volatility
+
+    record("counterexample_volatility", "counterexample", volatility, "v_t = sqrt(Q_t)")
+    record("counterexample_rho_wx", "counterexample", rho_wx)
+    record("counterexample_rho_w_star_x", "counterexample", rho_w_star_x)
+    record("counterexample_rho_xy", "counterexample", rho_xy, "forced by (i)")
+    record(
+        "three_dim_psd_left",
+        "counterexample",
+        rho_wy**2 - 2.0 * rho * rho_wy * rho_w_star_y + rho_w_star_y**2,
+    )
+    record("three_dim_psd_right", "counterexample", 1.0 - rho**2)
+
+    matrix = np.array(
+        [
+            [1.0, rho, rho_wx, rho_wy],
+            [rho, 1.0, rho_w_star_x, rho_w_star_y],
+            [rho_wx, rho_w_star_x, 1.0, rho_xy],
+            [rho_wy, rho_w_star_y, rho_xy, 1.0],
+        ]
+    )
+    for index, eigenvalue in enumerate(sorted(np.linalg.eigvalsh(matrix))):
+        record(
+            f"counterexample_eigenvalue_{index}",
+            "counterexample",
+            float(eigenvalue),
+            "spectrum of R_t; the matrix is indefinite",
+        )
+
+    # (d) The union bound, which is correct and uninformative.
+    limit = float(norm.cdf(-1.0))
+    record("phi_minus_one", "union bound", limit, "the limit of the worst case")
+    for steps in UNION_STEPS:
+        record(
+            f"union_bound_{steps}_steps",
+            "union bound",
+            steps * limit,
+            "clips to one; quoted to show how far above it the bound sits",
+        )
+
+    pd.DataFrame(rows).to_csv(TABLES / "worked_examples.csv", index=False)
 
 
 def make_constants_table() -> None:
@@ -1484,6 +1784,9 @@ def main(output_root: Path | None = None) -> None:
     make_criterion_shape_table()
     make_maximiser_table(rng)
     make_covering_table(rng)
+    make_critical_limit_table(rng)
+    make_antithetic_table()
+    make_worked_examples_table()
     make_constants_table()
 
 

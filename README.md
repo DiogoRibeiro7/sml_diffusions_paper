@@ -99,7 +99,7 @@ paper/                    the two manuscripts and everything they include
   companion.pdf           application companion, compiled
   references.bib          bibliography, 42 entries, its 39 DOIs Crossref-verified
   figures/                5 figures, vector PDF and PNG (generated)
-  tables/                 16 LaTeX tables and 19 CSV files (generated)
+  tables/                 18 LaTeX tables and 25 CSV files (generated)
 code/
   generate_results.py         every figure and table
   check_correlation_matrix.py correlation-matrix and grid-domain diagnostics
@@ -129,10 +129,10 @@ gates keep the manuscript and the code from drifting apart.
 
 | Gate | Command | What it enforces |
 | --- | --- | --- |
-| Tests | `make test` | 270 tests. Every closed form is checked against an independent computation: numerical integration, direct Monte Carlo, or brute force. Tolerances are stated at each assertion. |
-| Reproducibility | `make verify` | 45 artefacts regenerated into a scratch directory and compared with the committed copies. CSV field-wise at `1e-9`; PDF and PNG by SHA-256. Figure output carries no embedded timestamp, so the comparison is exact. |
-| Wording | `make phrases` | 54 patterns for claims retracted in an earlier review round. Guards against an overstatement removed from one section reappearing in another later. |
-| Numbers | `make numbers` | Every number in a manuscript table, and every prose decimal of two or more places, must be the correct rounding of a generated value. Detection is measured, not assumed: 79 per cent of two-decimal errors, 96 per cent of three, 99.8 per cent of four. Prose numbers predating the check are frozen in a baseline, so new ones fail while old debt is paid down. |
+| Tests | `make test` | 272 tests. Every closed form is checked against an independent computation: numerical integration, direct Monte Carlo, or brute force. Tolerances are stated at each assertion. |
+| Reproducibility | `make verify` | 53 artefacts regenerated into a scratch directory and compared with the committed copies. CSV field-wise at `1e-9`; PDF and PNG by SHA-256. Figure output carries no embedded timestamp, so the comparison is exact. |
+| Wording | `make phrases` | 54 patterns for claims retracted in an earlier review round. Guards against an overstatement removed from one section reappearing in another later. Also fails on a LaTeX macro destroyed by a shell escape, which compiles silently and reaches the page. |
+| Numbers | `make numbers` | Every number in a manuscript table, and every prose decimal of two or more places, must be the correct rounding of a generated value. Detection is measured, not assumed, under two error models: against arbitrary wrong values, 82 / 97 / 99.6 per cent at two, three and four decimals; against near-misses of real generated quantities, which is the realistic error, 63 / 86 / 98. The baseline of ungenerated prose numbers is now empty. |
 | Release | `python code/make_release.py` | All of the above, plus a clean LaTeX log, resolved front-matter metadata, no draft label, deposit metadata that parses, and every release document present. |
 
 `make check` runs the first three. The release gate refuses to build if any fails; `--allow-draft`

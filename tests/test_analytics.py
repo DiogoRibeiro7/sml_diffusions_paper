@@ -1968,10 +1968,19 @@ def test_number_gate_detection_rate() -> None:
     The rate is measured by drawing random wrong values and counting how many the
     matcher accepts.  It is not 100 per cent and cannot be: a wrong value that
     happens to land within rounding distance of some other generated value is
-    indistinguishable from a right one.  The floors below are set well under the
-    measured rates, so this fails on a real degradation rather than on noise --
-    for instance if the pool of generated values grew large enough to swallow
-    arbitrary numbers.
+    indistinguishable from a right one.
+
+    Two error models are measured, because the first flatters the gate.  Drawing
+    uniformly on [0, 10] scatters the wrong values over a range where the pool is
+    mostly empty, so they are easy to catch.  Perturbing a real generated value
+    instead puts the error where the pool is densest, which is where real errors
+    occur -- a stale figure from a scratch run, a digit transposed in
+    transcription.  Detection under the second model is 15 points lower at two
+    decimals, and it is the number the module's docstring leads with.
+
+    The floors are set under the measured rates, so this fails on a real
+    degradation rather than on noise -- for instance if the pool of generated
+    values grew large enough to swallow arbitrary numbers.
     """
     gate = pytest.importorskip(
         "check_table_numbers", reason="number gate not importable"
@@ -1980,15 +1989,71 @@ def test_number_gate_detection_rate() -> None:
     assert len(values) > 100, "pool too small for the measurement to mean anything"
 
     rng = np.random.default_rng(4_091)
-    floors = {2: 0.70, 3: 0.90, 4: 0.97}
-    for decimals, floor in floors.items():
-        trials = 3000
-        caught = sum(
-            not gate.matches(f"{value:.{decimals}f}", values)
-            for value in rng.uniform(0.0, 10.0, size=trials)
+    # Errors are near-misses of quantities of a plausible size; the extremes of
+    # the pool are exponents and counts, not values anyone mistypes.
+    plausible = [value for value in values if 0.001 < abs(value) < 1000]
+
+    # decimals -> (arbitrary-error floor, near-miss floor)
+    # Floors sit a few points under the measured rates, which fall slowly as the
+    # pool grows; see the module docstring for the current measurements.
+    floors = {2: (0.77, 0.58), 3: (0.93, 0.82), 4: (0.98, 0.95)}
+    for decimals, (arbitrary_floor, near_floor) in floors.items():
+        trials = 4000
+        arbitrary = rng.uniform(0.0, 10.0, size=trials)
+        near_miss = rng.choice(plausible, size=trials) * rng.uniform(
+            1.05, 3.0, size=trials
         )
-        rate = caught / trials
-        assert rate >= floor, (
-            f"{decimals}-decimal detection fell to {rate:.1%}, below the {floor:.0%} "
-            "floor; the gate is weaker than its documentation claims"
-        )
+        for label, draws, floor in (
+            ("arbitrary", arbitrary, arbitrary_floor),
+            ("near-miss", near_miss, near_floor),
+        ):
+            caught = sum(
+                not gate.matches(f"{value:.{decimals}f}", values) for value in draws
+            )
+            rate = caught / trials
+            assert rate >= floor, (
+                f"{decimals}-decimal {label} detection fell to {rate:.1%}, below the "
+                f"{floor:.0%} floor; the gate is weaker than its documentation claims"
+            )
+
+
+def test_escape_mangled_macros_are_detected() -> None:
+    """A macro eaten by its own escape must fail the build, not typeset quietly.
+
+    Editing the manuscripts through a shell heredoc has repeatedly replaced a
+    backslash escape with the character it stands for.  LaTeX does not object:
+    a newline where a macro should be leaves math-mode italic text, and the run
+    completes with no error, no warning and no undefined reference.  Five such
+    breakages once shipped inside a single paragraph.  Every other check in the
+    repository reads the log or the numbers, so none of them can see this.
+    """
+    phrases = pytest.importorskip(
+        "check_forbidden_phrases", reason="phrase gate not importable"
+    )
+    # Built from character codes on purpose.  Writing these as escape sequences
+    # is exactly what breaks the manuscripts, and it would silently collapse the
+    # intact case and the damaged one into the same string.
+    backslash, newline = chr(92), chr(10)
+    preamble = (
+        backslash + "newcommand{" + backslash + "neval}{N}" + newline
+        + backslash + "newcommand{" + backslash + "beta}{b}" + newline
+    )
+    intact = "The $" + backslash + "neval$ evaluations." + newline
+    eaten = "The $" + newline + "eval$ evaluations." + newline
+    assert intact != eaten, "the two cases must differ for this test to mean anything"
+
+    assert phrases.mangled_in_text(preamble + intact) == []
+
+    newline_eaten = phrases.mangled_in_text(preamble + eaten)
+    assert len(newline_eaten) == 1
+    assert "neval" in newline_eaten[0][1]
+
+    # A backspace where \beta belonged trips both rules, which is correct: it is
+    # a stray control character and it is a macro eaten by its own escape.
+    control_eaten = phrases.mangled_in_text(preamble + "A " + chr(8) + "eta term.")
+    reasons = {description for _, description in control_eaten}
+    assert any(backslash + "b" in reason for reason in reasons)
+    assert any("beta" in reason for reason in reasons)
+
+    # The real manuscripts must be clean.
+    assert phrases.scan_mangled_macros() == []
