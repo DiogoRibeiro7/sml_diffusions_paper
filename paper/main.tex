@@ -2190,7 +2190,7 @@ Assume \eqref{eq:interchange_condition} and the rate condition of \Cref{prop:uni
 \begin{equation}\label{eq:sandwich_condition}
 \frac{M}{S^{2/K}\log S}\longrightarrow\infty .
 \end{equation}
-Then the simulated maximum likelihood estimator in the model \eqref{eq:location_model} satisfies $\widetilde\theta_{N,M,S}\to\thetao$ in probability. Along $M=S=n$ with $K>2$, condition \eqref{eq:sandwich_condition} holds automatically, so for $K\ge5$ consistency requires only $N/(\log n)^{1+4/K}\to\infty$ and is unconditional --- along the very sequence for which \Cref{thm:collapse} makes the simulated transition density converge in probability to zero.
+Then the simulated maximum likelihood estimator in the model \eqref{eq:location_model} satisfies $\widetilde\theta_{N,M,S}\to\thetao$ in probability. Along $M=S=n$ with $K>2$, condition \eqref{eq:sandwich_condition} holds automatically, so consistency reduces to the single requirement $N\gg(\log n)^{p}$ and is unconditional in every dimension $K>2$ --- along the very sequence for which \Cref{thm:collapse} makes the simulated transition density converge in probability to zero. For $K\ge5$ the exponent improves to $1+4/K$, by the envelope route of \Cref{rem:high_dimension_route}, but only the exponent changes: nothing is conditional in the intervening dimensions.
 \end{corollary}
 
 \begin{proof}
