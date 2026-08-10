@@ -22,13 +22,16 @@ number of simulations. The paper derives the exact finite-`M` moments, the gener
 with its constants, the corrected density-level normalisation, and the mean squared error, minimised
 at `M ≍ S^(2/(K+4))`.
 
-It then gives a counterexample to the joint transition-density statements of Brandt and Santa-Clara
-(2002), *Journal of Financial Economics* 63, 161–210. Along `M = S → ∞`, a sequence satisfying their
-own rate condition and their own regularity assumptions, the simulated density converges in
-probability to zero for every `K > 2` while the true density is strictly positive. This refutes the
-consistency asserted in their Lemma 2 and, since `√S` times the centred density then diverges, the
-central-limit statement of their Lemma 3. The proofs of their parameter-estimator theorems
-consequently fail, and in the four dimensions the application uses, their rate condition is
+It then shows that the estimator collapses on the whole subcritical region: whenever
+`S / M^(K/2) → 0`, the simulated density converges in probability to zero at every pair of points,
+although the true density is strictly positive there.
+
+The consequence for the literature follows as a corollary. The diagonal `M = S → ∞` satisfies both
+the rate condition of Brandt and Santa-Clara (2002), *Journal of Financial Economics* 63, 161–210,
+and their own regularity assumptions, so their Lemma 2 asserts consistency exactly where the density
+collapses, for every `K > 2`; and since `√S` times the centred density then diverges, the
+central-limit statement of their Lemma 3 fails with it. The proofs of their parameter-estimator
+theorems consequently fail, and in the four dimensions the application uses, their rate condition is
 incompatible with mean-square consistency of the simulated density.
 
 The threshold is sharp. Collapse holds throughout the subcritical region, under `R_{M,S} → 0` alone,
@@ -45,10 +48,15 @@ inconsistent, and in the most tractable case it proves the opposite. In a Gaussi
 the simulated maximiser is **consistent** along `M = S = n` with `K > 2` — precisely the sequence on
 which the density collapses to zero. Collapse of the density and consistency of the maximiser hold
 simultaneously, in the same model on the same designs, so the counterexample provably does not
-transfer and no argument through pointwise density behaviour alone can make it. What remains open is
-the rate. The consistency argument itself is conditional: it rests on a uniform law whose proof was
-found incomplete under external review, and which now carries an unverified empirical-tail
-hypothesis. Separately, whether `√N(θ̃ - θ̂)` diverges would refute the *conclusion* of Lemma 5
+transfer and no argument through pointwise density behaviour alone can make it. The consistency
+argument is unconditional in every dimension `K > 2`, the application's four included: the uniform
+law it rests on splits the observations on the position of the centre rather than on the size of the
+criterion, which needs only a first moment of the envelope, and the price is a polylogarithmic
+requirement `N ≫ (log S)^p`. That price is compatible with the published rate conditions, though the
+two become simultaneously satisfiable only at simulation sizes far beyond anything runnable, which
+the paper states rather than glosses.
+
+What remains open is the rate. Whether `√N(θ̃ - θ̂)` diverges would refute the *conclusion* of Lemma 5
 rather than its proof, and half of that is proved. The criterion's score at the truth has the exact second
 moment `4 S^(2/K) G_S(θ₀) / N`, so it grows like `S^(1/K)` and cannot converge to the exact score —
 the discrepancy is present, exactly, in the score. What is not proved is that it survives division
@@ -252,6 +260,7 @@ Cite the **concept DOI**, which represents every version and always resolves to 
 | DOI | Refers to | Status |
 | --- | --- | --- |
 | [`10.5281/zenodo.21719868`](https://doi.org/10.5281/zenodo.21719868) | all versions; resolves to the latest | **cite this** |
+| [`10.5281/zenodo.21877843`](https://doi.org/10.5281/zenodo.21877843) | v1.8.0 | current |
 | [`10.5281/zenodo.21857286`](https://doi.org/10.5281/zenodo.21857286) | v1.7.0 | superseded: asserts the empirical tail cannot be closed at `K = 3, 4`; it can |
 | [`10.5281/zenodo.21855599`](https://doi.org/10.5281/zenodo.21855599) | v1.6.1 | superseded: estimator-level results conditional in every dimension |
 | [`10.5281/zenodo.21850110`](https://doi.org/10.5281/zenodo.21850110) | v1.6.0 | superseded: corrections incompletely applied; contradicts itself on consistency |

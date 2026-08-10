@@ -63,6 +63,18 @@ identifiers:
       Concept DOI. Represents every version of this work and always resolves to
       the most recent one. Cite this unless you need to pin a specific version.
   - type: doi
+    value: 10.5281/zenodo.21877843
+    description: >-
+      Version DOI for v1.8.0, the current release. It closes the empirical-tail
+      condition in every dimension K > 2, the application's four included, by
+      splitting the observations on the position of the centre rather than on
+      the size of the criterion; consistency of the simulated maximiser in the
+      location model is therefore unconditional, at the cost of a
+      polylogarithmic requirement on the number of observations. It also
+      corrects two misrounded antithetic pair correlations, repairs five macros
+      that a shell escape had destroyed and that LaTeX typeset as stray italic
+      text, and brings every number quoted in prose under a named generator.
+  - type: doi
     value: 10.5281/zenodo.21857286
     description: >-
       Version DOI for v1.7.0, superseded by defect. It states that the
