@@ -49,8 +49,8 @@ keywords:
   - nonregular inference
 license: CC-BY-4.0
 repository-code: "https://github.com/DiogoRibeiro7/sml_diffusions_paper"
-date-released: 2026-08-09
-version: v1.7.0
+date-released: 2026-08-10
+version: v1.8.0
 doi: 10.5281/zenodo.21719868
 # Zenodo mints a version DOI only when a release is published, and the identifier
 # it issues cannot be predicted, so the entry for the release named above is added
@@ -65,13 +65,15 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.21857286
     description: >-
-      Version DOI for v1.7.0, the current release. It proves the uniform law of
-      large numbers, and with it consistency of the simulated maximiser in the
-      location model, unconditionally when K sigma^2 > 4, that is in five
-      dimensions and above; and it establishes uniformity of the interchange in
-      the step size. At K = 3 and K = 4 the result remains conditional, the
-      natural repair there yielding a rate condition incompatible with the
-      published one.
+      Version DOI for v1.7.0, superseded by defect. It states that the
+      empirical-tail condition cannot be discharged at K = 3 and K = 4, the
+      application's dimension included, and argues the obstruction is
+      structural. It is not: the argument holds for truncation on the criterion
+      and fails for truncation on the centre, which v1.8.0 uses to make the
+      result unconditional in every dimension K > 2. Two antithetic pair
+      correlations are also misrounded, and five occurrences of a macro in the
+      antithetic section were destroyed by a shell escape and typeset as stray
+      italic text.
   - type: doi
     value: 10.5281/zenodo.21855599
     description: >-
