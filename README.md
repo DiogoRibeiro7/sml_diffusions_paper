@@ -35,9 +35,11 @@ theorems consequently fail, and in the four dimensions the application uses, the
 incompatible with mean-square consistency of the simulated density.
 
 The threshold is sharp. Collapse holds throughout the subcritical region, under `R_{M,S} → 0` alone,
-and the density-level central limit theorem throughout its complement, so no designs are left
-unsettled between them — the collapse rate is `O(R (log 1/R)^(K/2))`. The scaling that produces the
-threshold does not depend on the paper's one imported hypothesis: under Aronson-type two-sided
+with rate `O(R (log 1/R)^(K/2))`, and the density-level central limit theorem holds throughout the
+supercritical region `R_{M,S} → ∞`, so no designs are left unsettled between them. The boundary
+`R_{M,S} ≍ 1` is neither: it is a third regime, with a nondegenerate non-Gaussian limit.
+
+The scaling that produces the threshold does not depend on the paper's one imported hypothesis: under Aronson-type two-sided
 Gaussian bounds on the Euler density, which are checkable from `μ` and `V`, the moment law holds with
 its constant bracketed, so the exponent of `h` — and hence the effective size — follows from
 primitive conditions. Assumption (A5) does exactly one thing, which is to replace that bracket by
@@ -63,11 +65,15 @@ the discrepancy is present, exactly, in the score. What is not proved is that it
 by the curvature, and Appendix A measures the obstacle: the finite-`S` criterion is about a third
 less curved than its limit at `S = 10⁴` and does not approach it until `S ≈ 10¹⁰`, so the two
 dependences on `S` nearly cancel across every simulation size anyone can run. The prediction is
-therefore neither confirmed nor refuted by simulation, and is reported as a prediction. What the
-simulation does establish is a level rather than a trend: solving the stationarity condition exactly,
-the simulated maximiser carries roughly twice the error of the exact MLE at every size tested, so
-the loss is real at practical simulation sizes even though its growth in `S` is not resolvable. The
-paper does not claim the published empirical estimates are wrong.
+therefore neither confirmed nor refuted by simulation, and is reported as a prediction.
+
+What the simulation does establish is a level rather than a trend. Iterating the stationarity
+condition to convergence from eight random starts and keeping the best, the *nearest-atom proxy*
+minimiser carries roughly twice the error of the exact MLE at every size tested, so the loss is real
+at practical simulation sizes even though its growth in `S` is not resolvable. That measurement is
+of the proxy criterion over a unit-variance cloud, not of the simulated likelihood at finite `M`;
+the two are linked by a sandwich, not identical. The paper does not claim the published empirical
+estimates are wrong.
 
 ## The companion note
 

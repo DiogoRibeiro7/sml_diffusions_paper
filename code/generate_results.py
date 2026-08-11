@@ -1261,15 +1261,21 @@ def _refine(clouds: NDArray[np.float64], start, iterations: int = 200):
     return theta
 
 
-def simulated_maximiser(clouds: NDArray[np.float64], rng: np.random.Generator):
+def proxy_minimiser(clouds: NDArray[np.float64], rng: np.random.Generator):
     """Return the best local minimum found from several random starts.
 
     The estimator is the GLOBAL minimiser, and theta_0 is not known in practice,
     so the search must not begin there.  An earlier version started at the
     origin, which is theta_0, and understated the error by up to fourteen per
-    cent at S = 256; restarts beat that solution in 28 of 30 replications.  With
-    a finite restart budget this remains an upper bound on the criterion and so
-    a lower bound on the estimator's error.
+    cent at S = 256; restarts beat that solution in 28 of 30 replications.
+
+    With a finite restart budget this remains an upper bound on the attained
+    criterion value.  It does NOT give a lower bound on the estimator's error,
+    and an earlier version of this docstring said it did.  Criterion values do
+    not order parameter errors: a suboptimal local minimum can sit nearer to
+    theta_0 than the global one as easily as farther.  What the restarts remove
+    is a bias of known direction -- starting the search at the answer -- while
+    the residual effect of a finite budget is of unknown sign.
     """
     dimension = clouds.shape[2]
     best, best_value = None, math.inf
@@ -1299,7 +1305,13 @@ def central_chi_coefficient(dimension: int, order: int, size: float) -> float:
 
 
 def make_maximiser_table(rng: np.random.Generator) -> None:
-    """Compare the simulated maximiser's error with the exact MLE's."""
+    """Compare the nearest-atom proxy minimiser's error with the exact MLE's.
+
+    What is minimised is the proxy criterion X_N over a unit-variance cloud, not
+    the simulated likelihood at finite M.  The two are linked by the sandwich of
+    prop:nearest_atom, not by being the same object, and the table's name should
+    not suggest otherwise.
+    """
     dimension = MAXIMISER_DIMENSION
     n_obs = MAXIMISER_OBSERVATIONS
     rows = []
@@ -1318,7 +1330,7 @@ def make_maximiser_table(rng: np.random.Generator) -> None:
             clouds = increments[:, None, :] - rng.normal(
                 size=(n_obs, size, dimension)
             )
-            estimate = simulated_maximiser(clouds, rng)
+            estimate = proxy_minimiser(clouds, rng)
             tilde.append(math.sqrt(n_obs) * float(np.linalg.norm(estimate)))
             hat.append(math.sqrt(n_obs) * float(np.linalg.norm(increments.mean(axis=0))))
         simulated = float(np.mean(tilde))
@@ -1342,8 +1354,8 @@ def make_maximiser_table(rng: np.random.Generator) -> None:
             }
         )
     frame = pd.DataFrame(rows)
-    frame.to_csv(TABLES / "simulated_maximiser.csv", index=False)
-    (TABLES / "simulated_maximiser.tex").write_text(
+    frame.to_csv(TABLES / "proxy_minimiser.csv", index=False)
+    (TABLES / "proxy_minimiser.tex").write_text(
         frame.to_latex(
             index=False,
             float_format=lambda value: f"{value:.6g}",
@@ -1459,6 +1471,39 @@ def simulate_critical_limit(rng: np.random.Generator) -> NDArray[np.float64]:
     """Draw from the critical limit law ``L = sum_i exp(-t_i)``."""
     gaps = rng.exponential(size=(CRITICAL_DRAWS, CRITICAL_TERMS))
     return np.exp(-np.cumsum(gaps, axis=1)).sum(axis=1)
+
+
+def make_covering_counterexample_table() -> None:
+    """Tabulate the counterexample to the discarded form of the covering bound.
+
+    The lemma once took the density infimum over Theta itself.  A ball around a
+    point of Theta protrudes beyond it, and for a Gaussian cloud the density on
+    that protrusion is smaller, so ``f_min * volume`` overstates the ball's mass
+    rather than bounding it below.  The table records the comparison at the
+    manuscript's example and confirms that the repaired bound, which takes the
+    infimum over the r/2-neighbourhood, sits on the correct side.
+    """
+    dimension, variance, radius = 4, 1.0, 0.5
+    volume = unit_ball_volume(dimension)
+    density = (2 * math.pi * variance) ** (-dimension / 2)
+    discarded = density * volume * radius**dimension
+    exact = float(chi2.cdf(radius**2 / variance, dimension))
+    repaired = (
+        density
+        * math.exp(-(radius**2) / (2 * variance))
+        * volume
+        * radius**dimension
+    )
+    rows = [
+        {"quantity": "discarded_lower_bound", "value": discarded},
+        {"quantity": "exact_ball_probability", "value": exact},
+        {"quantity": "repaired_lower_bound", "value": repaired},
+        {"quantity": "kappa_at_unit_variance", "value": math.exp(-5 / 8)},
+    ]
+    # The defect and the repair, asserted rather than described.
+    assert discarded > exact, "the discarded bound is supposed to fail here"
+    assert repaired <= exact, "the repaired bound must not fail"
+    pd.DataFrame(rows).to_csv(TABLES / "covering_counterexample.csv", index=False)
 
 
 def make_critical_limit_table(rng: np.random.Generator) -> None:
@@ -1784,6 +1829,7 @@ def main(output_root: Path | None = None) -> None:
     make_criterion_shape_table()
     make_maximiser_table(rng)
     make_covering_table(rng)
+    make_covering_counterexample_table()
     make_critical_limit_table(rng)
     make_antithetic_table()
     make_worked_examples_table()

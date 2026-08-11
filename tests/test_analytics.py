@@ -1876,7 +1876,7 @@ def test_criterion_shape_converges_too_slowly_to_settle_the_rate() -> None:
     assert frame["limit_shape_ratio"].nunique() == 1
 
 
-def test_simulated_maximiser_matches_the_finite_S_prediction() -> None:
+def test_proxy_minimiser_matches_the_finite_S_prediction() -> None:
     """The M-estimator linearisation must reproduce the measured error.
 
     With the score second moment and the curvature both exact, the predicted
@@ -1893,7 +1893,7 @@ def test_simulated_maximiser_matches_the_finite_S_prediction() -> None:
     """
     generate = pytest.importorskip("generate_results", reason="generator not importable")
     frame = pd.read_csv(
-        ROOT / "paper" / "tables" / "simulated_maximiser.csv"
+        ROOT / "paper" / "tables" / "proxy_minimiser.csv"
     ).sort_values("simulations")
     assert len(frame) >= 3
     assert generate.MAXIMISER_RESTARTS >= 4, "the search must not start at the truth"
