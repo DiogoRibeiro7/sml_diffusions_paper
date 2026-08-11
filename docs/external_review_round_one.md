@@ -1,5 +1,7 @@
 # External review, first round
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 Seven findings from an independent reader of v1.0.1, all accepted and all fixed. One was
 publication-blocking. This is the first review not conducted by the author or by an agent working
 for the author, and it found a false statement that five internal rounds had missed.

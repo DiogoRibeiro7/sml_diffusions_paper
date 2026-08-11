@@ -1,5 +1,7 @@
 # Bibliography audit, round two
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 Follows `docs/bibliography_audit.md`. Only entries touched or re-checked in this round are
 recorded here; entries verified in round one and unchanged since are not repeated.
 

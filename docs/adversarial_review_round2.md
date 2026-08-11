@@ -1,5 +1,7 @@
 # Adversarial review, round two
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 Second hostile pass, conducted after the round-two corrections and without relying on the earlier
 review reports. The manuscript was not modified during the review pass; the issues below were
 recorded first and then fixed, with resolutions noted.

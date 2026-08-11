@@ -1,5 +1,7 @@
 # Change log, the split into two documents
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 Baseline `c8540d1`. No mathematical content was added, removed or altered in this round. The single
 manuscript was divided into two, on the recommendation of all three referee reports, and the
 supporting machinery was generalised to build and gate both.

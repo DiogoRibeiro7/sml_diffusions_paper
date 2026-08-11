@@ -54,7 +54,7 @@ transfer and no argument through pointwise density behaviour alone can make it. 
 argument is unconditional in every dimension `K > 2`, the application's four included: the uniform
 law it rests on splits the observations on the position of the centre rather than on the size of the
 criterion, which needs only a first moment of the envelope, and the price is a polylogarithmic
-requirement `N ≫ (log S)^p`. That price is compatible with the published rate conditions, though the
+requirement `N ≫ (log S)^(p+ε)`, for any fixed `ε > 0`. That price is compatible with the published rate conditions, though the
 two become simultaneously satisfiable only at simulation sizes far beyond anything runnable, which
 the paper states rather than glosses.
 

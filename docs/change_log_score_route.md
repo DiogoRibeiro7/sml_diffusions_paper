@@ -1,5 +1,7 @@
 # Change log, the score at the truth
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 Baseline `d21ed04` (v1.4.0). The `sqrt(N)` question is advanced but **not** settled. What is new is
 an exact result about the score, and a quantitative explanation of why the step from the score to
 the estimator resists both proof and simulation.

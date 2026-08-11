@@ -1,5 +1,7 @@
 # Final claim dependency audit
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 Every substantive claim in the abstract, introduction, Section 8, conclusion and Appendices C to G,
 with what it rests on and what it refers to. Compiled after the third revision round on branch
 `fix/final-mathematical-review`.

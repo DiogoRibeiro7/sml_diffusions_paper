@@ -1,5 +1,7 @@
 # Bibliography audit
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 Every entry in `paper/references.bib` was checked against primary bibliographic sources:
 publisher pages, DOI records and journal tables of contents. Secondary summaries were not used
 as the basis for any correction.

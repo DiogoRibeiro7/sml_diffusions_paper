@@ -1,5 +1,7 @@
 # Change log, the curvature identity
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 Baseline `1f1e35f`. The step the previous round reported as the substantive obstacle is closed, and
 a defect in that round's measurement of the maximiser is corrected.
 

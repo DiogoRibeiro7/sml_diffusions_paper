@@ -1,5 +1,7 @@
 # Final local revision review
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 Fifth round, twelve targeted issues. The core Brownian moment, counterexample, local moment and
 density-CLT results were not reopened; no error was found in them and none was sought beyond
 confirming they still compile, still reproduce, and are still stated as before.

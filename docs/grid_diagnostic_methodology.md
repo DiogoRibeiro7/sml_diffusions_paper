@@ -1,5 +1,7 @@
 # Grid diagnostic methodology
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 What the candidate-state grid in Appendix E computes, exactly, and what it does not compute. This
 document exists because an earlier version of the analysis described the grid as a sweep over the
 "reachable state space" and quoted a percentage of it, which claims more than a grid can support.

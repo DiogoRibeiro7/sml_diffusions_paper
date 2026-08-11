@@ -1,5 +1,7 @@
 # Application claims: dependency matrix
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 Every application-specific claim in the manuscript, with the result or calculation it rests on and
 whether that support survives the corrected feasibility analysis of Appendix E. Produced after the
 second review round, in which the volatility floor was recomputed under the complete variance

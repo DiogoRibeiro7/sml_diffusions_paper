@@ -1,5 +1,7 @@
 # Change log, the external referee round
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 Baseline `96c9d2e` (v1.5.0). An external referee report on the new estimator-level material. One
 finding breaks a theorem previously labelled proved; the rest are overclaims, a quantifier
 imprecision, and three small proof repairs. Every finding was checked before being accepted, and

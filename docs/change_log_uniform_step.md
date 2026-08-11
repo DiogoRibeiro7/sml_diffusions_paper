@@ -1,5 +1,7 @@
 # Change log, the uniform-in-theta step and a correction
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 Baseline `d0d6112` (v1.3.0). The last open step in the argmax question is closed, the argmax
 question itself is settled in one direction, and a claim published in v1.3.0 is corrected.
 

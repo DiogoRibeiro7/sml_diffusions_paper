@@ -1337,7 +1337,7 @@ R_{M,S}=\frac{S}{M^{K/2}}.
 Before drawing the consequence, one identification must be made explicit rather than assumed, because \Cref{prop:score_moment} differentiates in the \emph{evaluation point} $y$ while hypothesis \ref{it:me_score} concerns $\nabla_\theta$.
 
 \begin{assumption}[Score identification]\label{ass:score_identification}
-The model is such that differentiation of the summand in the parameter reduces to differentiation in the evaluation point, up to a bounded nonsingular linear map: $\nabla_\theta G_h=J\,\nabla_yG_h+\Rem_h$ with $\lVert J\rVert$ and $\lVert J^{-1}\rVert$ bounded and $\E\lVert\Rem_h\rVert^2=o(h^{-(K+2)/2})$.
+The model is such that differentiation of the summand in the parameter reduces to differentiation in the evaluation point, up to a bounded nonsingular linear map: $\nabla_\theta G_h=J\,\nabla_yG_h+\Rem_h$ with $\lVert J\rVert$ bounded above, the smallest singular value of $J$ bounded below away from zero, and $\E\lVert\Rem_h\rVert^2=o(h^{-(K+2)/2})$. Since $\theta\in\R^L$ while $\mu$ takes values in $\R^K$, the map $J$ is $K\times L$ and need not be square; the singular-value condition requires $L\le K$ and furnishes a left inverse $J^{+}=(J^{\mathsf T}J)^{-1}J^{\mathsf T}$ of bounded norm, which is what the argument uses. When $L=K$ it is nonsingularity of $J$ with $\lVert J^{-1}\rVert$ bounded.
 \end{assumption}
 
 The assumption is not vacuous, and it is not confined to the location model either. It holds exactly, with $\Rem_h\equiv0$, for every constant-coefficient family whose diffusion matrix does not depend on the parameter.
@@ -1348,7 +1348,7 @@ Let $dY_t=\mu(\theta)\,dt+\Sigma\,dW_t$ with $\mu:\ThetaSet\to\R^K$ continuously
 \nabla_\theta G_h=-J(\theta)^{\mathsf T}\,\nabla_yG_h,
 \qquad J(\theta)=\frac{\partial\mu}{\partial\theta},
 \]
-so \Cref{ass:score_identification} holds with $\Rem_h\equiv0$ whenever $J$ and $J^{-1}$ are bounded on $U$.
+so \Cref{ass:score_identification} holds with $\Rem_h\equiv0$ whenever $\lVert J\rVert$ is bounded on $U$ and its smallest singular value is bounded below there, which for $L=K$ is boundedness of $J$ and $J^{-1}$.
 \end{proposition}
 
 \begin{proof}
@@ -1796,7 +1796,7 @@ If the unconditioned endpoint estimator is nevertheless used, the practical cont
 \[
 R_{M,S}=\frac{S}{M^{K/2}},
 \]
-and for parameter estimation rather than density evaluation it is the score-level version $S/M^{(K+2)/2}$ of \eqref{eq:score_effective_size}, which is more demanding by one power of $M$. Increasing $M$ without increasing these is not an accuracy improvement.
+For parameter estimation rather than density evaluation, the score-numerator calculation of \Cref{rem:score_scale} suggests monitoring $S/M^{(K+2)/2}$ of \eqref{eq:score_effective_size} \emph{in addition}, which is more demanding by one power of $M$. That second quantity is a diagnostic and not a theorem: what is proved is the density-level effective size, while the score-level scale rests on a numerator second moment whose transfer across the ratio $\nabla\widehat q/\widehat q$ we do not establish. Increasing $M$ without increasing the first, or watching the second, is not an accuracy improvement.
 
 \emph{Two: refining both at once makes things worse, not better.} This is the point most likely to be missed in practice, because refining $M$ and $S$ together looks like unambiguous progress. In $K=4$,
 \begin{equation}\label{eq:doubling_halves}
@@ -2056,12 +2056,12 @@ f_{\min,r}=\inf\bigl\{f_n(z):\operatorname{dist}(z,\Theta)\le r/2\bigr\}
 for the infimum of the atom density over the closed $r/2$-neighbourhood of $\Theta$. Then, conditionally on $\Delta Y_n$ and for every $r>0$,
 \begin{equation}\label{eq:covering_tail}
 \Pp\bigl(\rho_S>r\ \big|\ \Delta Y_n\bigr)
-\le\Bigl(1+\tfrac{2D}{r}\Bigr)^{K}\exp\bigl(-S f_{\min,r}\,\omega_K(r/2)^K\bigr).
+\le\Bigl(1+\tfrac{4D}{r}\Bigr)^{K}\exp\bigl(-S f_{\min,r}\,\omega_K(r/2)^K\bigr).
 \end{equation}
 \end{lemma}
 
 \begin{proof}
-Cover $\Theta$ by balls of radius $r/2$ centred at the points of a grid of spacing $r/2$; at most $(1+2D/r)^K$ are needed. If every such ball contains an atom then no point of $\Theta$ is farther than $r$ from an atom. Each such ball lies inside the $r/2$-neighbourhood of $\Theta$, so an atom falls in it with probability at least $f_{\min,r}\omega_K(r/2)^K$ and is missed by all $S$ atoms with probability at most $\{1-f_{\min,r}\omega_K(r/2)^K\}^S\le\exp(-Sf_{\min,r}\omega_K(r/2)^K)$. A union bound over the grid gives \eqref{eq:covering_tail}.
+Let $\{\theta_i\}$ be a maximal subset of $\Theta$ whose points are pairwise more than $r/2$ apart. Maximality makes it an $r/2$-net: no point of $\Theta$ is farther than $r/2$ from some $\theta_i$. The balls $B(\theta_i,r/4)$ are disjoint and all lie in a ball of radius $D+r/4$ about any point of $\Theta$, so comparing volumes bounds their number by $\{(D+r/4)/(r/4)\}^K=(1+4D/r)^K$. A grid of spacing $r/2$ would not do here: the farthest point of a cube of side $r/2$ lies at distance $(r/4)\sqrt K$ from its centre, which exceeds $r/2$ once $K>4$. If every ball $B(\theta_i,r/2)$ contains an atom then every point of $\Theta$ is within $r$ of one, by the triangle inequality through the nearest $\theta_i$. Each such ball lies inside the $r/2$-neighbourhood of $\Theta$, so an atom falls in it with probability at least $f_{\min,r}\omega_K(r/2)^K$ and is missed by all $S$ atoms with probability at most $\{1-f_{\min,r}\omega_K(r/2)^K\}^S\le\exp(-Sf_{\min,r}\omega_K(r/2)^K)$. A union bound over the grid gives \eqref{eq:covering_tail}.
 \end{proof}
 
 \begin{remark}[The infimum must be taken over a neighbourhood]\label{rem:covering_neighbourhood}
@@ -2101,7 +2101,7 @@ For the moments write $\E[\Psi_S^m\mid\Delta Y_n]=\int_0^\infty mu^{m-1}\Pp(\Psi
 
 \emph{Below $r_0$.} There \eqref{eq:covering_kappa} applies, so \eqref{eq:covering_tail} holds with $f_{\min,r}$ replaced by $\kappa f_{\min}$. Substituting $u=S^{2/K}r^2$ and using
 \begin{equation}\label{eq:covering_count}
-\Bigl(1+\frac{2D}{r}\Bigr)^{K}\le 2^K\max\bigl\{1,(2D/r)^K\bigr\}\le 2^K\bigl(1+(2D)^KSu^{-K/2}\bigr),
+\Bigl(1+\frac{4D}{r}\Bigr)^{K}\le 2^K\max\bigl\{1,(4D/r)^K\bigr\}\le 2^K\bigl(1+(4D)^KSu^{-K/2}\bigr),
 \end{equation}
 the tail is at most $C_{K,D}(1+Su^{-K/2})\exp(-c_K\kappa f_{\min}u^{K/2})$ with $c_K=\omega_K2^{-K}$. Splitting that integral at $u_0=\{2\log(C_{K,D}S)/(c_K\kappa f_{\min})\}^{2/K}$, below which the tail is bounded by one and above which the exponential factor is at most $(C_{K,D}S)^{-1}$, gives \eqref{eq:envelope_moment} with $u_0^m$ in the leading role.
 
@@ -2123,7 +2123,7 @@ Let $\Theta\subset\R^K$ be compact and assume \eqref{eq:interchange_condition}. 
 \qquad
 p=1+\frac4K+\frac{16}{K(K\sigma^2-2)} .
 \end{equation}
-If $N/(\log S)^{p}\to\infty$ then $\sup_{\theta\in\Theta}\lvert X_N(\theta)-G(\theta)\rvert\to0$ in probability. No hypothesis beyond \eqref{eq:interchange_condition} is required.
+If $N/(\log S)^{p+\varepsilon}\to\infty$ for some $\varepsilon>0$ then $\sup_{\theta\in\Theta}\lvert X_N(\theta)-G(\theta)\rvert\to0$ in probability. No hypothesis beyond \eqref{eq:interchange_condition} is required. The exponent $p$ itself is \emph{not} claimed; \Cref{rem:epsilon_loss} says what is lost and why it is not recoverable by the argument given here.
 \end{proposition}
 
 \begin{proof}
@@ -2164,15 +2164,37 @@ The indicator does not depend on $\theta$, so the Lipschitz property and hence t
 \gamma_\eta\longrightarrow\frac4{K^2\sigma^2\alpha}
 \quad\text{as }\eta\downarrow0 .
 \]
- Since $2\cdot4/(K^2\sigma^2\alpha)=16/\{K(K\sigma^2-2)\}$, both bounds vanish under $N\gg(\log S)^{p}$ for $\eta$ small enough. Adding the three terms gives $\sup_\Theta\lvert X_N-\E X_N\rvert\to0$, and the passage from $\E X_N$ to $G$ is the monotonicity argument of \Cref{prop:uniform_lln}.
+ Since $2\cdot4/(K^2\sigma^2\alpha)=16/\{K(K\sigma^2-2)\}$, the $\eta$-dependent exponent tends to $p$ as $\eta\downarrow0$ but exceeds it for every fixed $\eta$. The quantifiers must therefore run in the order $\varepsilon$ first, then $\eta$: given $\varepsilon>0$, choose $\eta\in(0,\alpha)$ small enough that the exponent is at most $p+\varepsilon/2$, and then both bounds vanish under $N\gg(\log S)^{p+\varepsilon}$, the remaining $\varepsilon/2$ absorbing the $(\log S)^{o(1)}$ factor that expanding $(R_S+D)^2$ contributes. Adding the three terms gives $\sup_\Theta\lvert X_N-\E X_N\rvert\to0$, and the passage from $\E X_N$ to $G$ is the monotonicity argument of \Cref{prop:uniform_lln}.
 \end{proof}
 
 The exponent is finite in every dimension above two: at $\sigma^2\to1$ it is $p=7.67$ at $K=3$, $p=4$ at $K=4$, $p=2.87$ at $K=5$ and $p=2.33$ at $K=6$. So \Cref{cor:argmax_consistent} holds with no unverified condition in any dimension $K>2$, the application's $K=4$ included.
 
-\begin{remark}[The rate conditions are compatible, but not at any reachable size]\label{rem:window}
-Since a power of $\log S$ is eventually smaller than any power of $S$, the requirement $N\gg(\log S)^p$ is compatible with the published $N/S^{1/4}\to0$: taking $N=(\log S)^{p+1}$ satisfies both for all large $S$, so admissible sequences exist and the theorem is not vacuous on the published region.
+\begin{corollary}[The uniform law, uniformly in the step size]\label{cor:uniform_lln_sigma}
+Fix $\sigma_0^2$ with $2/K<\sigma_0^2<1$ and write $p(\sigma^2)=1+4/K+16/\{K(K\sigma^2-2)\}$ for the exponent of \eqref{eq:tail_exponent} at variance $\sigma^2$. If $N/(\log S)^{p(\sigma_0^2)+\varepsilon}\to\infty$ for some $\varepsilon>0$, then
+\[
+\sup_{\sigma^2\in[\sigma_0^2,1]}\ \sup_{\theta\in\Theta}\bigl\lvert X_{N,S,\sigma}(\theta)-G_\sigma(\theta)\bigr\rvert\ \longrightarrow\ 0
+\]
+in probability. In particular the conclusion holds along any triangular sequence $\sigma_n^2\in[\sigma_0^2,1]$, and so along $\sigma_n^2=1-1/n$ for all $n$ large enough.
+\end{corollary}
 
-They are not compatible at sizes anyone will use. At $K=4$, where $p=4$, the inequality $(\log S)^4<S^{1/4}$ first holds near $S=10^{29}$; below that no $N$ satisfies both conditions at once. The same arithmetic gives $S\approx10^{14}$ at $K=6$. This is the third time in this appendix that a statement true in the limit turns out to describe a regime far beyond simulation, after the curvature deficit of \Cref{tab:criterion_shape} and the collapse rate itself, and the pattern is worth naming: the estimator's asymptotics and its practice are separated by many orders of magnitude, which is why simulation evidence about this method should be read with care in either direction.
+\begin{proof}
+Every constant in the proof of \Cref{prop:uniform_lln_all} is continuous in $\sigma^2$ on the compact interval $[\sigma_0^2,1]$ and therefore bounded there: the tail exponent $\alpha=\tfrac12-1/(K\sigma^2)$ is continuous and, being increasing in $\sigma^2$, is bounded below by its value at $\sigma_0^2$, which is positive because $K\sigma_0^2>2$; the dominating function of \Cref{lem:sigma_uniform} is bounded by its value at $\sigma_0^2$ for the same reason; and the envelope moments of \Cref{cor:envelope_moments} depend on $\sigma^2$ only through $\kappa=e^{-5/(8\sigma^2)}$ and the Gaussian constants, both continuous and bounded away from zero on the interval. Replacing each by its worst value over $[\sigma_0^2,1]$ leaves the proof intact and yields the exponent $p(\sigma^2)$ at its largest, which since $p$ is decreasing in $\sigma^2$ is $p(\sigma_0^2)$.
+\end{proof}
+
+The cost of this is nothing, because $\varepsilon$ absorbs it. Given $\varepsilon>0$, $p$ is continuous at $\sigma^2=1$, so $\sigma_0^2<1$ may be chosen with $p(\sigma_0^2)\le p(1)+\varepsilon/2$; \Cref{cor:uniform_lln_sigma} then gives the conclusion under $N\gg(\log S)^{p(1)+\varepsilon}$, which is the requirement already stated. The diagonal $\sigma_n^2=1-1/n$ enters $[\sigma_0^2,1]$ for all large $n$, so nothing further is needed.
+
+\begin{remark}[Why the exponent is $p+\varepsilon$ and not $p$]\label{rem:epsilon_loss}
+The proof gives up an arbitrarily small amount twice, and neither loss is recoverable by a hypothesis stated at the exponent $p$ itself.
+
+The first is the truncation exponent. The distant-centre bound carries $e^{-(\alpha-\eta)R^2}$ for $\eta\in(0,\alpha)$, so the exponent the argument actually needs is $2\cdot4/\{K^2\sigma^2(\alpha-\eta)\}$, which decreases to $16/\{K(K\sigma^2-2)\}$ as $\eta\downarrow0$ but strictly exceeds it at every fixed $\eta$. The second is the cross term in $(R_S+D)^2=R_S^2+2DR_S+D^2$, whose middle term contributes a factor $\exp\{C\sqrt{\log\log S}\}=(\log S)^{o(1)}$.
+
+Both are smaller than any fixed positive power of $\log S$, which is why the exponent is $p$ in the limit. But $(\log S)^{o(1)}$ is not dominated by every sequence satisfying $N/(\log S)^p\to\infty$, because that ratio may itself diverge arbitrarily slowly: $N=(\log S)^p\log\log S$ meets the hypothesis at exponent $p$ and fails it at every exponent above $p$. A statement at $p$ would therefore need an argument that loses nothing, or an explicit slowly varying $L(S)$ with the conclusion under $N/\{(\log S)^pL(S)\}\to\infty$. We have neither, and the sharp exponent is not what the paper is for: any fixed $\varepsilon>0$ leaves the requirement polylogarithmic, and the comparison with a polynomial condition such as $N/S^{1/4}\to0$ is untouched by it. We are grateful to a referee for the point, and for the counterexample.
+\end{remark}
+
+\begin{remark}[The rate conditions are compatible, but not at any reachable size]\label{rem:window}
+Since a power of $\log S$ is eventually smaller than any power of $S$, the requirement $N\gg(\log S)^{p+\varepsilon}$ is compatible with the published $N/S^{1/4}\to0$: taking $N=(\log S)^{p+\varepsilon+1}$ satisfies both for all large $S$, so admissible sequences exist and the theorem is not vacuous on the published region.
+
+They are not compatible at sizes anyone will use. At $K=4$, where $p=4$, the inequality $(\log S)^4<S^{1/4}$ first holds near $S=10^{29}$; below that no $N$ satisfies both conditions at once. The same arithmetic gives $S\approx10^{14}$ at $K=6$. Both figures use the limiting exponent $p$ rather than the $p+\varepsilon$ the theorem is stated at, so each is the \emph{earliest} size at which the window can open; at any $\varepsilon>0$ it opens later still, and the conclusion drawn from them is only strengthened. This is the third time in this appendix that a statement true in the limit turns out to describe a regime far beyond simulation, after the curvature deficit of \Cref{tab:criterion_shape} and the collapse rate itself, and the pattern is worth naming: the estimator's asymptotics and its practice are separated by many orders of magnitude, which is why simulation evidence about this method should be read with care in either direction.
 \end{remark}
 
 \begin{remark}[A shorter route when $K\sigma^2>4$]\label{rem:high_dimension_route}
@@ -2180,7 +2202,7 @@ When
 \begin{equation}\label{eq:high_dimension_condition}
 K\sigma^2>4 ,
 \end{equation}
-which by $\sigma^2<1$ means $K\ge5$, the splitting is unnecessary: the envelope is then square integrable outright, since $\E[f_{\min}^{-4/K}]<\infty$ exactly under \eqref{eq:high_dimension_condition}, and the maximal inequality applies to the whole class at once. That gives the conclusion of \Cref{prop:uniform_lln_all} under the weaker $N\gg(\log S)^{1+4/K}$, which is $p$ with its last term deleted.
+which by $\sigma^2<1$ means $K\ge5$, the splitting is unnecessary: the envelope is then square integrable outright, since $\E[f_{\min}^{-4/K}]<\infty$ exactly under \eqref{eq:high_dimension_condition}, and the maximal inequality applies to the whole class at once. That gives the conclusion of \Cref{prop:uniform_lln_all} under the weaker $N\gg(\log S)^{1+4/K+\varepsilon}$, which is $p$ with its last term deleted, and carries the same $\varepsilon$ for the same reason.
 
 \end{remark}
 
@@ -2200,12 +2222,18 @@ S^{2/K}\E\bigl[\min_s\lVert\theta-b_{n,s}\rVert^2\bigr]
 \qquad
 \Lambda_S(\lambda)=S^{2/K}\!\int_0^\infty\!2u\bigl\{1-G(u^2;K,\lambda)\bigr\}^S du .
 \end{equation}
-The entire dependence on $\sigma^2$ is now the prefactor and the noncentrality, and $\partial/\partial\sigma^2$ of the left side is $\Lambda_S(\lambda)-\lambda\Lambda_S'(\lambda)$. Since $\Theta$ is bounded and $\sigma^2\ge\sigma_0^2>0$, the noncentrality ranges over a compact set, so it suffices to bound $\Lambda_S$ and $\Lambda_S'$ there uniformly in $S$. The first is bounded because it converges. For the second, the standard identity $\partial_\lambda G(x;K,\lambda)=\tfrac12\{G(x;K+2,\lambda)-G(x;K,\lambda)\}$ together with the stochastic ordering of $\chi^2_{K+2}(\lambda)$ over $\chi^2_K(\lambda)$ gives $\lvert\partial_\lambda G\rvert\le\tfrac12G$, whence
+The entire dependence on $\sigma^2$ is now the prefactor and the noncentrality, and $\partial/\partial\sigma^2$ of the left side is $\Lambda_S(\lambda)-\lambda\Lambda_S'(\lambda)$.
+
+The noncentrality is \emph{not} confined to a compact set, and an earlier version of this proof asserted that it was. $\Theta$ is bounded, but the centre $c=\Delta Y_n$ is Gaussian, so $\lambda=\lVert\theta-c\rVert^2/\sigma^2$ is unbounded. The argument is therefore made conditionally on $c$ and then integrated. Fix $L>0$ and split on $\{\lambda\le L\}$. The bounds below are uniform over that event, so the family is equi-Lipschitz there. On its complement the integrand is dominated by the Gaussian envelope already constructed for \Cref{prop:nn_interchange}, whose integrability is exactly \eqref{eq:interchange_condition} and which does not depend on $S$ or on $\sigma^2\in[\sigma_0^2,1]$; choosing $L$ large makes its contribution smaller than any prescribed $\varepsilon$, uniformly in $S$. Equicontinuity on the bounded part together with a tail that is uniformly small is equicontinuity of the integrated quantity, which is what the net argument below consumes. It therefore suffices to bound $\Lambda_S$ and $\Lambda_S'$ uniformly in $S$ over $\lambda\le L$. The first is bounded because it converges. For the second, the standard identity $\partial_\lambda G(x;K,\lambda)=\tfrac12\{G(x;K+2,\lambda)-G(x;K,\lambda)\}$ together with the stochastic ordering of $\chi^2_{K+2}(\lambda)$ over $\chi^2_K(\lambda)$ gives $\lvert\partial_\lambda G\rvert\le\tfrac12G$, whence
 \[
 \lvert\Lambda_S'(\lambda)\rvert
 \ \le\ \tfrac12S^{1+2/K}\!\int_0^\infty\!2u\bigl\{1-G(u^2;K,\lambda)\bigr\}^{S-1}G(u^2;K,\lambda)\,du .
 \]
-Near the origin $G(u^2;K,\lambda)\le C_Ku^K$, because the noncentral density is bounded uniformly for $\lambda$ in a compact set, and $\{1-G\}^{S-1}\le e^{-(S-1)G}$. Substituting $w=Su^K$ turns the integral into $C S^{-1-2/K}\int_0^\infty w^{2/K}e^{-cw}\,dw$, a convergent integral, so $\lvert\Lambda_S'\rvert\le C$ with $C$ free of $S$.
+Two directions of small-ball estimate are needed here, and an earlier version used only one: the factor $G$ in the integrand calls for an upper bound, while extracting decay from $\{1-G\}^{S-1}\le e^{-(S-1)G}$ calls for a \emph{lower} one. Both hold. For $0<u<u_0$ and $0\le\lambda\le L$ the noncentral $\chi^2_K$ density is bounded above and below away from zero on the relevant range, so
+\begin{equation}\label{eq:small_ball_two_sided}
+c_Lu^K\ \le\ G(u^2;K,\lambda)\ \le\ C_Lu^K .
+\end{equation}
+Split the integral at $u_0$. Below it, \eqref{eq:small_ball_two_sided} gives $G\le C_Lu^K$ and $\{1-G\}^{S-1}\le e^{-c_L(S-1)u^K}$, and substituting $w=Su^K$ turns that piece into $CS^{-1-2/K}\int_0^\infty w^{2/K}e^{-cw}\,dw$, a convergent integral, so it contributes $O(1)$ once the prefactor $S^{1+2/K}$ is restored. Above $u_0$, put $q=\sup_{\lambda\le L}\{1-G(u_0^2;K,\lambda)\}$, which is strictly less than one because $G(u_0^2;K,\lambda)$ is continuous and strictly positive on the compact $\lambda$-range. Factoring $q^{S-2}$ out of $\{1-G\}^{S-1}$ leaves an integral bounded by the mean of the noncentral $\chi^2_K$, finite and continuous in $\lambda$, so that piece is $O(S^{1+2/K}q^{S})$ and vanishes geometrically. Hence $\lvert\Lambda_S'(\lambda)\rvert\le C_L$ with $C_L$ free of $S$.
 
 The family $\{\sigma^2\mapsto\sigma^2\Lambda_S(\lVert d\rVert^2/\sigma^2)\}_S$ is therefore equi-Lipschitz on $[\sigma_0^2,1]$. Equi-Lipschitz plus pointwise convergence gives uniform convergence on a compact interval by the usual finite-net argument: cover the interval by finitely many points spaced $\varepsilon/(3L)$ apart, use pointwise convergence at each, and pay $\varepsilon/3$ on either side to reach an arbitrary $\sigma^2$. The same argument applies to the coefficients $a_j^{(S)}$, which are fixed linear functionals of the same integrals.
 \end{proof}
@@ -2213,7 +2241,7 @@ The family $\{\sigma^2\mapsto\sigma^2\Lambda_S(\lVert d\rVert^2/\sigma^2)\}_S$ i
 Since $\sigma_n^2=1-h_n\to1$ and $2/K<1$ for $K>2$, a fixed $\sigma_0^2\in(2/K,1)$ contains the tail of any admissible sequence, so \Cref{lem:sigma_uniform} licenses the use of those propositions along $M=S=n$ and disposes of the quantifier issue recorded below.
 
 \begin{remark}[A quantifier that needed the lemma]\label{rem:sigma_uniformity}
-\Cref{prop:nn_interchange} and \Cref{prop:curvature} are $S\to\infty$ statements at a fixed $\sigma^2=1-h$, while the consistency application takes $M=S=n$, so that $h_n\to0$ and $\sigma_n^2\to1$ along the same sequence. A fixed-$h$ limit cannot be substituted into a joint limit without a uniformity statement, and an earlier version of this appendix noted the difficulty and left it. \Cref{lem:sigma_uniform} supplies the statement, so the objection is met rather than recorded.
+\Cref{prop:nn_interchange} and \Cref{prop:curvature} are $S\to\infty$ statements at a fixed $\sigma^2=1-h$, while the consistency application takes $M=S=n$, so that $h_n\to0$ and $\sigma_n^2\to1$ along the same sequence. A fixed-$h$ limit cannot be substituted into a joint limit without a uniformity statement, and an earlier version of this appendix noted the difficulty and left it. \Cref{lem:sigma_uniform} supplies it for those two results. It does \emph{not} supply it for \Cref{prop:uniform_lln_all}, which is also a fixed-$\sigma^2$ statement and is also applied along the diagonal; that second quantifier is \Cref{cor:uniform_lln_sigma}. Both are needed, an earlier version supplied only the first, and the omission was invisible because the two lemmas sit in different subsections.
 \end{remark}
 
 \begin{remark}[An argument we published and had to withdraw]\label{rem:ullnn_gap}
@@ -2262,7 +2290,7 @@ Assume \eqref{eq:interchange_condition} and the rate condition of \Cref{prop:uni
 \begin{equation}\label{eq:sandwich_condition}
 \frac{M}{S^{2/K}\log S}\longrightarrow\infty .
 \end{equation}
-Then the simulated maximum likelihood estimator in the model \eqref{eq:location_model} satisfies $\widetilde\theta_{N,M,S}\to\thetao$ in probability. Along $M=S=n$ with $K>2$, condition \eqref{eq:sandwich_condition} holds automatically, so consistency reduces to the single requirement $N\gg(\log n)^{p}$ and is unconditional in every dimension $K>2$ --- along the very sequence for which \Cref{thm:collapse} makes the simulated transition density converge in probability to zero. For $K\ge5$ the exponent improves to $1+4/K$, by the envelope route of \Cref{rem:high_dimension_route}, but only the exponent changes: nothing is conditional in the intervening dimensions.
+Then the simulated maximum likelihood estimator in the model \eqref{eq:location_model} satisfies $\widetilde\theta_{N,M,S}\to\thetao$ in probability. Along $M=S=n$ with $K>2$, condition \eqref{eq:sandwich_condition} holds automatically, so consistency reduces to the single requirement $N\gg(\log n)^{p+\varepsilon}$, for any fixed $\varepsilon>0$, and is unconditional in every dimension $K>2$ --- along the very sequence for which \Cref{thm:collapse} makes the simulated transition density converge in probability to zero. For $K\ge5$ the exponent improves to $1+4/K+\varepsilon$, by the envelope route of \Cref{rem:high_dimension_route}, but only the exponent changes: nothing is conditional in the intervening dimensions.
 \end{corollary}
 
 \begin{proof}
@@ -2270,7 +2298,7 @@ Multiply \eqref{eq:nearest_atom_sandwich} by $S^{2/K}/N$ and set
 \[
 A_N(\theta)=-\frac{2hS^{2/K}}{N}\log\widehat{\mathcal L}_{N,M,S}(\theta)-S^{2/K}hK\log(2\pi h),
 \]
-so that $\sup_\theta\lvert A_N(\theta)-X_N(\theta)\rvert\le2S^{2/K}h\log S\to0$ by \eqref{eq:sandwich_condition}. The subtracted term does not depend on $\theta$, so $\widetilde\theta_{N,M,S}$ minimises $A_N$. By \Cref{prop:uniform_lln_all}, $\sup_\Theta\lvert A_N-G\rvert\to0$ in probability; it is that proposition and not the entropy bound of \Cref{prop:uniform_lln} that supplies the uniform law, the latter furnishing only the bracketing estimate used inside it. The limit $G(\theta)=C\exp\{\lVert\theta-\thetao\rVert^2/(K\sigma^2-2)\}$ is continuous and strictly increasing in $\lVert\theta-\thetao\rVert$, hence uniquely minimised at $\thetao$ and well separated: $\inf_{\lVert\theta-\thetao\rVert\ge\varepsilon}G(\theta)>G(\thetao)$ for every $\varepsilon>0$. The argmin theorem for uniformly convergent criteria with a well-separated minimum gives the conclusion. For $M=S=n$, \eqref{eq:sandwich_condition} reads $n^{1-2/K}\gg\log n$, which holds for every $K>2$.
+so that $\sup_\theta\lvert A_N(\theta)-X_N(\theta)\rvert\le2S^{2/K}h\log S\to0$ by \eqref{eq:sandwich_condition}. The subtracted term does not depend on $\theta$, so $\widetilde\theta_{N,M,S}$ minimises $A_N$. By \Cref{cor:uniform_lln_sigma}, $\sup_\Theta\lvert A_N-G\rvert\to0$ in probability. Three citations have to be kept apart here. The entropy bound of \Cref{prop:uniform_lln} furnishes only the bracketing estimate used inside the proof. \Cref{prop:uniform_lln_all} supplies the uniform law at a \emph{fixed} $\sigma^2$, which is not what this application needs, since $M=S=n$ forces $\sigma_n^2=1-1/n$ to move with $n$. It is \Cref{cor:uniform_lln_sigma}, the version uniform over $\sigma^2\in[\sigma_0^2,1]$, that licenses the substitution. The limit $G(\theta)=C\exp\{\lVert\theta-\thetao\rVert^2/(K\sigma^2-2)\}$ is continuous and strictly increasing in $\lVert\theta-\thetao\rVert$, hence uniquely minimised at $\thetao$ and well separated: $\inf_{\lVert\theta-\thetao\rVert\ge\varepsilon}G(\theta)>G(\thetao)$ for every $\varepsilon>0$. The argmin theorem for uniformly convergent criteria with a well-separated minimum gives the conclusion. For $M=S=n$, \eqref{eq:sandwich_condition} reads $n^{1-2/K}\gg\log n$, which holds for every $K>2$.
 \end{proof}
 
 This cuts against a reading the density results invite. Along $M=S=n$ with $K>2$ the simulated transition density collapses to zero at every fixed pair of points, and yet the maximiser of the simulated likelihood converges to the true parameter. The density counterexample does not transfer, and cannot be made to transfer by any argument proceeding through pointwise density behaviour alone. The caution stated throughout this paper --- that \Cref{thm:collapse} refutes two published statements about the transition density without showing the estimator inconsistent --- is therefore not a hedge awaiting resolution but the demonstrably right conclusion in the most tractable case.

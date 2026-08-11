@@ -1,5 +1,7 @@
 # Change log, the three open problems
 
+> **SUPERSEDED — retained for the audit history.** This document records the state of the work at the time it was written, including statements later corrected or withdrawn. Do not read it as the current theorem statement; see `docs/change_log_referee_round_three.md` for the current round and `paper/main.tex` for the statements themselves.
+
 Baseline `4bd5eca`. Three problems the manuscript had recorded as open are addressed. Two are
 closed. The third is advanced by one of its two named steps, and the remaining step is given a
 sharper description than "standard in kind if delicate in execution".
