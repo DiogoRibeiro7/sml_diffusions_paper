@@ -63,6 +63,18 @@ identifiers:
       Concept DOI. Represents every version of this work and always resolves to
       the most recent one. Cite this unless you need to pin a specific version.
   - type: doi
+    value: 10.5281/zenodo.21887801
+    description: >-
+      Version DOI for v1.9.0, the current release. It repairs the covering
+      lemma, whose density infimum was taken over the parameter set rather than
+      over the neighbourhood the union bound requires; the repaired lemma costs
+      only a constant, so the unconditional uniform law and the location-model
+      consistency corollary survive with their exponent intact. It also demotes
+      the score-level corollary, which claimed a necessity its proof withheld,
+      supplies the equicontinuity that the step-size uniformity lemma had
+      assumed, and renames the numerical table for the nearest-atom proxy it
+      actually measures.
+  - type: doi
     value: 10.5281/zenodo.21877843
     description: >-
       Version DOI for v1.8.0, superseded by defect. Its covering lemma is
