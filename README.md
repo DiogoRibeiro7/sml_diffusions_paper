@@ -266,7 +266,7 @@ Cite the **concept DOI**, which represents every version and always resolves to 
 | DOI | Refers to | Status |
 | --- | --- | --- |
 | [`10.5281/zenodo.21719868`](https://doi.org/10.5281/zenodo.21719868) | all versions; resolves to the latest | **cite this** |
-| [`10.5281/zenodo.21877843`](https://doi.org/10.5281/zenodo.21877843) | v1.8.0 | current |
+| [`10.5281/zenodo.21877843`](https://doi.org/10.5281/zenodo.21877843) | v1.8.0 | superseded: covering lemma false; its uniform law and consistency corollary are unproved there |
 | [`10.5281/zenodo.21857286`](https://doi.org/10.5281/zenodo.21857286) | v1.7.0 | superseded: asserts the empirical tail cannot be closed at `K = 3, 4`; it can |
 | [`10.5281/zenodo.21855599`](https://doi.org/10.5281/zenodo.21855599) | v1.6.1 | superseded: estimator-level results conditional in every dimension |
 | [`10.5281/zenodo.21850110`](https://doi.org/10.5281/zenodo.21850110) | v1.6.0 | superseded: corrections incompletely applied; contradicts itself on consistency |

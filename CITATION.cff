@@ -49,8 +49,8 @@ keywords:
   - nonregular inference
 license: CC-BY-4.0
 repository-code: "https://github.com/DiogoRibeiro7/sml_diffusions_paper"
-date-released: 2026-08-10
-version: v1.8.0
+date-released: 2026-08-11
+version: v1.9.0
 doi: 10.5281/zenodo.21719868
 # Zenodo mints a version DOI only when a release is published, and the identifier
 # it issues cannot be predicted, so the entry for the release named above is added
@@ -65,15 +65,17 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.21877843
     description: >-
-      Version DOI for v1.8.0, the current release. It closes the empirical-tail
-      condition in every dimension K > 2, the application's four included, by
-      splitting the observations on the position of the centre rather than on
-      the size of the criterion; consistency of the simulated maximiser in the
-      location model is therefore unconditional, at the cost of a
-      polylogarithmic requirement on the number of observations. It also
-      corrects two misrounded antithetic pair correlations, repairs five macros
-      that a shell escape had destroyed and that LaTeX typeset as stray italic
-      text, and brings every number quoted in prose under a named generator.
+      Version DOI for v1.8.0, superseded by defect. Its covering lemma is
+      false as stated: it takes the atom density's infimum over the parameter
+      set and applies it to balls around points of that set, which protrude
+      beyond it, so for a Gaussian cloud the claimed lower bound on a ball's
+      mass exceeds the mass itself. The covering tail bound therefore fails, and
+      with it the proof of the unconditional uniform law and of the consistency
+      corollary that rests on it. Both results survive in v1.9.0, whose repaired
+      lemma costs only a constant, but the proof given in v1.8.0 does not
+      establish them. Its score-level corollary also claims a necessity its own
+      proof withholds, and its numerical table measures the nearest-atom proxy
+      while naming the simulated maximiser.
   - type: doi
     value: 10.5281/zenodo.21857286
     description: >-
